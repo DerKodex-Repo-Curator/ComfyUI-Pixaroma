@@ -410,6 +410,9 @@ Master the Pixaroma suite with our video guides and workflow deep-dives:
 
 ## 🛠 Changelog
 
+### **October 11, 2026 · v1.4.209**
+- **Load Images from Folder: clearer help for Skip pictures already done.** Use it to do a big folder in parts. A stopped Run has saved nothing yet.
+
 ### **October 10, 2026 · v1.4.208**
 - **Load Images from Folder: when every picture is already done,** the Run now stops quietly with a short notice instead of a red error box.
 
