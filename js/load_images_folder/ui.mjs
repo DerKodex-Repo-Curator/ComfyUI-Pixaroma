@@ -219,7 +219,7 @@ export function openPickGallery(node, anchorEl, ctx) {
     `<div class="pix-lif-done" data-act="done" title="Apply this selection and close">Done</div>` +
     `</div>` +
     `<div class="pix-lif-gal-skip">` +
-    `<div class="pix-lif-subf pix-lif-skipdone" title="Leave out every picture that already has a result: a file with the same name (any extension) in the folder on the right. A big folder that stopped halfway then carries on where it stopped. Works when the results keep the picture's name (%input% in Save Image, or Save Text's One file per entry)."><span class="box"></span> Skip pictures already done in</div>` +
+    `<div class="pix-lif-subf pix-lif-skipdone" title="Leave out every picture that already has a result: a file with the same name (any extension) in the folder on the right. Do a big folder in parts, or only the pictures added since (Select all again): each Run makes only what is missing. Works when the results keep the picture's name (%input% in Save Image, or Save Text's One file per entry)."><span class="box"></span> Skip pictures already done in</div>` +
     `<input class="pix-lif-donef" type="text" spellcheck="false" placeholder="the results folder (empty = ComfyUI output)" title="Where the results are. Empty = ComfyUI's output folder, a name like AI Scenes = a folder inside output, or a full path to an approved folder.">` +
     `</div>`;
   document.body.appendChild(gal);

@@ -39,7 +39,7 @@ export const KEYWORDS = {
   PixaromaLoadImage: "open file input picker photo import folder folders directory browse my pictures outside",
   PixaromaLoadImageMini: "small compact loader tidy folder folders directory browse my pictures",
   PixaromaImageInfo: "width height mask filename size dimensions",
-  PixaromaLoadImagesFolder: "batch folder directory many bulk each one by one subfolders recursive keep structure tree mirror flatten skip done resume continue already finished crash halfway path",
+  PixaromaLoadImagesFolder: "batch folder directory many bulk each one by one subfolders recursive keep structure tree mirror flatten skip done resume continue already finished crash halfway in parts only new path",
   PixaromaPreview: "view result thumbnail show display civitai metadata parameters resources share",
   PixaromaSaveImage: "export write disk output filename png jpg jpeg webp lossless quality compression file size smaller folder subfolders tree mirror civitai metadata parameters resources share lora hash embed settings gear hide buttons save now keep preview later",
   PixaromaCompare: "before after slider difference ab side by side overlay opacity fade",

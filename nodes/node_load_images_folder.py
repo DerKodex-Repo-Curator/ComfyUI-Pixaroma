@@ -184,8 +184,10 @@ DEFAULT_STATE = {
     "keepFolders": False,
     # "Skip pictures already done" (2026-10-08): leave out every picture whose
     # result is already in `doneFolder` (a file named like the picture's
-    # `filename` output, any extension), so a big folder that stopped halfway
-    # carries on where it stopped. doneFolder follows Save Image / Save Text's
+    # `filename` output, any extension), so a big folder can be done in parts
+    # and each Run makes only what is missing. It works from one Run to the
+    # next, never inside one: ComfyUI runs each node over the whole list, so a
+    # Run stopped halfway has saved nothing yet. doneFolder follows Save Image / Save Text's
     # folder rule: empty = output, a name = inside output, a full path = any
     # approved folder. See _done_keys().
     "skipDone": False,
@@ -277,9 +279,10 @@ class PixaromaLoadImagesFolder:
         "Prompt Reader Pixaroma). Wire filename into a Save node "
         "so each result keeps its original name, and width/height into an empty latent "
         "so it matches each image's size. Hit Run once and leave the batch count at 1. "
-        "A big folder that stopped halfway: in the gallery, switch on 'Skip pictures "
-        "already done in' and name the results folder, and every picture that already "
-        "has a file with its name there is left out."
+        "To do a big folder in parts, or only the pictures added since the last Run "
+        "(click Select all again): in the gallery, switch on 'Skip pictures already done in' "
+        "and name the results folder, and every picture that already has a file with its "
+        "name there is left out."
     )
 
     @classmethod
