@@ -244,10 +244,12 @@ The two editors can also use **rembg** (`pip install rembg`, then restart ComfyU
 
 ## 🛠 Changelog
 
-### **October 12, 2026 · v1.4.210-v1.4.211**
+### **October 12, 2026 · v1.4.210-v1.4.212**
 - **Preview Image and Image Compare: a Run that ends while another workflow tab is open** now shows up when you switch back, and never lands on the other tab.
 - **The same fix for every other node that shows a result** (Show Text, Pause Text, Save Text, Save Image, AI Prompt, Notify and 20 more): the other tab's nodes are never touched.
 - **AudioReact: the editor preview turns the same way as the saved video** for Swirl, Rotate Pulse, Drift, Slit Scan, Wave and Tilt.
+- **A new, shorter README:** every node in one line, grouped in order of use, each linking to its own help page on the website.
+- **Help window: Load Audio and H3 Audio Sync** now sit in their own Audio group with its music icon, not last with a box icon.
 
 ### **October 11, 2026 · v1.4.209**
 - **Load Images from Folder: clearer help for Skip pictures already done.** Use it to do a big folder in parts. A stopped Run has saved nothing yet.
