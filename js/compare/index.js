@@ -7,6 +7,7 @@ import { applyAdaptiveCanvasOnly, isVueNodes } from "../shared/nodes2.mjs";
 import { onRendererChange } from "../shared/renderer_switch.mjs";
 import { isLiveNode } from "../shared/live_node.mjs";
 import { attachCanvasSnapshot } from "../shared/canvas_snapshot.mjs";
+import { runTab, eachRestoredOutput } from "../shared/run_tab.mjs";
 
 // The accent of the node currently being painted. A canvas cannot read a CSS
 // variable, and the small paint helpers below take no node argument, so
@@ -422,9 +423,15 @@ function buildCmpUrl(d) {
 }
 
 function loadCmpImage(node, meta, idx) {
+  // Only the LAST request per side may land: a restore from properties and a
+  // newer result can both be loading after a tab switch, and an older picture
+  // finishing second would cover the newer one.
+  const seq = (node._cmpLoadSeq ??= [0, 0]);
+  const mine = ++seq[idx];
   const img = new Image();
   img.crossOrigin = "anonymous";
   img.onload = () => {
+    if (seq[idx] !== mine) return;
     if (idx === 0) node._cmpImg1 = img;
     else node._cmpImg2 = img;
     node.imgs = null;
@@ -603,13 +610,19 @@ function saveCompareImagesToProps(node, d1, d2) {
   };
 }
 
-function restoreCompareFromProperties(node) {
-  if (node._cmpImg1 || node._cmpImg2) return; // idempotent
+function restoreCompareViewState(node) {
   const s = node.properties?.[STATE_KEY];
   if (!s) return;
   if (typeof s.mode === "number") node._cmpMode = s.mode;
   if (typeof s.showWhich === "number") node._cmpShowWhich = s.showWhich;
   if (typeof s.opacity === "number") node._cmpOpacity = s.opacity;
+}
+
+function restoreCompareFromProperties(node) {
+  if (node._cmpImg1 || node._cmpImg2) return; // idempotent
+  const s = node.properties?.[STATE_KEY];
+  if (!s) return;
+  restoreCompareViewState(node);
   // images is a [side1, side2] array; either entry may be null (only one image
   // was connected). Load whichever is present. Older saves stored two non-null
   // entries, which still work here.
@@ -618,6 +631,54 @@ function restoreCompareFromProperties(node) {
     if (s.images[1]) loadCmpImage(node, s.images[1], 1);
   }
   cmpRepaint(node);
+}
+
+// Both inputs are optional, so Python skips a missing one and tags each saved
+// image with its slot (1/2). Map by slot so a lone image2 lands on side 2, not
+// side 1. Fall back to index order for an untagged payload.
+function compareSidesOf(output) {
+  const imgs = Array.isArray(output?.images) ? output.images : [];
+  let d1 = null, d2 = null;
+  for (const d of imgs) {
+    if (d?.slot === 2) d2 = d;
+    else if (d?.slot === 1) d1 = d;
+  }
+  if (d1 == null && d2 == null && imgs.length) {
+    d1 = imgs[0] || null;
+    d2 = imgs[1] || null;
+  }
+  return [d1, d2];
+}
+
+function applyCompareOutput(node, output) {
+  const [d1, d2] = compareSidesOf(output);
+  // Persist BEFORE loading so a Vue tab switch right after execution
+  // restores correctly.
+  saveCompareImagesToProps(node, d1, d2);
+  // Load present slots; CLEAR absent ones so a stale image can't linger
+  // (e.g. toggling to text2img mutes image1 - side 1 must go empty, not
+  // keep showing the previous run's image). Clearing also outdates a load
+  // still in flight for that side.
+  const seq = (node._cmpLoadSeq ??= [0, 0]);
+  if (d1) loadCmpImage(node, d1, 0); else { seq[0]++; node._cmpImg1 = null; }
+  if (d2) loadCmpImage(node, d2, 1); else { seq[1]++; node._cmpImg2 = null; }
+  cmpRepaint(node);
+}
+
+// Restored results (core's onNodeOutputsUpdated, js/shared/run_tab.mjs): a pair
+// this node does not show yet is a Run it missed; the same pair (every plain
+// tab switch) changes nothing. The node was just rebuilt by the switch, so its
+// view (mode, side, opacity) is read back from properties before saving.
+function restoreCompareOutputs(nodeOutputs) {
+  eachRestoredOutput(nodeOutputs, "PixaromaCompare", (node, output) => {
+    if (!Array.isArray(output.images) || !output.images.length) return;
+    const sides = compareSidesOf(output).map((d) => d?.filename ?? null);
+    const saved = node.properties?.[STATE_KEY]?.images;
+    if (Array.isArray(saved) && saved.length === 2
+        && saved.every((d, i) => (d?.filename ?? null) === sides[i])) return;
+    restoreCompareViewState(node);
+    applyCompareOutput(node, output);
+  });
 }
 
 // ── Body painter (renderer-agnostic) ─────────────────────────
@@ -1201,6 +1262,10 @@ function applyCompareRenderer(node, vue) {
 
 app.registerExtension({
   name: "Pixaroma.Compare",
+  // A Run that ended while another workflow tab was open (js/shared/run_tab.mjs).
+  onNodeOutputsUpdated(nodeOutputs) {
+    restoreCompareOutputs(nodeOutputs);
+  },
   // No Settings-panel rows: this node's options live on the node itself (the
   // gear in the selection toolbar / the right-click entry). The setting ids are
   // unchanged and merely unregistered, so existing choices carry over; every
@@ -1276,30 +1341,14 @@ app.registerExtension({
     nodeType.prototype.onExecuted = function (output) {
       // Suppress default preview
       this.imgs = null;
-
-      // Both inputs are optional, so Python skips a missing one and tags each
-      // saved image with its slot (1/2). Map by slot so a lone image2 lands on
-      // side 2, not side 1. Fall back to index order for an untagged payload.
-      const imgs = Array.isArray(output?.images) ? output.images : [];
-      let d1 = null, d2 = null;
-      for (const d of imgs) {
-        if (d?.slot === 2) d2 = d;
-        else if (d?.slot === 1) d1 = d;
-      }
-      if (d1 == null && d2 == null && imgs.length) {
-        d1 = imgs[0] || null;
-        d2 = imgs[1] || null;
-      }
-
-      // Persist BEFORE loading so a Vue tab switch right after execution
-      // restores correctly.
-      saveCompareImagesToProps(this, d1, d2);
-      // Load present slots; CLEAR absent ones so a stale image can't linger
-      // (e.g. toggling to text2img mutes image1 - side 1 must go empty, not
-      // keep showing the previous run's image).
-      if (d1) loadCmpImage(this, d1, 0); else this._cmpImg1 = null;
-      if (d2) loadCmpImage(this, d2, 1); else this._cmpImg2 = null;
-      cmpRepaint(this);
+      // Core calls this on the OPEN tab's node with the run's id. A Run that
+      // ended while another workflow tab is open belongs to that tab (decided
+      // once the message's listeners ran); core hands it back when that tab
+      // opens again: onNodeOutputsUpdated below (js/shared/run_tab.mjs).
+      queueMicrotask(() => {
+        if (runTab(output) === "other") return;
+        applyCompareOutput(this, output);
+      });
     };
 
     // Suppress default background image rendering (legacy only — onDrawBackground

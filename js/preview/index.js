@@ -10,6 +10,7 @@ import { onRendererChange } from "../shared/renderer_switch.mjs";
 import { isLiveNode } from "../shared/live_node.mjs";
 import { attachCanvasSnapshot } from "../shared/canvas_snapshot.mjs";
 import { removeNodeWidget } from "../shared/remove_widget.mjs";
+import { runTab, eachRestoredOutput } from "../shared/run_tab.mjs";
 
 // ---- Nodes 2.0 helpers ----
 // The Vue "WidgetLegacy" bridge repaints a custom widget's canvas only via
@@ -1457,6 +1458,11 @@ function applyPreviewRenderer(node, vue) {
 app.registerExtension({
   name: "Pixaroma.Preview",
 
+  // A Run that ended while another workflow tab was open (js/shared/run_tab.mjs).
+  onNodeOutputsUpdated(nodeOutputs) {
+    restorePreviewOutputs(nodeOutputs);
+  },
+
   // No Settings-panel rows: this node's options live on the node itself (the
   // gear in the selection toolbar / the right-click entry). The setting ids are
   // unchanged and merely unregistered, so existing choices carry over; every
@@ -1800,26 +1806,57 @@ window.addEventListener("keydown", (e) => {
   repaint(node);
 }, true);
 
+// Save mode emits `ui.images` (so the Media Assets panel refreshes);
+// preview mode emits `ui.pixaroma_preview_frames`. Either way it's the
+// SAME shape (`[{filename, subfolder, type, _pixaroma_meta?}]`), so we
+// read whichever key is present. This single-key-per-mode design keeps
+// the Assets stack-count badge at 1 (server counts items across all
+// list-keyed arrays - see node_preview.py comment).
+function framesOfOutput(output) {
+  return output?.pixaroma_preview_frames || output?.images;
+}
+
 api.addEventListener("executed", ({ detail }) => {
-  // Cross-version node-id resolution: Vue may pass detail.node as a
-  // string, legacy as a number — try both.
-  let node = app.graph.getNodeById(detail.node);
-  if (!node && typeof detail.node === "string") {
-    node = app.graph.getNodeById(parseInt(detail.node, 10));
-  }
-  if (!node || node.type !== "PixaromaPreview") return;
+  const output = detail?.output;
+  // Decided after this message's listeners ran: a Run that ended while ANOTHER
+  // workflow tab is open belongs to that tab (ids repeat across workflows, so
+  // the lookup below would hit a stranger with the same id). Core keeps it and
+  // hands it back when that tab opens again: onNodeOutputsUpdated below.
+  queueMicrotask(() => {
+    if (runTab(output) === "other") return;
+    // Cross-version node-id resolution: Vue may pass detail.node as a
+    // string, legacy as a number — try both.
+    let node = app.graph.getNodeById(detail.node);
+    if (!node && typeof detail.node === "string") {
+      node = app.graph.getNodeById(parseInt(detail.node, 10));
+    }
+    if (!node || node.type !== "PixaromaPreview") return;
+    const frames = framesOfOutput(output);
+    if (!frames || !frames.length) return;
+    applyPreviewFrames(node, frames);
+  });
+});
 
-  // Save mode emits `ui.images` (so the Media Assets panel refreshes);
-  // preview mode emits `ui.pixaroma_preview_frames`. Either way it's the
-  // SAME shape (`[{filename, subfolder, type, _pixaroma_meta?}]`), so we
-  // read whichever key is present. This single-key-per-mode design keeps
-  // the Assets stack-count badge at 1 (server counts items across all
-  // list-keyed arrays - see node_preview.py comment).
-  const frames =
-    detail?.output?.pixaroma_preview_frames ||
-    detail?.output?.images;
-  if (!frames || !frames.length) return;
+// Restored results (core's onNodeOutputsUpdated): a frame list this node does
+// not show yet is a Run it missed, so it is applied like a fresh one; the same
+// list (every plain tab switch) changes nothing.
+function sameFrames(saved, frames) {
+  if (!Array.isArray(saved) || saved.length !== frames.length) return false;
+  return frames.every((f, i) => saved[i]?.filename === f?.filename
+    && (saved[i]?.subfolder || "") === (f?.subfolder || "")
+    && (saved[i]?.type || "temp") === (f?.type || "temp"));
+}
 
+function restorePreviewOutputs(nodeOutputs) {
+  eachRestoredOutput(nodeOutputs, "PixaromaPreview", (node, output) => {
+    const frames = framesOfOutput(output);
+    if (!Array.isArray(frames) || !frames.length) return;
+    if (sameFrames(node.properties?.pixaromaFrames, frames)) return;
+    applyPreviewFrames(node, frames);
+  });
+}
+
+function applyPreviewFrames(node, frames) {
   // Note: node.imgs is permanently locked to [] via Object.defineProperty
   // in onNodeCreated (so ComfyUI's native canvas-image-preview widget
   // never gets added even though we emit ui.images in save mode).
@@ -1869,7 +1906,7 @@ api.addEventListener("executed", ({ detail }) => {
   // restored/older node instance missed the onNodeCreated assignment.
   node.hideOutputImages = true;
   hydrateFrames(node, node.properties.pixaromaFrames);
-});
+}
 
 // The colour option: a right-click "Preview Image settings" entry, the gear in
 // the selection toolbar, and the shared colour panel behind both. onChange goes
