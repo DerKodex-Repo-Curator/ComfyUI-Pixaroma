@@ -16,18 +16,25 @@
 //   runTab(output)            "active" | "other" | "unknown"; call it from a
 //                             microtask queued in the executed handler, so
 //                             core's own listener has filed the output first.
-//   eachRestoredOutput(...)   for an onNodeOutputsUpdated hook: the restored
-//                             outputs of one node type, minus results of other
-//                             tabs that core's store kept for the tab that was
-//                             open when they ended.
+//   eachRestoredOutput(...)   for an onNodeOutputsUpdated hook: ONLY the results
+//                             of runs that ended while their tab was not open,
+//                             each handed out once.
+// That hook also fires after every Ctrl+Z / Ctrl+Y, every reload of the open
+// workflow and every load from the queue history, with outputs the node has
+// already shown: re-applying those wrote state back and jammed undo (the next
+// click recorded it and wiped redo). Results of ANOTHER tab that core's own
+// store kept for the tab that was open when they ended are never handed out
+// either: they are pending for their own tab, not this one.
 // Anything this cannot place (a run queued from another browser or the API,
 // an older frontend without these fields) answers "unknown" and the caller
 // keeps its old behaviour.
 import { app } from "../../../scripts/app.js";
 import { api } from "../../../scripts/api.js";
 
-const MAX_OWNERS = 2000;
-const owners = new Map(); // "type/subfolder/filename" -> the workflow that queued the run (this page session)
+const MAX_PENDING = 1000;
+// workflow -> file keys ("type/subfolder/filename") of runs that ended while
+// that workflow was not the open tab. Weak: a closed workflow takes its own.
+const pending = new WeakMap();
 
 function filesOf(output) {
   const out = [];
@@ -68,40 +75,25 @@ function ownerOf(output) {
   return null;
 }
 
-function remember(output, owner) {
-  for (const f of filesOf(output)) {
-    owners.delete(f);
-    owners.set(f, owner);
-  }
-  while (owners.size > MAX_OWNERS) owners.delete(owners.keys().next().value);
-}
-
-// Every run, not only the ones a Pixaroma node looks at: a restored output is
-// judged by these records (restoreOutputs hands back clones, so the identity
-// test above no longer works there).
+// Every run, not only the ones a Pixaroma node looks at: the open tab may have
+// no node with that id at all, and then nothing of ours is called for it.
 api.addEventListener("executed", ({ detail }) => {
   const output = detail?.output;
   if (!output || typeof output !== "object") return;
   queueMicrotask(() => {
     const owner = ownerOf(output);
-    if (owner) remember(output, owner);
+    if (!owner || owner === app.extensionManager?.workflow?.activeWorkflow) return;
+    let set = pending.get(owner);
+    if (!set) pending.set(owner, (set = new Set()));
+    for (const f of filesOf(output)) set.add(f);
+    while (set.size > MAX_PENDING) set.delete(set.values().next().value);
   });
 });
 
 export function runTab(output) {
   const owner = ownerOf(output);
   if (!owner) return "unknown";
-  remember(output, owner);
   return owner === app.extensionManager?.workflow?.activeWorkflow ? "active" : "other";
-}
-
-function restoredFromOtherTab(output) {
-  const active = app.extensionManager?.workflow?.activeWorkflow;
-  for (const f of filesOf(output)) {
-    const w = owners.get(f);
-    if (w && w !== active) return true;
-  }
-  return false;
 }
 
 // The node an onNodeOutputsUpdated key names: "id" on the root graph, or
@@ -116,11 +108,15 @@ function nodeByLocator(locatorId) {
 
 export function eachRestoredOutput(nodeOutputs, comfyClass, fn) {
   if (!nodeOutputs || typeof nodeOutputs !== "object") return;
+  const set = pending.get(app.extensionManager?.workflow?.activeWorkflow);
+  if (!set?.size) return;
   for (const [locatorId, output] of Object.entries(nodeOutputs)) {
     if (!output || typeof output !== "object") continue;
+    const files = filesOf(output);
+    if (!files.some((f) => set.has(f))) continue;
     const node = nodeByLocator(locatorId);
     if (!node || (node.comfyClass || node.type) !== comfyClass) continue;
-    if (restoredFromOtherTab(output)) continue;
     fn(node, output);
+    for (const f of files) set.delete(f);
   }
 }
