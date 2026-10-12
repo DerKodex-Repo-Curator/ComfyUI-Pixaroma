@@ -410,6 +410,10 @@ Master the Pixaroma suite with our video guides and workflow deep-dives:
 
 ## 🛠 Changelog
 
+### **October 12, 2026 · v1.4.210**
+- **Preview Image and Image Compare: a Run that ends while another workflow tab is open** now shows up when you switch back, and never lands on the other tab.
+- **AudioReact: the editor preview turns the same way as the saved video** for Swirl, Rotate Pulse, Drift, Slit Scan, Wave and Tilt.
+
 ### **October 11, 2026 · v1.4.209**
 - **Load Images from Folder: clearer help for Skip pictures already done.** Use it to do a big folder in parts. A stopped Run has saved nothing yet.
 
