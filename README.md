@@ -410,8 +410,9 @@ Master the Pixaroma suite with our video guides and workflow deep-dives:
 
 ## 🛠 Changelog
 
-### **October 12, 2026 · v1.4.210**
+### **October 12, 2026 · v1.4.210-v1.4.211**
 - **Preview Image and Image Compare: a Run that ends while another workflow tab is open** now shows up when you switch back, and never lands on the other tab.
+- **The same fix for every other node that shows a result** (Show Text, Pause Text, Save Text, Save Image, AI Prompt, Notify and 20 more): the other tab's nodes are never touched.
 - **AudioReact: the editor preview turns the same way as the saved video** for Swirl, Rotate Pulse, Drift, Slit Scan, Wave and Tilt.
 
 ### **October 11, 2026 · v1.4.209**
