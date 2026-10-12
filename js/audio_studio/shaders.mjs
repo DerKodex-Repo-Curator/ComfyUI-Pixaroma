@@ -76,6 +76,13 @@ float onset_at(int frame_idx) {
 vec4 sample_image(vec2 uv) {
     return texture(u_image, clamp(uv, 0.0, 1.0));
 }
+
+// The engine's sampling grid is [-1,1] with y pointing DOWN (-1 = top row);
+// v_uv is [0,1] with y pointing UP (GL). A formula that uses the sign of y
+// (rotation, swirl, tilt, waves) turns the OTHER way if copied onto v_uv, so
+// those shaders convert with these two and keep the engine's math verbatim.
+vec2 to_grid(vec2 uv) { return vec2(uv.x * 2.0 - 1.0, 1.0 - uv.y * 2.0); }
+vec2 from_grid(vec2 g) { return vec2(g.x * 0.5 + 0.5, 0.5 - g.y * 0.5); }
 `;
 
 // --- Motion shaders -----------------------------------------------------
@@ -136,8 +143,8 @@ void main() {
     float sway = sin(phase);
     float bob  = cos(phase);
     float amp = env_t * u_intensity * 0.04;
-    vec2 uv = v_uv - vec2(sway * amp, bob * amp);
-    fragColor = sample_image(uv);
+    vec2 g = to_grid(v_uv) - vec2(sway * amp, bob * amp);
+    fragColor = sample_image(from_grid(g));
 }
 `,
 
@@ -150,13 +157,12 @@ void main() {
     float sway = sin(6.28318530718 * u_motion_speed * u_t);
     float angle = sway * env_t * u_intensity * (3.14159265359 / 12.0) * u_motion_direction;
     float c = cos(angle), s = sin(angle);
-    vec2 p = (v_uv - 0.5);
+    vec2 p = to_grid(v_uv);
     float xs = p.x * u_aspect;
     float ys = p.y;
     float nx = (xs * c - ys * s) / u_aspect;
     float ny = xs * s + ys * c;
-    vec2 uv = vec2(nx, ny) + 0.5;
-    fragColor = sample_image(uv);
+    fragColor = sample_image(from_grid(vec2(nx, ny)));
 }
 `,
 
@@ -185,7 +191,7 @@ void main() {
   swirl: COMMON_PRELUDE + `
 void main() {
     float env_t = env_at(u_frame_index);
-    vec2 p = (v_uv - 0.5) * 2.0;
+    vec2 p = to_grid(v_uv);
     float xs = p.x * u_aspect;
     float ys = p.y;
     float r = sqrt(xs*xs + ys*ys);
@@ -194,8 +200,7 @@ void main() {
     float thp = theta + twist;
     float nx = r * cos(thp) / u_aspect;
     float ny = r * sin(thp);
-    vec2 uv = vec2(nx, ny) * 0.5 + 0.5;
-    fragColor = sample_image(uv);
+    fragColor = sample_image(from_grid(vec2(nx, ny)));
 }
 `,
 
@@ -221,13 +226,12 @@ void main() {
   wave: COMMON_PRELUDE + `
 void main() {
     float env_t = env_at(u_frame_index);
-    float yn = (v_uv.y - 0.5) * 2.0;
+    vec2 g = to_grid(v_uv);
     float k = 4.0 * 3.14159265359 * u_wave_density;
     float omega = 6.28318530718 * max(u_motion_speed * 2.0, 0.4) * u_motion_direction;
     float A = env_t * u_intensity * 0.05;
-    float dx = A * sin(k * yn - omega * u_t);
-    vec2 uv = v_uv + vec2(dx * 0.5, 0.0);
-    fragColor = sample_image(uv);
+    g.x += A * sin(k * g.y - omega * u_t);
+    fragColor = sample_image(from_grid(g));
 }
 `,
 
@@ -238,10 +242,9 @@ void main() {
     float env_t = env_at(u_frame_index);
     float sway = sin(6.28318530718 * u_motion_speed * u_t);
     float skew = sway * env_t * u_intensity * 0.20 * u_motion_direction;
-    vec2 p = (v_uv - 0.5) * 2.0;
+    vec2 p = to_grid(v_uv);
     p.x = p.x + skew * p.y;
-    vec2 uv = p * 0.5 + 0.5;
-    fragColor = sample_image(uv);
+    fragColor = sample_image(from_grid(p));
 }
 `,
 
@@ -332,14 +335,14 @@ void main() {
   slit_scan: COMMON_PRELUDE + `
 void main() {
     float env_t = env_at(u_frame_index);
-    float yn = (v_uv.y - 0.5) * 2.0;       // y in [-1,1]
+    vec2 g = to_grid(v_uv);
+    float yn = g.y;
     float k = 4.0 * 3.14159265359 * u_slit_density;
     float omega = 6.28318530718 * max(u_motion_speed * 2.0, 0.4) * u_motion_direction;
     float A = env_t * u_intensity * 0.04;
     float dy = A * sin(k * yn - omega * u_t);
     float dx = A * 0.5 * cos(k * yn - omega * u_t);
-    vec2 uv = v_uv + vec2(dx, dy) * 0.5;
-    fragColor = sample_image(uv);
+    fragColor = sample_image(from_grid(g + vec2(dx, dy)));
 }
 `,
 };
