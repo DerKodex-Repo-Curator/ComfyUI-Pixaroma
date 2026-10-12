@@ -77,46 +77,46 @@ The groups are in order of how much they are used in real workflows, and inside 
 
 | Node | What it&nbsp;does |
 |---|---|
-| [Preview Image&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/preview-image/) | Shows your images on the node, one or a whole batch, with Save, Copy and Open&nbsp;buttons. |
-| [Load Image Mini&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/load-image-mini/) | A small Load Image: a picker, a preview and two outputs. Resize lives in the&nbsp;gear. |
-| [Image Info&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/image-info/) | Unpacks Load Image Mini's `image_info` into the mask, width, height and file&nbsp;name. |
-| [Image Compare&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/image-compare/) | Compare two images with a slider, side by side, or see exactly what&nbsp;changed. |
-| [Load Images from Folder&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/load-images-from-folder/) | Runs your workflow once for each picture in any folder you&nbsp;choose. |
-| [Save Image&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/save-image/) | Saves to any folder, with a live preview of the exact file&nbsp;name. |
-| [Save Mp4&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/save-mp4/) | Turns frames and sound into an mp4 and plays it on the&nbsp;node. |
-| [Remove Background&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/remove-background/) | Cuts out the subject with a BiRefNet model: cutout, mask and inverted mask in one&nbsp;node. |
-| [Load Image&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/load-image/) | Load Image with resize built in: max megapixels, longest side, fit inside, crop to fill and&nbsp;more. |
-| [Image Grid&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/image-grid/) | Puts every picture of a Run in one grid image, with each file name under its&nbsp;picture. |
-| [Save 3D&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/save-3d/) | Shows a 3D model, stands it on the ground, and saves it as OBJ, GLB or&nbsp;STL. |
-| [Load Video&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/load-video/) | Loads a video as frames, sound and info, and plays it on the&nbsp;node. |
-| [Pause Image&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/pause-image/) | Stops the Run so you can look at the picture before the slow part&nbsp;runs. |
-| [Load 3D&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/load-3d/) | Loads a 3D model and gives you the model and a picture of&nbsp;it. |
-| [Load Video Frame&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/load-video-frame/) | Picks one exact frame from a video to use as an&nbsp;image. |
-| [First Last Frame&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/first-last-frame/) | Takes the first and the last frame of a video as two&nbsp;images. |
-| [Save Video&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/save-video/) | Saves an mp4 to any folder with your own file name, and plays it on the&nbsp;node. |
+| [Preview&nbsp;Image&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/preview-image/) | Shows your images on the node, one or a whole batch, with Save, Copy and Open&nbsp;buttons. |
+| [Load&nbsp;Image&nbsp;Mini&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/load-image-mini/) | A small Load Image: a picker, a preview and two outputs. Resize lives in the&nbsp;gear. |
+| [Image&nbsp;Info&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/image-info/) | Unpacks Load Image Mini's `image_info` into the mask, width, height and file&nbsp;name. |
+| [Image&nbsp;Compare&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/image-compare/) | Compare two images with a slider, side by side, or see exactly what&nbsp;changed. |
+| [Load&nbsp;Images&nbsp;from&nbsp;Folder&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/load-images-from-folder/) | Runs your workflow once for each picture in any folder you&nbsp;choose. |
+| [Save&nbsp;Image&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/save-image/) | Saves to any folder, with a live preview of the exact file&nbsp;name. |
+| [Save&nbsp;Mp4&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/save-mp4/) | Turns frames and sound into an mp4 and plays it on the&nbsp;node. |
+| [Remove&nbsp;Background&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/remove-background/) | Cuts out the subject with a BiRefNet model: cutout, mask and inverted mask in one&nbsp;node. |
+| [Load&nbsp;Image&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/load-image/) | Load Image with resize built in: max megapixels, longest side, fit inside, crop to fill and&nbsp;more. |
+| [Image&nbsp;Grid&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/image-grid/) | Puts every picture of a Run in one grid image, with each file name under its&nbsp;picture. |
+| [Save&nbsp;3D&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/save-3d/) | Shows a 3D model, stands it on the ground, and saves it as OBJ, GLB or&nbsp;STL. |
+| [Load&nbsp;Video&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/load-video/) | Loads a video as frames, sound and info, and plays it on the&nbsp;node. |
+| [Pause&nbsp;Image&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/pause-image/) | Stops the Run so you can look at the picture before the slow part&nbsp;runs. |
+| [Load&nbsp;3D&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/load-3d/) | Loads a 3D model and gives you the model and a picture of&nbsp;it. |
+| [Load&nbsp;Video&nbsp;Frame&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/load-video-frame/) | Picks one exact frame from a video to use as an&nbsp;image. |
+| [First&nbsp;Last&nbsp;Frame&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/first-last-frame/) | Takes the first and the last frame of a video as two&nbsp;images. |
+| [Save&nbsp;Video&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/save-video/) | Saves an mp4 to any folder with your own file name, and plays it on the&nbsp;node. |
 
 ### 💬 Prompt and Text
 
 | Node | What it&nbsp;does |
 |---|---|
 | [Prompt&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/prompt/) | A prompt box with saved shortcuts (`@tags`), random picks and&nbsp;lists. |
-| [Show Text&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/show-text/) | Shows any text or value going through a wire, in a box you can copy&nbsp;from. |
+| [Show&nbsp;Text&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/show-text/) | Shows any text or value going through a wire, in a box you can copy&nbsp;from. |
 | [Text&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/text/) | A big text box with one text output. Type once, wire it into many&nbsp;nodes. |
-| [Text Join Two, Three and Four&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/text-join-two/) | Joins two, three or four pieces of text into one. Type or wire each&nbsp;one. |
-| [AI Prompt&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/ai-prompt/) | Runs a language model on your own PC with an instruction you save on the&nbsp;node. |
-| [Prompt Each&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/prompt-each/) | Many prompts, one Run, one picture&nbsp;each. |
-| [Prompt Multi&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/prompt-multi/) | Queues one Run per prompt, or sends all the prompts out as a&nbsp;list. |
-| [Prompt From List&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/prompt-from-list/) | Picks one prompt by number from a Prompt Multi&nbsp;list. |
-| [Prompt Pack&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/prompt-pack/) | Paste a block of prompts and queue one Run per&nbsp;prompt. |
-| [Save Text&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/save-text/) | Collects the text of every Run into one list and a .txt&nbsp;file. |
-| [Prompt Reader&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/prompt-reader/) | Reads the prompt saved inside a ComfyUI, Automatic1111 or Civitai&nbsp;picture. |
-| [Prompt Stack&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/prompt-stack/) | Builds one prompt from rows you switch on and&nbsp;off. |
-| [Video Prompt&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/video-prompt/) | Writes a MiniMax H3 video prompt on your own&nbsp;PC. |
-| [Find and Replace&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/find-and-replace/) | Changes words in a text on its way through a&nbsp;wire. |
-| [Load Texts from Folder&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/load-texts-from-folder/) | Sends the .txt files of a folder through the workflow one by&nbsp;one. |
-| [Pause Text&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/pause-text/) | Stops the Run so you can read and fix a text before the rest&nbsp;runs. |
-| [Caption Review&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/caption-review/) | Every picture of a folder with its caption under it, to read and fix a training&nbsp;set. |
-| [Music Prompt&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/music-prompt/) | One idea in, a caption and lyrics out for MiniMax Music&nbsp;3. |
+| [Text&nbsp;Join&nbsp;Two,&nbsp;Three&nbsp;and&nbsp;Four&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/text-join-two/) | Joins two, three or four pieces of text into one. Type or wire each&nbsp;one. |
+| [AI&nbsp;Prompt&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/ai-prompt/) | Runs a language model on your own PC with an instruction you save on the&nbsp;node. |
+| [Prompt&nbsp;Each&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/prompt-each/) | Many prompts, one Run, one picture&nbsp;each. |
+| [Prompt&nbsp;Multi&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/prompt-multi/) | Queues one Run per prompt, or sends all the prompts out as a&nbsp;list. |
+| [Prompt&nbsp;From&nbsp;List&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/prompt-from-list/) | Picks one prompt by number from a Prompt Multi&nbsp;list. |
+| [Prompt&nbsp;Pack&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/prompt-pack/) | Paste a block of prompts and queue one Run per&nbsp;prompt. |
+| [Save&nbsp;Text&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/save-text/) | Collects the text of every Run into one list and a .txt&nbsp;file. |
+| [Prompt&nbsp;Reader&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/prompt-reader/) | Reads the prompt saved inside a ComfyUI, Automatic1111 or Civitai&nbsp;picture. |
+| [Prompt&nbsp;Stack&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/prompt-stack/) | Builds one prompt from rows you switch on and&nbsp;off. |
+| [Video&nbsp;Prompt&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/video-prompt/) | Writes a MiniMax H3 video prompt on your own&nbsp;PC. |
+| [Find&nbsp;and&nbsp;Replace&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/find-and-replace/) | Changes words in a text on its way through a&nbsp;wire. |
+| [Load&nbsp;Texts&nbsp;from&nbsp;Folder&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/load-texts-from-folder/) | Sends the .txt files of a folder through the workflow one by&nbsp;one. |
+| [Pause&nbsp;Text&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/pause-text/) | Stops the Run so you can read and fix a text before the rest&nbsp;runs. |
+| [Caption&nbsp;Review&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/caption-review/) | Every picture of a folder with its caption under it, to read and fix a training&nbsp;set. |
+| [Music&nbsp;Prompt&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/music-prompt/) | One idea in, a caption and lyrics out for MiniMax Music&nbsp;3. |
 
 ### 📝 Notes and Overlay
 
@@ -125,8 +125,8 @@ The groups are in order of how much they are used in real workflows, and inside 
 | [Label&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/label/) | A text caption on the canvas to name parts of your workflow. No wires, it never&nbsp;runs. |
 | [Note&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/note/) | A note with headings, lists, tables, icons, and Download or YouTube&nbsp;buttons. |
 | [Info&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/info/) | A small button that opens a note in a reading window, so big notes do not fill the&nbsp;canvas. |
-| [Text Watermark&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/text-watermark/) | Stamps text in the same spot on every image of a batch, all set up on the&nbsp;node. |
-| [Text Overlay&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/text-overlay/) | Puts styled text on an image, with a full screen editor to place&nbsp;it. |
+| [Text&nbsp;Watermark&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/text-watermark/) | Stamps text in the same spot on every image of a batch, all set up on the&nbsp;node. |
+| [Text&nbsp;Overlay&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/text-overlay/) | Puts styled text on an image, with a full screen editor to place&nbsp;it. |
 
 ### 🔢 Values
 
@@ -138,60 +138,60 @@ The groups are in order of how much they are used in real workflows, and inside 
 | [Dropdown&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/dropdown/) | A dropdown you fill in yourself: pick a short name, send a long&nbsp;value. |
 | [Duration&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/duration/) | Type a length in seconds, get the frame count your video model&nbsp;wants. |
 | [Number&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/number/) | One number field that sends the same value as a whole number and as a&nbsp;decimal. |
-| [Control Panel&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/control-panel/) | Sliders, switches and dropdowns for settings all over your workflow, in one&nbsp;node. |
-| [Portrait Landscape&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/portrait-landscape/) | Flips a width and height between tall and wide with one&nbsp;click. |
+| [Control&nbsp;Panel&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/control-panel/) | Sliders, switches and dropdowns for settings all over your workflow, in one&nbsp;node. |
+| [Portrait&nbsp;Landscape&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/portrait-landscape/) | Flips a width and height between tall and wide with one&nbsp;click. |
 | [WH&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/wh/) | Two number fields: width and&nbsp;height. |
-| [Number Pick&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/number-pick/) | One number, picked from a row of buttons you choose&nbsp;yourself. |
+| [Number&nbsp;Pick&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/number-pick/) | One number, picked from a row of buttons you choose&nbsp;yourself. |
 
 ### 🔀 Logic and Flow
 
 | Node | What it&nbsp;does |
 |---|---|
-| [Run Timer&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/run-timer/) | Times the whole Run and plays a chime when it is done. No wires&nbsp;needed. |
-| [Free VRAM&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/free-vram/) | Frees the graphics card's memory at the exact point you&nbsp;choose. |
-| [Loop Start and Loop End&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/loop-start/) | Repeats part of a workflow a set number of&nbsp;times. |
+| [Run&nbsp;Timer&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/run-timer/) | Times the whole Run and plays a chime when it is done. No wires&nbsp;needed. |
+| [Free&nbsp;VRAM&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/free-vram/) | Frees the graphics card's memory at the exact point you&nbsp;choose. |
+| [Loop&nbsp;Start&nbsp;and&nbsp;Loop&nbsp;End&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/loop-start/) | Repeats part of a workflow a set number of&nbsp;times. |
 | [Combine&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/combine/) | Joins two inputs into one batch: images, frames, latents, numbers or&nbsp;text. |
 | [Switch&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/switch/) | Many inputs, one output: click a row to choose which one goes&nbsp;through. |
-| [Mute Switch&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/mute-switch/) | Switches to turn whole parts of a workflow on and&nbsp;off. |
+| [Mute&nbsp;Switch&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/mute-switch/) | Switches to turn whole parts of a workflow on and&nbsp;off. |
 | [Monitor&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/monitor/) | A live readout of how hard your computer is&nbsp;working. |
-| [XY Plot&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/xy-plot/) | Compares settings side by side in one labeled grid, with no extra&nbsp;wiring. |
-| [Set and Get&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/set/) | Sends a value across the canvas with no cable: Set stores it under a name, Get reads&nbsp;it. |
+| [XY&nbsp;Plot&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/xy-plot/) | Compares settings side by side in one labeled grid, with no extra&nbsp;wiring. |
+| [Set&nbsp;and&nbsp;Get&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/set/) | Sends a value across the canvas with no cable: Set stores it under a name, Get reads&nbsp;it. |
 | [Notify&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/notify/) | Plays a sound when the Run reaches this node, and times how long it took to get&nbsp;there. |
-| [Switch WH&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/switch-wh/) | Chooses between two width and height pairs with one&nbsp;click. |
-| [Switch Source&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/switch-source/) | Flips a whole set of wires between setup A and setup&nbsp;B. |
-| [Group Switch&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/group-switch/) | On and off switches for your groups, in one small&nbsp;panel. |
-| [Text Match&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/text-match/) | Does a text contain one of your words? Yes or no, plus gates that let things through only on a&nbsp;match. |
-| [Version Check&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/version-check/) | Shows your Pixaroma, ComfyUI and frontend versions, with a Copy&nbsp;button. |
-| [Run Log&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/run-log/) | Keeps the last 10 Run times of this workflow on the&nbsp;canvas. |
+| [Switch&nbsp;WH&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/switch-wh/) | Chooses between two width and height pairs with one&nbsp;click. |
+| [Switch&nbsp;Source&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/switch-source/) | Flips a whole set of wires between setup A and setup&nbsp;B. |
+| [Group&nbsp;Switch&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/group-switch/) | On and off switches for your groups, in one small&nbsp;panel. |
+| [Text&nbsp;Match&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/text-match/) | Does a text contain one of your words? Yes or no, plus gates that let things through only on a&nbsp;match. |
+| [Version&nbsp;Check&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/version-check/) | Shows your Pixaroma, ComfyUI and frontend versions, with a Copy&nbsp;button. |
+| [Run&nbsp;Log&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/run-log/) | Keeps the last 10 Run times of this workflow on the&nbsp;canvas. |
 
 ### ✂️ Resize and Crop
 
 | Node | What it&nbsp;does |
 |---|---|
-| [Resize Crop&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/resize-crop/) | Makes an image an exact width and height by cropping, never&nbsp;stretching. |
-| [Longest Side&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/longest-side/) | Makes a picture's longest side the size you click, and can crop it to a&nbsp;shape. |
-| [Image Crop&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/image-crop/) | Draw the crop box on the image, no pixel numbers to&nbsp;type. |
-| [Image Uncrop&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/image-uncrop/) | Puts an edited crop back onto the original, in the exact spot it came&nbsp;from. |
-| [Inpaint Crop&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/inpaint-crop/) | Paint a mask and get a crop sized for the model, ready to&nbsp;inpaint. |
-| [Inpaint Stitch&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/inpaint-stitch/) | Puts the inpainted crop back onto the original so the seam does not&nbsp;show. |
+| [Resize&nbsp;Crop&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/resize-crop/) | Makes an image an exact width and height by cropping, never&nbsp;stretching. |
+| [Longest&nbsp;Side&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/longest-side/) | Makes a picture's longest side the size you click, and can crop it to a&nbsp;shape. |
+| [Image&nbsp;Crop&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/image-crop/) | Draw the crop box on the image, no pixel numbers to&nbsp;type. |
+| [Image&nbsp;Uncrop&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/image-uncrop/) | Puts an edited crop back onto the original, in the exact spot it came&nbsp;from. |
+| [Inpaint&nbsp;Crop&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/inpaint-crop/) | Paint a mask and get a crop sized for the model, ready to&nbsp;inpaint. |
+| [Inpaint&nbsp;Stitch&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/inpaint-stitch/) | Puts the inpainted crop back onto the original so the seam does not&nbsp;show. |
 | [Outpaint&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/outpaint/) | Adds space around an image so a model can paint new scenery&nbsp;there. |
-| [Outpaint Stitch&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/outpaint-stitch/) | Puts your sharp original back onto the outpaint result, keeping only the new&nbsp;area. |
-| [Image Resize&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/image-resize/) | Resizes an image and its mask, with many modes including&nbsp;Pad. |
+| [Outpaint&nbsp;Stitch&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/outpaint-stitch/) | Puts your sharp original back onto the outpaint result, keeping only the new&nbsp;area. |
+| [Image&nbsp;Resize&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/image-resize/) | Resizes an image and its mask, with many modes including&nbsp;Pad. |
 
 ### 🧰 Utility
 
 | Node | What it&nbsp;does |
 |---|---|
-| [LoRA Loader&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/lora-loader/) | Many LoRAs in one node, with trigger words read from each&nbsp;file. |
-| [Krea LoRA Converter&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/krea-lora-converter/) | Makes a Krea 2 LoRA trained on fal.ai load in&nbsp;ComfyUI. |
+| [LoRA&nbsp;Loader&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/lora-loader/) | Many LoRAs in one node, with trigger words read from each&nbsp;file. |
+| [Krea&nbsp;LoRA&nbsp;Converter&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/krea-lora-converter/) | Makes a Krea 2 LoRA trained on fal.ai load in&nbsp;ComfyUI. |
 
 ### 🎨 Editors
 
 | Node | What it&nbsp;does |
 |---|---|
 | [Paint&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/paint/) | A painting editor with layers, brushes and a smudge&nbsp;tool. |
-| [3D Builder&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/3d-builder/) | Build, light and render a 3D scene inside&nbsp;ComfyUI. |
-| [Image Composer&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/image-composer/) | Arrange, blend and adjust many images on one canvas, in&nbsp;layers. |
+| [3D&nbsp;Builder&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/3d-builder/) | Build, light and render a 3D scene inside&nbsp;ComfyUI. |
+| [Image&nbsp;Composer&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/image-composer/) | Arrange, blend and adjust many images on one canvas, in&nbsp;layers. |
 | [Sketch&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/sketch/) | Mark what to change on a picture and write the change beside it, for edit&nbsp;models. |
 | [AudioReact&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/audioreact/) | Turns a still image into a video that moves with the&nbsp;music. |
 
@@ -199,8 +199,8 @@ The groups are in order of how much they are used in real workflows, and inside 
 
 | Node | What it&nbsp;does |
 |---|---|
-| [Load Audio&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/load-audio/) | Shows a sound file's shape so you can take just the part you&nbsp;want. |
-| [H3 Audio Sync&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/h3-audio-sync/) | Makes a MiniMax H3 video sing your song instead of one it makes&nbsp;up. |
+| [Load&nbsp;Audio&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/load-audio/) | Shows a sound file's shape so you can take just the part you&nbsp;want. |
+| [H3&nbsp;Audio&nbsp;Sync&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/h3-audio-sync/) | Makes a MiniMax H3 video sing your song instead of one it makes&nbsp;up. |
 
 ### 🖱️ Canvas tools (no node needed)
 
@@ -211,9 +211,9 @@ The groups are in order of how much they are used in real workflows, and inside 
 | [Align](https://workflows.pixaroma.com/help/nodes/align/) | <img src="assets/readme/toolbar-align.svg" height="22" align="absmiddle" alt="Align"> in the top toolbar: nodes snap into line as you drag them, with a guide&nbsp;line. |
 | [Pixaroma&nbsp;Group](https://workflows.pixaroma.com/help/nodes/pixaroma-group/) | A group box with Run, Mute, Bypass and Fold buttons in its&nbsp;header. |
 | [Node&nbsp;Colors](https://workflows.pixaroma.com/help/nodes/node-colors/) | Right-click a node or group to recolour it, with favourites and copy and&nbsp;paste. |
-| [Adaptive node&nbsp;titles](https://workflows.pixaroma.com/help/nodes/adaptive-node-titles/) | Title text turns white or dark by itself, so it stays readable on any&nbsp;colour. |
+| [Adaptive&nbsp;node&nbsp;titles](https://workflows.pixaroma.com/help/nodes/adaptive-node-titles/) | Title text turns white or dark by itself, so it stays readable on any&nbsp;colour. |
 | [Connection&nbsp;FX](https://workflows.pixaroma.com/help/nodes/connection-fx/) | Slots that fit glow while you drag a wire. Off until you turn it&nbsp;on. |
-| [Run button&nbsp;effects](https://workflows.pixaroma.com/help/nodes/run-button-effects/) | Optional effects on ComfyUI's Run&nbsp;button. |
+| [Run&nbsp;button&nbsp;effects](https://workflows.pixaroma.com/help/nodes/run-button-effects/) | Optional effects on ComfyUI's Run&nbsp;button. |
 | [Your own&nbsp;fonts](https://workflows.pixaroma.com/help/faq/#q-fonts) | Put .ttf or .otf files in `ComfyUI/models/fonts` and Text Overlay and Text Watermark can use&nbsp;them. |
 
 ---
