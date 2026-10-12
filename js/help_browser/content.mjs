@@ -28,7 +28,7 @@ import { KEYWORDS } from "./keywords.mjs";
 const CAT_ORDER = [
   ["🎨 Editors", "🎨"], ["🖼️ Image", "🖼️"], ["✂️ Resize & Crop", "✂️"],
   ["💬 Prompt & Text", "💬"], ["📝 Notes & Overlay", "📝"], ["🔢 Values", "🔢"],
-  ["🔀 Logic & Flow", "🔀"], ["🧰 Utility", "🧰"],
+  ["🔀 Logic & Flow", "🔀"], ["🧰 Utility", "🧰"], ["🎵 Audio", "🎵"],
 ];
 
 // Frontend-only (virtual) nodes have no Python def, so no category comes with
