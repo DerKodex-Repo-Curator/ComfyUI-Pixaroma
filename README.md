@@ -1,410 +1,244 @@
 <div align="center">
-  <img src="assets/pixaroma_logo.svg" width="120" alt="Pixaroma Logo">
+  <img src="assets/pixaroma_logo.svg" width="110" alt="Pixaroma logo">
   <h1>ComfyUI Pixaroma</h1>
-  <p align="center">
-    <strong>Useful ComfyUI nodes for everyday workflows.</strong><br />
-    Load Image • Crop • Compose • Paint • 3D • Compare • Preview • Save MP4 • Notes & Labels • Resolution • Switches • Remove Background • Text & Number utilities
+  <p><strong>Nodes and canvas tools that make ComfyUI easier to&nbsp;use.</strong></p>
+  <p>Load, resize, preview and save images. Write and reuse&nbsp;prompts.<br>
+  Switch parts of a workflow on and off, and explain it with&nbsp;notes.</p>
+  <p>
+    <a href="https://workflows.pixaroma.com/help/"><img src="assets/readme/btn-help.svg" height="36" alt="Help page"></a>
+    <a href="#-install"><img src="assets/readme/btn-install-grey.svg" height="36" alt="Install"></a>
+    <a href="#-all-nodes-at-a-glance"><img src="assets/readme/btn-nodes-grey.svg" height="36" alt="Nodes"></a>
+    <a href="#-changelog"><img src="assets/readme/btn-changelog-grey.svg" height="36" alt="Changelog"></a>
+    <a href="https://discord.gg/gggpkVgBf3"><img src="assets/readme/btn-discord-grey.svg" height="36" alt="Discord"></a>
   </p>
-
-  <p align="center">
-    <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License"></a>
-    <a href="https://discord.gg/gggpkVgBf3"><img src="https://img.shields.io/badge/discord-5865F2?style=flat-square&logo=discord&logoColor=white" alt="Discord"></a>
-    <a href="https://www.youtube.com/@pixaroma"><img src="https://img.shields.io/badge/youtube-red?style=flat-square&logo=youtube" alt="YouTube"></a>
-  </p>
-  <p align="center">
-    <a href="#-getting-started">📥 Install</a> &nbsp;·&nbsp;
-    <a href="#-creative-suite">🎨 Nodes</a> &nbsp;·&nbsp;
-    <a href="#-learning-resources">📺 Tutorials</a> &nbsp;·&nbsp;
-    <a href="#-changelog">🛠 Changelog</a> &nbsp;·&nbsp;
-    <a href="https://discord.gg/gggpkVgBf3">💬 Discord</a>
+  <p>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License: MIT"></a>
+    <a href="https://www.youtube.com/@pixaroma"><img src="https://img.shields.io/badge/YouTube-121K%20subscribers-FF0000?style=flat-square&logo=youtube&logoColor=white" alt="YouTube subscribers"></a>
+    <a href="https://discord.gg/gggpkVgBf3"><img src="https://img.shields.io/badge/Discord-97.9K%20members-5865F2?style=flat-square&logo=discord&logoColor=white" alt="Discord members"></a>
   </p>
 </div>
 
 ---
 
-> ## 💬 Bugs, questions and ideas all go to Discord
->
-> **[#pixaroma-nodes on the Pixaroma Discord](https://discord.com/channels/1245221993746399232/1513481633762775110)** is now the one place for everything: bug reports, questions and feature ideas. ([Join here first](https://discord.gg/gggpkVgBf3) if you are not on the server, it is free.)
->
-> **Issues and Discussions here are closed.** Not because reports are unwelcome, the opposite. They were spread across four places, so questions sat unanswered for weeks. On Discord there is a large community that often answers within minutes, everything lands in one channel, and a real bug gets looked at properly instead of being lost in a queue.
->
-> **Pull requests are also closed.** The nodes are tightly connected: one change usually has to be carried into the help text, the node's own tooltips, and other nodes that read its state (Prompt Reader and XY Plot both need to know when a node changes). A patch that only touches one file leaves the rest inconsistent, so ideas and code suggestions are very welcome on Discord instead.
->
-> **New here, or something looks broken?** The [help page](https://workflows.pixaroma.com/help/) covers installing, updating, and the 30-second fix for most "a node looks broken" reports. Inside ComfyUI, the orange **?** in the top toolbar opens the full help for every node.
-
-> 💡 **Updated Pixaroma and a node looks broken or old?** Hard-refresh your ComfyUI browser tab with **Ctrl+Shift+R** (**Cmd+Shift+R** on Mac). The browser caches old node visuals, so without a hard refresh you can still see the previous version even though the update installed correctly.
-
-## 🎨 Creative Suite
-
-Pixaroma turns ComfyUI into a powerful, easy-to-use design space. It brings professional editing right into your workflow!
-
-### 🗂️ Pixaroma Workflows
-Click the orange **W** in the top toolbar, beside the Help question mark (or press **Alt+W**). A panel opens over the workflow files you already have, so nothing is imported and nothing is moved. **Every workflow gets a picture**: a small map of the graph itself straight away, then its own last output image once you have run it, or any picture you choose. **Search reads inside the files**, so you can type a model or LoRA filename, a phrase from a prompt, or your own note and find the workflows that use it. Rename with F2, drag onto a folder to move, and right click for duplicate, cover, reveal and delete. **Needs tidying** gathers the ones worth a look: files still called "Unsaved Workflow", sets that are copies of each other, and any needing nodes you do not have, each with its fix beside it. Under your own folders are collections that fill themselves by reading each file, so a workflow filed in the wrong place still turns up in the right place. The cursor starts in the search box and the arrow keys move through the results.
-
-### ❓ Pixaroma Help
-Not sure what a node does? Click the orange **?** in the top toolbar, beside Align. A help window opens covering **every Pixaroma node**, the canvas tools that do not add a node at all, and four short guides: updating the nodes, opening a workflow you downloaded, the fix for most "it looks broken" reports, and where to ask when none of that helps. **Search reads the whole text**, not just node names, so you can type the problem ("buttons missing", "make it bigger") instead of guessing the name. Each node page explains what every input, setting and output is for, and you can **drop the node straight onto your canvas** with a button or by dragging its card there. The bar along the bottom always shows **which version you are on** and copies the full details for a support question in one click, with Discord and the tutorials next to it. Drag the divider to widen the list, and click the **?** again to close.
-
-### ✨ Image Composer
-Easily combine and arrange multiple images. Move, scale, and rotate layers using a simple visual editor. **Per-layer blur** lets you focus or defocus any layer non-destructively with a simple slider. **Shift+Scroll wheel** scales the selected layer in place for quick adjustments. Use the eraser to tweak things by hand, or let our AI background removal tool isolate objects for you instantly.
-
-📥 [Download example workflow](workflows/Image%20Composer%20Pixaroma%20Workflow.json)
-
-![Image Composer Node](workflows/Image%20Composer%20Pixaroma%20Workflow.jpg?v=2)
-![Image Composer Editor](workflows/Image%20Composer%20Pixaroma%20Workflow%20v2.jpg?v=2)
-
-### 🖌️ Paint Pixaroma
-A fast, easy-to-use painting tool. It features layers, custom brushes, and a smudge tool for smooth blending. Perfect for fixing details, drawing custom masks, or painting from scratch.
-
-📥 [Download example workflow](workflows/Paint%20Pixaroma%20Workflow.json)
-
-![Paint Node](workflows/Paint%20Pixaroma%20Workflow.jpg?v=2)
-![Paint Editor](workflows/Paint%20Pixaroma%20Workflow%20v2.jpg?v=2)
-
-### 🧊 3D Builder
-A full 3D scene editor right inside ComfyUI. Drop in shapes, trees, houses, furniture, or import your own 3D models. You get easy camera controls, realistic lighting, undo/redo, and live previews. Perfect for making reference scenes for ControlNet or depth maps!
-
-📥 [Download example workflow](workflows/3D%20Builder%20Pixaroma%20Workflow.json)
-
-![3D Builder Node](workflows/3D%20Builder%20Pixaroma%20Workflow.jpg?v=2)
-![3D Builder Editor](workflows/3D%20Builder%20Pixaroma%20Workflow%20v2.jpg?v=2)
-
-### 🎚️ AudioReact Pixaroma
-Audio-reactive image-to-video. **No extra models needed**, just an image and an audio track. Open the fullscreen editor, scrub the audio, and watch 15 motion modes (Pulse Zoom, Camera Shake, Glitch, Pinch, Wave, Tilt, Pixelate, RGB Split, and more) react to the beat in real time with a live WebGL preview. Stack 8 overlay effects on top: chroma shift, bloom, vignette, hue shift, cinematic teal/orange grade, letterbox, scanlines, and film grain. Pairs with **Save Mp4 Pixaroma** to write the clip directly to MP4 with audio muxed in. Requires WebGL2.
-
-📥 [Download example workflow](workflows/AudioReact%20Workflow.json)
-
-![AudioReact Node](workflows/AudioReact%20Workflow.jpg?v=2)
-![AudioReact Editor](workflows/AudioReact%20Workflow%20v2.jpg?v=2)
-
-### 📊 XY Plot Pixaroma
-Compare settings side by side without setting anything up. Drop it at the end of your workflow and wire your final image in, just like a preview node. Then pick what changes **across** (columns) and **down** (rows) from a dropdown of the nodes already in your graph - no extra wiring. The value box adapts to your pick: a number gives a Start/End/Steps range, a dropdown (sampler, model, scheduler) gives a checklist, a lora lets you compare loras or their strengths (works with the Power Lora Loader too), and your prompt gives find-and-replace. Hit Run once and every combination fills a labeled grid right in the node, with **Dark/Light/Mono** grid themes and **Save/Copy/Open** buttons. The seed stays **locked** across the grid so the only thing changing is the thing you're testing.
-
-### 🎛️ LoRA Loader Pixaroma
-Stack as many LoRAs as you want in one compact node, each on its own line with an on/off switch and a strength you type or nudge with arrows - and chain the model and clip through several of them. Click the **i** on any LoRA to see its details and trigger words, read straight from the file with no internet needed; tick the ones you want (or type your own) and they come out of a **triggers** output as plain text for your prompt. A searchable, browse-by-folder picker makes finding a LoRA quick, and an optional **Civitai** lookup fills in official trigger words and a preview when you ask, with a link to the model's page. If Civitai keeps saying it cannot find a LoRA you know is there, add your **Civitai API key** in the settings: the site keeps some models out of sight for anyone who is not signed in, and a key lets the lookup see them. The key is kept on your computer and never goes into a workflow. **Add LoRA**, all on/off and the settings tuck into the middle of the node to keep it small; right-click a row to move, duplicate or remove it.
-
-### 🔗 Text Join Pixaroma
-Join a few pieces of text into one, each on its own line - and every line is **type-or-wire**: type straight in, or drag a wire from another node to feed it, so fixed text and text from elsewhere mix freely. Comes in **Two**, **Three** and **Four** line versions, and the lines **grow** as you enlarge the node so long text has room. Right-click for the settings: choose what goes **between** the pieces (comma, space, new line, none, or your own), **skip empty** lines so you never get a stray comma, and - the handy part - **rename each line** to whatever fits your workflow (trigger words, prompt, camera, lighting) so the node reads the way you think. A per-line copy and paste sits on each box, and it works in both the classic and the new node interface.
-
-### ✂️ Image Crop
-No more guessing crop sizes with numbers! Visually draw your crop box, or set width, height, position and a center/edge alignment right on the node - math expressions like `1024+512` work too. Standard presets (1:1, 16:9, 9:16…) keep social and video aspects locked. Wire **any IMAGE** output into the node (Load Image, VAE Decode, anything) and run the workflow once - the editor and mini-preview will show the live source. Or paste an image straight from the clipboard with **Ctrl+V**. It keeps **transparency** too (wire a mask in, get a matching cropped mask out) and hands off a **crop_info** wire to the new **Image Uncrop** node, so you can edit the crop and paste it back later.
-
-📥 [Download example workflow](workflows/Crop%20Pixaroma%20Workflow.json)
-
-![Image Crop Node](workflows/Crop%20Pixaroma%20Workflow.jpg?v=3)
-![Image Crop Editor](workflows/Crop%20Pixaroma%20Workflow%20v2.jpg?v=2)
-
-### 🧩 Image Uncrop
-The other half of crop-and-edit: paste an edited or upscaled crop **back** onto the original image at the exact spot it came from. Wire the **crop_info** from Image Crop into it, run your crop through any nodes you like (upscale, recolor, inpaint, remove background), and Image Uncrop drops the result back in place - everything outside the crop stays untouched. A **feather** slider softens the seam for a seamless blend, and transparency carries straight through.
-
-### 🩹 Inpaint Crop Pixaroma
-The easy way to set up an inpaint. Open the fullscreen editor and **paint** over the part you want the AI to redo - brush, erase, invert, an adjustable brush, and **zoom** (scroll) + **pan** (Space-drag) for fine detail. The node automatically finds the area around your mask, adds a margin, and crops a clean, **model-friendly** piece (sized to a multiple of 8 and scaled toward your target) so even a small spot gets enough resolution to look sharp. Set how the result blends back - **softness**, mask grow, and **Mask** (only the painted area) vs **Whole crop** - right here, with a live preview. Wire the cropped **image** and **mask** into your inpaint or edit model (Flux, KSampler, edit models), then send the **crop_info** wire to Inpaint Stitch to paste the result back. Turn on **invert_mask** to inpaint the opposite area (no separate Invert Mask node), and it works with a mask wired in too. Works in both the classic and the new node interface.
-
-### 🪡 Inpaint Stitch Pixaroma
-The other half: paste your inpainted crop **back** onto the original, blended so the seam disappears. Wire in the **crop_info** from Inpaint Crop and your processed crop, and by default only the area you painted changes - everything else stays pixel-perfect. Fine-tune the **softness**, **blend mode**, and an optional **color match** right on this node; because it runs after the sampler, changing them re-runs only this node (instant, no re-generating the image). It also hands back the untouched **original**, so you can drop both into Image Compare for an instant before / after.
-
-### 🖍️ Sketch Pixaroma
-Tell an edit model exactly what to change by marking it on the picture. Wire a picture in, pick a tool and draw: a **Box** or **Circle** around something, a **Freehand** loop (or the rough shape of something to add), an **Arrow**, or a **word** typed right onto the picture. Every mark gets its own number and color, and the cursor jumps to its note, so you type the change (`make the hat red`) and press Enter. The node writes the instruction for you, one sentence per mark ("Inside the red box: make the hat red."), plus a line asking the model to remove the marks. Wire **image** into Flux 2 Klein, Qwen Image Edit or Kontext and **prompt** into the text encode. There is also a **mask** output for inpaint workflows, undo and redo, four line widths, and a big view for careful marking. Works in both the classic and the new node interface.
-
-### 🌓 Image Compare
-The best way to see the difference between two images. Easily compare them side-by-side with a slider, overlap them, or highlight exactly what changed between the two versions.
-
-📥 [Download example workflow](workflows/Image%20Compare%20Pixaroma%20Workflow.json)
-
-![Image Compare Node](workflows/Image%20Compare%20Pixaroma%20Workflow.jpg?v=2)
-![Image Compare Editor](workflows/Image%20Compare%20Pixaroma%20Workflow%20v2.jpg?v=2)
-
-### ⏸️ Pause Image Pixaroma
-A checkpoint you drop into your workflow to stop and look at the image before running the slow part (like an upscale or a second pass). Press Run and it pauses there, showing you the image while the rest of the workflow waits. Like what you see? Hit **Continue** and only the steps after it run - the heavy generation is skipped, so it's fast, and you upscale the exact image you saw. Don't like it? Hit **Regenerate** for a fresh one, or change something upstream and run again. Flip the toggle to **Pass** to run everything in one go. **Copy**, **Save to disk**, **Save to output**, and **Open** buttons act right on the previewed image. Works in both the classic and the new node interface.
-
-### ✍️ Pause Text Pixaroma
-A checkpoint for words, the way Pause Image is for pictures. When text comes from an AI writer and heads into the rest of your workflow, this lets you read it and fix it before it goes on. Drop it in the wire between the text source and whatever uses the text. Press Run and it pauses, showing the text in an editable box - tidy it up, then hit **Continue** to send your edited version on (the slow text step is skipped, so it's fast). Don't like what it wrote? Hit **Regenerate** and it finds the node that made the text, rolls its seed, and gives you a fresh one, so you never have to touch the seed yourself. Flip the toggle to **Pass** to run straight through without stopping, or **Keep** to reuse the same text and make a new image every run - handy for trying one prompt many times. **Copy** and **Revert** buttons are right there. Works in both the classic and the new node interface.
-
-### 🖼️ Load Image Pixaroma
-A drop-in replacement for ComfyUI's native LoadImage with everything you'd want in one node. Same upload / drag-drop / Ctrl+V paste / multi-frame / alpha-to-mask behavior as native, plus inline resize: pick from **Off**, **Max megapixels**, **Longest side**, **Scale by ×**, **Fit inside**, **Crop to fill**, or **Match aspect ratio** with a sub-toggle for Crop or Pad (12 ratio presets + Custom, with a Pixaroma color picker for the Pad color). **Snap to /8/16/32/64**, **Resample picker** (Auto / Nearest / Bilinear / Bicubic / Lanczos with one-line hints under each), and an **Allow upscaling** toggle apply on top. Numeric fields accept math expressions (`1024+64`, `512*2`), ↑↓ arrow stepping (Shift = 10×), and have visible +/- spinner buttons. A live **Input → Output** info bar with tiny aspect-ratio rectangles shows you exactly what dimensions the workflow will produce as you tweak settings. Outputs include `IMAGE`, `MASK`, `WIDTH`, `HEIGHT`, `FILENAME` (no extension), `ORIGINAL_WIDTH`, `ORIGINAL_HEIGHT` - eliminates downstream Get Image Size + Image Scale chains in most workflows.
-
-### 🪶 Load Image Mini Pixaroma
-The compact version of Load Image, for when you want a small, uncluttered node on the canvas. Same engine and the same picking - **upload / drag-drop / Ctrl+V paste**, the ◀ ▶ arrows and thumbnail file picker, and full **Open in Mask Editor** / Copy-Paste (Clipspace) support - but the face is just a toolbar, the file picker and a preview. All the resize modes (**Max megapixels**, **Longest side**, **Scale by ×**, **Fit inside**, **Crop to fill**, **Match aspect ratio**) plus snap, resample and upscaling live in the gear settings panel, and you can recolour the node's buttons per node. It outputs just `IMAGE` and a small `image_info` bundle. Pair it with **Image Info Pixaroma** to unpack that bundle into `IMAGE`, `MASK`, `WIDTH`, `HEIGHT`, `FILENAME` - wire it in only when you need those extras, so the loader itself stays small (Image Info also shows the size and filename right on its own face). Works in both the classic and the new node interface.
-
-### 📂 Load Images from Folder Pixaroma
-Point it at any folder on your computer and batch-process its images through your workflow. Pick which ones in a thumbnail gallery (**Select all**, the **First N**, or hand-pick), then hit Run once and it feeds each selected image through your graph on its own, giving you a finished result for every image (mixed image sizes are fine). Set the folder with the real OS folder dialog (the **Browse** button, Windows / Mac / Linux) or just type or paste a path. It carries the same inline resize options as Load Image Pixaroma (**Max megapixels**, **Longest side**, **Scale by**, **Fit inside**, **Crop to fill**, **Match aspect ratio**, **Pad**), applied to each image as it loads. Outputs `IMAGE`, `MASK`, `WIDTH`, `HEIGHT`, `FILENAME`, `INDEX`, `TOTAL`, `PATH` - wire WIDTH/HEIGHT into an empty latent so it matches each image, FILENAME into a Save node so every result keeps its original name, and PATH into Prompt Reader to read the prompt saved in every picture. Do a big folder in parts, or only the pictures added since (click **Select all** again): switch on **Skip pictures already done** in the gallery and every picture that already has a result is left out. Works in both the classic and the new node interface.
-
-### 🗿 Load 3D Pixaroma
-Load a 3D model and get the model **and** a picture of it from one node, so the same model can feed a 3D workflow and an image workflow. Opens **GLB, GLTF, OBJ, FBX, STL and PLY** from ComfyUI's `input/3d` and `output/3d` folders (a model a 3D workflow just saved is already in the list), with a big **Upload** button and drag-and-drop. The model shows live on the node: drag to turn it, scroll to zoom, or jump to **Front**, **Back**, **Left**, **Right**, **Top** or **3/4**. Pick a look - **Color** (its own textures), **Clay** (just the shape in grey), **Normal** or **Depth** (ready for ControlNet) or **Wire** - and type the **Width** and **Height**, or wire them in from Sizes Pixaroma so the picture follows your size pick; the bright frame shows exactly the picture that comes out. Outputs `model_3d`, `image`, a matching `mask`, and the picture's `width` and `height` for your empty latent. The gear holds the background, light, camera, which way is up, and a quarter turn for a model that faces the wrong way. Works in both the classic and the new node interface.
-
-### 📤 Save 3D Pixaroma
-See a 3D model on the node, check which way it faces, and save it. Wire in a mesh from a 3D generator or a `model_3d` from Load 3D Pixaroma. The square view turns with a drag and jumps to **Front**, **Back**, **Left**, **Right**, **Top** or **3/4**, while a floor grid, an orange **FRONT** arrow and an X Y Z marker show how the model stands. Pick a look - **Color**, **Clay**, **Wire** (the real edges, so quads show as quads), **Panels** or **Normal**. **Turn X / Y / Z**, **Center** and **On ground** fix the file itself, and a check line tells you when the model floats, sinks or sits off center. **Preview** writes a temporary file, **Save** writes one on every run, and **Save now** keeps the last preview without running again. **Format**: OBJ keeps quads and colours, GLB keeps colours and textures, STL is for 3D printers. The gear holds the save folder (any folder you pick), the light, the background and the viewer switches. Outputs `model_3d`. Works in both the classic and the new node interface.
-
-### ↔️ Image Resize Pixaroma
-Resize any image (and its mask) anywhere in your workflow with one compact node. Pick a mode - **Off**, **Max megapixels**, **Longest side**, **Scale by ×**, **Fit inside**, **Crop to fill**, **Match aspect ratio**, or **Pad** (add a colored border for outpainting / inpainting, where the new area becomes the editable mask region). **Crop to fill** has a 9-point **anchor** (keep the top, a corner, the center…) and a **Fill / Crop** toggle (scale-and-crop, or cut a piece at original pixels). A live **Input → Output** card with tiny aspect-ratio rectangles shows exactly what you'll get, and turns orange only when the size actually changes. Wire a **width / height** in (e.g. from Resolution Pixaroma): connect just one to scale while keeping the aspect ratio, or both for an exact size, and the controls adapt automatically. **Snap to /8/16/32/64**, a **Resample picker** (Auto / Nearest / Bilinear / Bicubic / Lanczos), and an **Allow upscaling** toggle apply on top; number fields take math like `1024+64`. Outputs `IMAGE`, `MASK`, `WIDTH`, `HEIGHT`.
-
-### 📏 Longest Side Pixaroma
-One-number resizing, and the small sibling of Image Resize. Click a size and the **longer edge** of your picture becomes exactly that, with the other edge following so nothing is squashed - it works the same for a tall photo or a wide one, so you never have to decide whether you mean width or height. Five **size tabs** (864, 1024, 1216, 1536, 2048 by default; type your own in the settings, and each one is rounded to match the step). Five **shape chips** (**keep**, 1:1, 16:9, 9:16, 2:3 by default, swapped from a palette of every ratio) - picking a shape takes the biggest piece of it out of your picture first, so nothing stretches and no empty bars appear. A small button steps through **Off / 8 / 16 / 32 / 64** and rounds both sides, which is what most models want. The node shows the size it will send **before you run**, reading the picture coming in. The gear also holds the crop anchor (9 points), whether small pictures may grow, the resample quality and the node's colour. Outputs `IMAGE`, `WIDTH`, `HEIGHT`. Reach for Image Resize Pixaroma instead when you need a width **and** a height. Works in both the classic and the new node interface.
-
-### 🔲 Resize Crop Pixaroma
-A dead-simple crop-to-fill node. Wire in an image, set a **width** and **height** (type them, or wire them in from another node like WH or Resolution Pixaroma), and it scales the image to completely fill that size and crops the overflow from the center - so the output is **always exactly** the size you asked for, with no stretching or black bars. Smaller images scale up to fill. An optional **mask** is cropped along with it. Outputs `IMAGE`, `MASK`, `WIDTH`, `HEIGHT`. Perfect for forcing images or video frames to a fixed size like 512×896 or 704×1280. Works in both the classic and the new node interface.
-
-### 🖼️ Outpaint Pixaroma
-Add a solid-colour border around your image so an outpainting model can paint new scenery into it - the setup step for extending a picture past its edges, in one node. **To ratio** grows the image to a target shape (1:1, 3:2, 16:9…) and an **Add space** row picks which side the new area goes on; **By side** adds an exact number of pixels per edge, or just **drag a green edge** right on the preview to pull the canvas out. A live **preview** shows the composition with the pad numbers on the fill and a size **badge**, and an **Input → Output** card shows the real dimensions (orange when they change). The fill is **neutral grey** by default - a strongly coloured fill can tint the whole result - but click the swatch to pick any colour. Optionally cap the result at a **megapixel limit** (choose your own buttons, or add a custom value) so it stays a sane size to generate, with an optional snap to a multiple of 8/16/32/64. Right-click or the gear opens settings to choose which ratio and megapixel buttons show and recolour the node; a small arrow folds it down to just the picture. Outputs `IMAGE`, `WIDTH`, `HEIGHT`. The outpainting itself is done by your model or LoRA, which needs its own trigger words in your prompt. Works in both the classic and the new node interface.
-
-### ✂️ Outpaint Stitch Pixaroma
-The companion to Outpaint Pixaroma. Once the model has filled in the new scenery, this puts your **original picture back at full quality** and keeps only the freshly generated area - because a large image usually has to be shrunk for the model, which softens the original half on the way through, and this brings it back sharp (only the new part, which had to be generated, stays soft). Wire the extra `outpaint_info` output from Outpaint Pixaroma into it and it drops the original back in exactly the right place and blends the join. **Feather** softens the seam, and **Color match** evens out any colour or brightness step where the old and new areas meet - it follows the background (so a light wall over a dark floor is handled per region, not as one flat colour) and evens out only the background tone, leaving any new subject the model added untouched. Both are sliders you can also wire a number into, and you can compare different Feather and Color match values side by side with XY Plot Pixaroma. Outputs the recombined `IMAGE` and a `MASK` of just the new area, so you can refine only that part later. Works in both the classic and the new node interface.
-
-### 📝 Note Pixaroma
-A beautiful, simple text editor to document your workflows right on the canvas. Write normally with bold, italics, lists, headings, code blocks (with copy button), and inline icons (CLIP, LORA, GGUF, model versions, and 30+ more). Drop in custom-colored **buttons** (Download / View Page / Read More / plain), **separators** (5 line styles: solid, dashed, dotted, double, thick), **tables**, and **folder hints** for download paths. Each block carries its OWN colour, picked from a clean modal that opens centered on the screen, so two separators (or two grids, or two folder hints) in the same note can have totally different looks. YouTube and Discord buttons come pre-colored. There is also a Code view for hand-editing the underlying HTML, plus a drop-in LLM prompt at `assets/note-pixaroma-llm-prompt.txt` if you want ChatGPT, Gemini, or a custom GPT to generate notes for you. It perfectly saves and restores exactly how you styled it.
-
-📥 [Download example workflow](workflows/Note%20Pixaroma%20Workflow.json)
-
-![Note Pixaroma Node](workflows/Note%20Pixaroma%20Workflow.jpg?v=2)
-![Note Pixaroma Editor](workflows/Note%20Pixaroma%20Workflow%20v2.jpg?v=2)
-
-### 🏷️ Label Pixaroma
-Keep your workflows tidy with clean, custom labels.
-
-📥 [Download example workflow](workflows/Labels%20Pixaroma%20Workflow.json)
-
-![Labels Node](workflows/Labels%20Pixaroma%20Workflow.jpg?v=2)
-![Labels Editor](workflows/Labels%20Pixaroma%20Workflow%20v2.jpg?v=2)
-
-### ℹ️ Info Pixaroma
-Turn the big notes around a workflow into small buttons. Each **Info** button has a title, an icon (27 built in, so they travel with the workflow) and a colour, and a click opens the note in a reading window you can move and resize. Each button remembers its own window size and text size (**A−** / **A+**). When a workflow has several buttons, the window lists them all so you can jump between them, and resting the mouse on a button shows the note's first lines. **Edit** opens the same rich editor as Note Pixaroma (headings, lists, icons, tables, Download and YouTube buttons) with a **Template** menu that adds ready-made sections. A new button can start from **Read me**, **Download Models**, **Nodes Info**, **Settings**, **Run Times**, **Prompt tips** and more, and an empty one shows a dashed outline until you write it.
-
-### ✏️ Text Overlay Pixaroma
-Drop a styled text caption straight onto an image. 10 bundled fonts (Inter, Roboto, Montserrat, Oswald, Playfair Display, Lora, Bebas Neue, Anton, Caveat, JetBrains Mono), bold and italic toggles, three alignment options, size, line height, letter spacing, opacity, rotation, X / Y position, text color and an optional background bar behind the text. Type math like `100+12` in any number field and it evaluates. Click **Open Text Editor** for a fullscreen canvas where you can drag the text to move it, drag the corners to resize, drag the round handle on top to rotate, snap to canvas center / thirds / edges, and use **Fit W** or **Fit H** to fill the image. Save your work straight to disk as a PNG. Wire the optional **text** input to feed the caption from any upstream text source (the textarea on the node grays out so you know not to type there). New nodes auto-center the text on whatever image you wire in, no manual positioning needed for the first render.
-
-### 💧 Text Watermark Pixaroma
-A no-editor sibling of Text Overlay built for stamping a watermark onto an image (or a whole batch). Pick a corner, edge, or center on a 3x3 grid plus a small margin, and the text lands in the same spot on every image regardless of size. Size the text as fixed pixels or as a percentage of the image width (so mixed-size batches stay consistent), with the same font / weight / color / opacity / rotation / background bar controls as Text Overlay. No fullscreen editor - everything's on the node body. Use it when you want a watermark, a date stamp, or a corner caption applied uniformly to many images.
-
-### 🎞️ Load Video Pixaroma
-Bring a video into ComfyUI and turn it into frames. Upload one from your computer or pick from the dropdown, and it **plays right on the node** so you can check it before running (click the picture to play / pause). It hands you the **frames, the audio, and the details** (frame count, fps, width, height, length) all at once, so you rarely need a separate info node. Control how much to load: cap the number of frames for long clips, skip frames off the start, force a steady frame rate, or resize each frame (**crop-to-fill** an exact size with no stretching). Pairs with **Save Mp4** - send the frames and audio straight across to rebuild the video.
-
-### 🎯 Load Video Frame Pixaroma
-Grab one exact frame out of a video and use it as an image - like a Load Image node, but for video. Load a clip and a preview appears on the node with a slider: **drag** it to any spot, **step one frame** back or forward with the arrow buttons for a pinpoint pick, or **type** the exact frame number. It reads the frame count for you and shows where you are (**"frame 76 · 117 frames"**), then hands you the picked frame plus its mask and the video's frame count, fps, width and height. Perfect for pulling a still, a start frame, or a reference out of a video without exporting it in another program first. Works in both the classic and the new node interface.
-
-### 🔚 First Last Frame Pixaroma
-Takes the **very first and the very last frame** out of a video and hands them to you as two pictures. The reason most people want this is to **carry on from where a clip ended**: render a video, take its last frame, use that as the starting picture for the next video, and the two clips join up. Repeat that and a long scene can be built out of short ones. Wire either output into **Save Image** to keep it. There are **two inputs** because ComfyUI has two different kinds of video travelling on wires and they do not fit the same slot: use `video_frames` for a batch of frames (the output of **Load Video Pixaroma**, or the frames coming straight out of a video model), and `video` for ComfyUI's own **Load Video** node. Connect whichever one you have. Reading a video file only costs the two frames it needs, so pointing it at a long clip does not fill your memory with the whole thing, and the frames come out exactly as they are in the video with nothing resized, cropped or recoloured. Works in both the classic and the new node interface.
-
-### 🎵 Load Audio Pixaroma
-Pick a sound file and take exactly the piece you want, without cutting it up somewhere else first. The whole file is **drawn as a waveform** on the node, so you can see where the loud parts are, and you drag a window across it to choose your moment: drag either orange edge to trim, drag the middle to slide, or **click anywhere to place the play cursor** and press play to hear it. Wire the seconds output of **Duration Pixaroma** into it and the window becomes exactly as long as the video you are about to make, resizing the moment you connect it, so picture and sound cannot drift apart. If your window runs past the end of the file it fills the rest with real silence or loops back, whichever you chose, and says so on the node. Upload straight from your computer, and the file list refreshes every time you open it. Works with any model.
-
-### 🎤 H3 Audio Sync Pixaroma
-Make a **MiniMax H3** video perform *your* recording instead of the meaningless sound the model would invent. H3 is unusual: it creates the picture and the sound together as one thing, which is why you cannot simply mute what it made and lay your own song on top - the mouth was never moving to your song in the first place. This node drops your recording into the sound half and holds it still, so the only thing left for the model to decide is the picture that fits it. It works out the clip length by itself, so you never type a duration, and it hands back your track cut to exactly that length, ready for the save node. If your recording is shorter than the clip it fills the rest with silence or loops it, and if the clip is longer than about 15 seconds it warns you **before** the render rather than after. Pairs with Load Audio Pixaroma.
-
-### 🎥 Video Prompt Pixaroma
-Type your idea in plain words, press **Generate**, and get a finished **MiniMax H3** prompt written for you, on your own machine. H3 wants its prompts in a particular shape, with named sections, a soundscape, music and a strict way of writing anything a person says out loud, and getting it wrong quietly spoils the clip. This node does all of that from a sentence like *"a blacksmith hammers glowing steel in a dark forge"*. It also hands back a **frames** output already snapped to the pattern H3 accepts, so the video is exactly as long as the prompt was written for - getting those two out of step is the easiest way to waste a render. **You do not pick a mode:** wire nothing and it writes text to video, wire one picture and it looks at that picture and animates it, wire two and it writes the journey between them, joining them for you so they cannot end up the wrong way round. Everything runs locally through a vision model in your `text_encoders` folder, with no account and nothing sent anywhere, and the node finds a suitable model by itself if you have one. Every word of the wording it follows is **yours to edit** in the settings, kept outside the plugin folder so updates never overwrite it, and you can switch our length instructions off entirely and use your own for any video model you like. A **Free VRAM** switch hands the memory straight back to your video model once the prompt is written.
-
-### 🤖 AI Prompt Pixaroma
-A model, an instruction you save on the node, and whatever you wire in - out comes text. Everything runs on your own machine using a model in your `text_encoders` folder, with no account, no key, and nothing sent anywhere. The instruction is called the **formula**, and because it lives on the node rather than in a shared file, a copy of the node is a complete independent one, so a row of three can hold three different jobs. That is the point: the output is plain text and the text input takes plain text, so they **chain with nothing in between** - one node turns a photo into a prompt, the next rewrites it in another style, a third names the mood of a piece of music, and all of it joins up. It comes with **six ready-made recipes**, each naming the model it was written for: two for **Krea 2** (from your idea, or from a picture you feed it), one for **Z-Image Turbo**, and three that use audio and video - transcribe what is said, describe what a recording sounds like, or watch a clip and write the video prompt that would recreate it. A recipe carries the sampling settings it was measured at as well as the wording, because the two together are what make it work, and you can **share one as a plain readable .txt** or straight to the clipboard for a chat message. Wire nothing and it simply passes your text through, so you can drop it into a working graph and set it up afterwards.
-
-### 🎬 Save Mp4 Pixaroma
-Encode video frames + optional audio straight to MP4. Built-in `<video>` preview right on the node so you can watch the result without leaving ComfyUI (click the picture to play / pause). Pairs with AudioReact and Load Video, but works with any source that produces frames + AUDIO.
-
-### 🔁 Loop Start / Loop End + Combine Pixaroma
-Repeat a section of your workflow a set number of times. Put your nodes **between** Loop Start and Loop End, choose how many rounds, and the whole section runs again and again - perfect for building a long video in chunks or piling up a batch of images. Each round can **carry values forward** (the frames so far, a running counter), and the **Combine** node joins each round's result onto the growing pile (images into one batch, numbers into a list). Things that don't fit together (like an image and some text) stop with a clear, plain message instead of a confusing error. Works in both the classic and the new node interface.
-
-### 💬 Show Text Pixaroma
-See what text or data is flowing through your nodes, with a real read-only text box you can **select and copy** from. **Resize the node freely** in any direction; long text scrolls with a scrollbar instead of forcing the node to grow. New **STRING output** lets you chain it into other nodes (great for inspecting a prompt before passing it on). Saves and restores with your workflow.
-
-### 🗒️ Save Text Pixaroma
-For when you try a lot of prompts and the good ones get lost. Wire any text in - your own, or whatever an LLM prompt generator hands back - and **every run adds it to a list on the node**, one under the other. The list is also written to a **.txt file**, so what you tried today is still there tomorrow. The text passes straight out of the output unchanged, so the node can sit in the middle of a chain or off to the side quietly collecting. The line under the box always tells you where you stand: green and **saved** means the file matches what you see, orange and **not saved yet** means you have edited it since. Edit or delete freely in the box, **Copy all** puts the lot on your clipboard, and **Clear never deletes your file** - it keeps it and starts a new one, so clearing is turning a page, not throwing anything away. Choose any folder with **Browse**, name the file how you like (`%counter%` keeps the numbering going so nothing is ever overwritten), and it saves after every run unless you tell it not to. Entries are separated by a blank line, which is exactly Prompt Pack Pixaroma's format, so a saved file pastes straight back in to re-run your best ones. If one of your prompts happens to contain a blank line of its own, the node says so and tells you which setting to change.
-
-### 🧾 Load Texts from Folder Pixaroma
-The text version of Load Images from Folder: it reads every **.txt file** in a folder and runs the workflow once per text - a folder of prompts, or the captions Save Text writes with **One file per entry**. Wire Load Images from Folder's `filename` into it and you get the text that belongs to **each picture** (01_Cat.png gets 01_Cat.txt), in the same order, so pictures and captions always travel together. Pick the folder with **Browse folder** or type it.
-
-### 📋 Caption Review Pixaroma
-Read and fix the captions of a training set in one window: every picture of a folder with its **.txt caption under it, editable**. Find a word, show only the pictures without a caption, type to fix one, and **Save changes** writes them back. A picture with no caption gets a new .txt when you write one. A tool on the canvas: it never runs and needs no wires.
-
-### 🧮 Image Grid Pixaroma
-A folder Run makes 40 pictures but a preview shows only the last one. Image Grid puts **every picture of the Run into one grid image**, with each file name under its picture, an optional **before** row above the results and a title on top. It shows on the node and comes out as an image, so Save Image keeps it. Great for a whole-folder overview, a before and after, or a tutorial.
-
-### 🔎 Text Match Pixaroma
-Does this text contain one of your words? Text Match gives a **yes / no**, which word matched and its number, and two gates that let a picture (or anything) through **only on a match** or only without one. Put a vision AI in front ("Is the face sharp? Answer yes or no") and a whole folder is **filtered in one Run**: only the pictures it said yes to are saved. Plain words, never a code pattern; whole words and upper / lower case are your choice.
-
-### 🔍 Prompt Reader Pixaroma
-Load any PNG that was generated with ComfyUI (or Automatic1111 / Forge) and read the **positive prompt** saved inside its metadata. No image preview - just the text. Drag-drop a file, click **Upload Image**, or pick from the file combo; the prompt appears the moment you choose a file, so you see it before running. One orange **Copy** button puts the prompt on your clipboard. The **STRING output** wires straight into CLIPTextEncode (or any text input) so you can re-use the prompt without retyping. Handles complex workflows with chained text nodes (ConditioningCombine, StringConcatenate, SDXL dual-text encoders). If the image has no prompt (JPG, screenshot, or a PNG whose metadata was stripped), you get a short clear message instead of a silent fail.
-
-### 🖼️ Preview Image Pixaroma
-A handy way to preview your images right on the node, but better! Works with **single images and full batches**: every frame appears as a thumbnail strip with a `i / N` counter - click any thumbnail to open it large inside the node. Use the **arrow keys** (← →) to flip through the batch, click anywhere on the open image to advance to the next, hit `Esc` or the `×` button to collapse back. Two save buttons act on the currently selected frame: **Save to Disk** (choose any folder on your computer; the suggested filename auto-increments per click) and **Save to Output** (saves to ComfyUI's `output/`, supports subfolder syntax like `SDXL/portrait`). Flip the **save_mode** widget to `save` and the node turns into a drop-in replacement for SaveImage - every batch frame is automatically written to `output/` with embedded workflow metadata. Both modes embed your workflow into the saved PNG so you can drag it back into ComfyUI later. The preview also **survives workflow tab switching**, so you can leave it on a frame and come back to it later.
-
-### 💾 Save Image Pixaroma
-Save your images to **any folder on your computer**, not just ComfyUI's output folder. Type or paste a path, click **Browse** to pick a folder with the normal system dialog, or leave it empty to use the output folder. The **filename builder** has clickable chips for everything you might want in a name - the wired filename from Load Image, the date or time, an auto-increasing counter, the width and height, the batch number, even the seed from a Seed node - and a live **"Will save as"** line always shows the exact file the next run will create, so a complex pattern is never a surprise. Files **never overwrite** (the counter continues from the highest one already there), and typing `/` in the name makes subfolders (like a folder per day). Pick **PNG** (keeps transparency, embeds the workflow so you can drag the file back into ComfyUI) or **JPG** (smaller, with a quality setting). The saved images show in a **big preview right on the node** - one image fills the space, a batch shows as a grid you can click through - so it doubles as a preview node, with **Copy**, **Open**, and **Open Folder** buttons and a right-click menu on the picture. Flip **Mode** to Preview to see results on the node without writing anything to disk. Works in both the classic and the new node interface.
-
-### 📐 Resolution Pixaroma
-A simple, one-click resolution picker. Choose from 9 popular aspect ratios - 1:1, 16:9, 9:16, 2:1, 3:2, 2:3, 4:3, 3:4, and 4:5 (Instagram-portrait friendly) - and instantly get the exact width and height you need, including popular sizes for AI video. Type any Custom Ratio (21:9, 16:10, anything) with auto-computed AI-friendly sizes, or use Custom Resolution to type exact dimensions. Math expressions work in the Width and Height fields too - type `1024+128` or `512*2` and it just works. It perfectly saves all your settings with your workflow!
-
-### 📐 Sizes Pixaroma
-Keep your favourite exact resolutions in one tidy list and pick the one you want with a click - it sends out the **width** and **height**. Add any size you like from the settings (a `1024 × 1536` here, a `1920 × 1080` there), and a **Portrait / Landscape** button flips the whole list between tall and wide, so you only ever add a size once and switch orientation on the fly. There is an optional **snap** to keep every size on a multiple of 8, 16, 32 or 64 (handy for models that are fussy about dimensions), and you can recolour the node's buttons per node - or save your colour as the default for every new one. A small arrow folds the node down to just the size you have selected when you want it out of the way, and adding a size you already have never makes a duplicate - it just points you at the one that is there. Works in both the classic and the new node interface.
-
-### 🌱 Seed Pixaroma
-A dedicated seed node you wire into KSampler (or any node with a seed input). Flip between **Random** - a fresh seed every run - and **Fixed** - the same seed for repeatable results - right on the node. **New fixed random** rolls a new seed and locks it (great for keeping a lucky result while you tweak other things), **Use last seed** brings back the seed from the previous run, and **Copy** puts the current seed on your clipboard. Type any number into the big readout to set it exactly, and in Random mode a **Last run** line tells you which seed actually made the latest image. One Seed node can feed several samplers at once so they all stay in sync. Works in both the classic and the new node interface.
-
-### 🔽 Dropdown Pixaroma
-A dropdown you fill in yourself. Each entry is a **short name** and the **value it stands for**, so you pick "warm light" instead of pasting the same long sentence again. Perfect for LoRA trigger words, prompt fragments you reuse, favourite sizes, or step counts. Open the settings from the **gear on the node**, type your entries, and choose what it sends out: **text, a whole number, a decimal, or on/off**. The output renames itself to match, so you can see at a glance what will come out, and it refuses a connection that would not fit. The small letter on the node decides which entry it sends each time you run, and you click it to change: **F** keeps the entry you picked, **I** steps to the next one every run, and **R** picks any of them at random - handy for trying a whole list of looks without touching anything between runs. Values that will not read as the chosen type are flagged rather than quietly changed, and your text is always kept if you switch type. Unlike **Control Panel Pixaroma**, which copies the type of whatever you plug it into, the list and the type belong to this node, so you can plug it in anywhere. **XY Plot Pixaroma** can drive it too, giving you one square per entry with the names written along the edge. The list is saved inside the workflow, so sharing the workflow shares your entries, and **Export** and **Import** move a list between workflows. Works in both the classic and the new node interface.
-
-### 🎛️ Control Panel Pixaroma
-One node that gathers every dial, switch and setting you keep reaching for, so you tweak them all from one place instead of hunting through the graph. Add a control, wire it to any input, and it becomes whatever you plug it into: a **slider** for a number (steps, cfg, denoise, a LoRA strength) that you drag, hold **Shift** for fine control, or double-click to type; a **switch** for an on/off setting; a **dropdown** for a picker like the sampler or scheduler that learns the whole list - and in the settings you tick which options to show, so it only offers the ones you actually use; a **seed** with randomize and new-seed buttons; or a **text** field you type into. A new control starts on **Auto** and the first input you connect it to teaches it everything - the kind, a sensible name, and for a slider the range, step and current value - so connecting never changes your workflow behind your back. Each control carries its own output on its own row, and it changes to match if you move it to a different input. It won't connect to things it can't drive, like a model or an image, and it tells you if you try. **Right-click** the node for the settings, where you add and remove controls, rename them, set a slider's range, choose which options a dropdown shows, and pick the colour the controls paint with (per node, and you can save your colour as the default for every new panel). Up to 16 controls per node, mixed freely, and you can add as many panels as you like. Works in both the classic and the new node interface.
-
-### 📏 WH Pixaroma
-A tiny utility node with two number fields for width and height, and matching width/height outputs. Use it when you want to type a target resolution manually somewhere in your workflow. Math expressions like `1024+64` or `512*2` work directly in the fields. Pairs perfectly with **Switch WH Pixaroma** so you can flip between manual values and the size coming from another node.
-
-### ✂️ Remove Background Pixaroma
-One node replaces the usual three-node chain (Remove Background, Invert Mask, Join Image with Alpha). Wire in your image, pick a model from the built-in dropdown, and get three outputs in one shot: the cutout image with a transparent background, the foreground mask (white on black), and the inverted mask (black on white). No separate Load Background Removal Model node to wire in. Three BiRefNet variants are supported, each tuned for a different use case:
-
-- **birefnet.safetensors** (Standard) - 424 MB - 4-6 GB VRAM - processes at 1024×1024. Best for clean objects, products, logos. Fast everyday cutouts.
-- **birefnet-hr.safetensors** (High Resolution) - 444 MB - 8 GB+ VRAM - processes at 2048×2048. Best for large images where you need fine outline detail picked up (jewelry, intricate hardware, complex shapes).
-- **birefnet-matting.safetensors** (Soft Alpha Edges) - 444 MB - 8 GB+ VRAM - processes at 2048×2048. Best for hair, fur, lace, soft fabric. Also worth trying for glass, smoke, sheer materials (trained mostly on portraits, so results on transparency vary).
-
-Drop the `.safetensors` files into `ComfyUI/models/background_removal/`; if the folder is empty the node tells you exactly what to download and where to put it. The model resizes your image to its internal resolution before finding the cutout, then the mask is scaled back to match your original size - so your output stays the same dimensions as your input regardless of which model you pick. Downloads: [Standard](https://huggingface.co/Comfy-Org/BiRefNet/tree/main/background_removal), [HR](https://huggingface.co/ZhengPeng7/BiRefNet_HR), [HR-matting](https://huggingface.co/ZhengPeng7/BiRefNet_HR-matting).
-
-### 🔀 Switch Pixaroma
-A universal multi-input switch for any data type. Connect models, images, prompts, masks, audio, latents, anything you want, and pick which one flows through with a single click on its toggle. The node starts with one input and grows on its own as you connect more cables (up to 32 rows). Each row gets a label that auto-fills with the type name (MODEL, IMAGE, CLIP...) so you can tell what is wired where at a glance; click the label to type your own name (for example "main checkpoint" or "alt prompt"), clear it and press Enter to revert to the type name. Only one input can be active at a time, lit up in Pixaroma orange. Disconnect the active row and the switch automatically moves to the next available one so your workflow doesn't break. All settings save with your workflow.
-
-### 🔀 Switch WH Pixaroma
-Switch between two width/height sources with a single click. Wire two width+height pairs into the **A** and **B** inputs (for example a Load Image Pixaroma's WIDTH/HEIGHT and a manual size from WH Pixaroma), then click **A** or **B** on the node body to choose which pair flows through. No rewiring cables. If one side has only one cable connected (the other forgotten), the node uses the complete side instead so the workflow doesn't break. If nothing is wired, you get a clear error message.
-
-### 🔄 Portrait Landscape Pixaroma
-Flip a size between portrait (tall) and landscape (wide) with one click. Enter your two dimensions (or wire them in), then tap **Portrait** or **Landscape** - Portrait makes the smaller number the width (a tall image), Landscape makes the larger number the width (a wide image), so the order you type them never matters. One node replaces keeping two WH nodes and a Switch WH just to flip orientation. Models are usually fussy about sizes, wanting them in steps of 8, 16, 32 or 64, so a **small button at the top of the node** steps through **Off, 8, 16, 32 and 64** and rounds both numbers to the nearest one before they go out - never down to nothing, and Off sends them exactly as typed. Each node keeps **its own step**, so one workflow can hold several set up differently, and the **gear** beside the button offers the same choice as a row of buttons along with the node's colour. Beside them the node **shows the size it will actually send**, like `896x1312`, updating as you change the step, flip the orientation or edit the numbers, so there is no guessing before a run (if a size is arriving on a wire it says so instead). Outputs `WIDTH`, `HEIGHT` - wire them straight into an empty latent. Works in both the classic and the new node interface.
-
-### 🔁 Switch Source Pixaroma
-Flip a whole pipeline (or any set of wires) between two sources with one click. Wire your **A** bank and **B** bank for as many rows as you need (works for any wire type: MODEL, CLIP, VAE, IMAGE, LATENT, STRING...), then toggle **A** or **B** to swap them all at once - no rewiring cables. Two common setups: swap a combined Load Checkpoint against three separate model/CLIP/VAE loaders, or flip a "local" pipeline against an "api" one without ticking ten little switches. Output labels are editable per row, and you can pick whether empty rows leave the output blank or show a clear error.
-
-### 🔇 Mute Switch Pixaroma
-Skip whole parts of a workflow with one click. Wire the last node of each "scene" (usually a KSampler) into a row, then use the small switches to pick what runs and what doesn't. Two pairs of buttons at the top: **Single** (only one scene runs at a time, like a radio button) or **Multi** (any combination), and **Mute** (the scene doesn't run) or **Bypass** (each node passes its input through unchanged). Chain Mute Switches together to group scenes: an outer Mute Switch can pick a group, and inner Mute Switches fine-tune which scenes inside that group run. Right-click for **Enable all rows** / **Disable all rows** to flip every row at once in Multi mode. Labels on rows are editable so you can name your scenes.
-
-### 🎛️ Group Switch Pixaroma
-A control panel of on / off switches, one per group, to mute or bypass whole groups with a click - a tidy, built-in way to do it with no extra extension needed. It lists both **Pixaroma groups** and regular **ComfyUI groups**, each with its colour dot and name (and a number if two share a name). A small **gear** opens a floating panel where you choose **Mute** or **Bypass**, whether to show **all** groups or just the ones you **pick** (with a search box and a locate button to jump to a group), and a switching rule: any number on, only one on at a time, or always keep one on. Flip a switch here and the group's own header button and any copies of this node all stay in sync. Works in both the classic and the new node interface.
-
-### 🔗 Set / Get Pixaroma
-Wireless connections for a cleaner canvas. Drop a **Set** node, wire anything into it (image, model, number, prompt), and give it a name. The Set has a passthrough output, so a node sitting nearby can wire to it directly, while far ones read it with a **Get** node - pick the name from a dropdown and it carries the same value, no cable stretched across the workflow. Colour a Set however you like and its Gets take the same colour (and follow along when you recolour it), so matching pairs are easy to spot, and the Get dropdown tags each name with its colour. Collapse them to almost nothing so they disappear into the background, and right-click to jump between a Get and its Set. They respect subgraphs (a value you **Set** in the main graph can be read by **Get** nodes inside your subgraphs), show a tiny value preview for plain numbers and text, and at run time they resolve straight to the original source - identical to a direct wire, with no extra cost. Works in both the classic and the new node interface. **Needs ComfyUI frontend 1.39.16 or newer** - older 1.39.x builds are missing a link feature these two nodes rely on (tested on 1.45.15). Not sure which frontend you have? Drop a **Version Check Pixaroma** node on the canvas, or look in **Settings → About**.
-
-### ⏱️ Duration Pixaroma
-Say how long a video should be in **seconds**, and this works out the **frame count** your model actually wants. It replaces the pair of nodes people normally wire up for this: one holding the number of seconds, and one doing maths on it. Video models are fussy about length, and most will not take just any frame count: they want it to land on a particular pattern. Open the **gear on the node**, pick your model, and it fills the numbers in for you, or type the frame rate, the step and the plus yourself for a model that is not listed. **You decide which lengths it offers**: give it a short list like 3, 5, 10 and 15 and you get **buttons** to click, or give it a smallest and largest and you get a **slider**. Two of these on the same canvas can be set up completely differently, so each workflow only offers lengths that make sense for it. **It shows you what it will send before you run**, including the true length, because rounding to your model's pattern usually shifts it a little: 5 seconds at 24 frames per second becomes 124 frames, which is really 5.17 seconds. The settings list every allowed length and what each one turns into, so a wrong setting shows up before you spend a render rather than after. There are **two outputs**: the frame count for your video node, and the real length in seconds for anything that has to stay in step with the picture, such as audio. Prefer to write the maths yourself? Choose **Custom formula** and type it, using the same functions as ComfyUI's own Math Expression node, so an expression pastes straight across. Only one is ever active, so picking a model switches the formula off and the other way round. Works in both the classic and the new node interface.
-
-### 🔢 Number Pixaroma
-A small node with one number field and two outputs: **int** and **float**. Useful when one downstream node wants a whole number and another wants a decimal from the same value, or when you want to convert a decimal into a whole number cleanly in the middle of a workflow. Accepts whole numbers, decimals, and math expressions like `1024+64` or `1024/3`. The int output rounds to the nearest whole number (`3.5` becomes `4`, `3.4` becomes `3`). Range is roughly plus or minus 1 quadrillion, so even very large numbers fit.
-
-### ✍️ Text Pixaroma
-A multi-line text field with a STRING output. Write your prompt (or any other long text) once and wire the output into multiple downstream nodes - positive prompt, negative prompt, captions, instructions, anywhere a string is needed. The field grows when you drag the node bigger, so you have plenty of room for long prompts. The text saves with your workflow.
-
-### 💬 Prompt Pixaroma
-A prompt box with a personal library of reusable shortcuts. Save a long chunk of prompt once (an oil-painting look, a lighting recipe, a quality booster), give it a short name, and then just type `@name` - it becomes the full text at run time, so the box stays short and readable. Type `@` for a searchable list of your saved shortcuts grouped by category; known ones show orange, a typo shows red, and a **Show expanded** preview shows exactly what gets sent. Wire another prompt into the text input and the two are joined - choose **My prompt first** or **Wired first** and the separator (comma, space, new line, pipe, and more). The **Tags** button opens a full-screen library where shortcuts live as cards you can create, rename, move between categories, and share with **Export** / **Import**; right-click any text in the box to copy it or save it as a shortcut, filling the library in for you so you only name it. Your library is stored on your own machine, stays private, and survives updating the pack - a shared workflow keeps your shortcuts to yourself, and dropping a finished image into **Prompt Reader Pixaroma** recovers the prompt behind it. For variety, type `*` and a category name (like `*Styles`) to drop in a RANDOM saved shortcut from that category, freshly chosen every run - it shows violet so it stands out from a fixed orange `@`. A shortcut can also be a **List**: put one option per line and type `#name` to drop in one of them each run. Each list picks its own way, from **Shuffle** (the default, which deals your options like a shuffled deck so every one comes up before any repeats), **Random**, or **In order** (1, 2, 3 and around again), and the last two remember their place between sessions. The library keeps the two apart, with Text categories and List categories in the sidebar, so `@` offers your wording and `#` offers your lists. Each node's button colour and the default join order are set from its gear. Works in both the classic and the new node interface.
-
-### 🧱 Prompt Stack Pixaroma
-A single node that holds an ordered stack of prompt chunks you can mute or include with one click. Add as many rows as you want, type a different piece of your prompt in each (style words, subject, lighting, quality boosters, anything), give each row a short label so you remember what it does, and toggle the orange **ON / OFF** switch to include or skip that row at run time. All the ON rows get joined into one text output with whatever separator you pick in the node's own settings (opened with the gear button on the node toolbar, or by right-clicking the node) (default comma+space, also works as newline, space, pipe, or anything you type). Drag the handle on the left of any row to reorder them, and the join order updates too. Rows that grow to many lines scroll on their own. The node tidies itself as you add and delete rows so it always fits its content with a bit of breathing room. Everything saves with your workflow. Great for testing prompt variants by clicking toggles instead of editing text.
-
-### 🎲 Prompt Multi Pixaroma
-The sibling of Prompt Stack: instead of joining your rows into one text output, it **runs the workflow once for each enabled row**. Type two or more prompt variants, give each a short label (e.g. "v1", "blue version"), and hit Run - you get one image per enabled prompt, sequentially, each as its own item in the ComfyUI queue panel so you can cancel any of them individually. Toggle the orange **ON / OFF** switch to skip a row without deleting it. Drag the handle on the left to reorder. Each generated image carries only the prompt that produced it, so dropping the PNG back into **Prompt Reader Pixaroma** correctly recovers that exact variant. Great for batch-comparing prompt ideas with a single click instead of editing text and re-running by hand. Also has a **List Prompts** mode (the buttons at the top) that ships the whole list out a `prompts` output for downstream **Prompt From List Pixaroma** nodes to pick from.
-
-### 🔁 Prompt Each Pixaroma
-Many prompts, **one Run, one picture each**. Type a prompt in each row and press Run once: the workflow runs again for every row, one after another, and all the pictures collect in the same Preview node. It renders them one at a time, so it uses no more memory than making a single picture and a long list is safe on a small graphics card. This is the difference from **Prompt Multi Pixaroma**, which queues a separate entry per prompt so you can cancel them individually: Prompt Each is a single queue entry that keeps going by itself. Each row has an **ON / OFF** button so you can skip one without deleting it, a drag handle to reorder, and the counter at the top always says how many prompts will actually run. Square brackets multiply a row into several prompts: `a [red|blue] car` gives two, and `a [red|blue] [car|van]` gives all four combinations, so you can see one row turn into six before you press Run (curly braces still pick one at random, as on Text Pixaroma, so the two work together). **Paste** drops a whole list in at once, one prompt per line, which is how a hundred prompts get in from a spreadsheet; **Copy** sends them back out the same way and keeps the switches. The node has no tag library of its own on purpose, because brackets take all the options while `@tags` pick one: wire **Prompt Pixaroma** into the `text` input instead and your whole library works here, added to your rows rather than replacing them. Outputs are `prompt`, plus `index` and `total` if you want the files numbered in the order you typed them.
-
-### 🎯 Prompt From List Pixaroma
-A tiny picker that pairs with **Prompt Multi Pixaroma** in List Prompts mode. Wire Prompt Multi's `prompts` output into this node's input, set a 1-based **index**, and you get back the prompt at that position. Drop multiple From List nodes to fan one prompt library out to different places - for example, use index 1 in scene A, index 2 in scene B. Out-of-range index returns an empty string instead of erroring, so a workflow with a mistyped index still runs.
-
-### 📦 Prompt Pack Pixaroma
-Paste a block of prompts and queue **one workflow run per prompt** - no per-row buttons to toggle. Buttons at the top say how the block is separated: **Blank line** (for long, multi-line prompts), **New line** (for short one-liners) or **--- line** (a line of dashes, for prompts that contain blank lines of their own). Those are the same three names as Save Text Pixaroma's Separator setting, so a file collected there pastes straight in. A counter shows how many prompts it found, so you know how many runs you're about to queue. Each generated image carries its own prompt (recoverable via Prompt Reader). Use it when you already have a long list of prompts in a text file or document and want to batch-run them all without typing each into its own field.
-
-### 🔤 Find and Replace Pixaroma
-Drop this node into a wire between a text source (an LLM node, Show Text, Text Pixaroma, any text output) and whatever uses the text. It catches the text on the way through, swaps out the words you tell it to, and passes the edited version on - the original source stays untouched. Add one rule per change: type what to find and what to put in its place, or leave the replace box empty to just delete the found text. Stack as many rules as you want and drag them to reorder (they apply top to bottom); toggle any rule off to skip it without losing it. Four switches at the top fine-tune the matching: **Case** (match capital letters exactly), **Whole word** (so "art" doesn't get caught inside "artist"), **Regex** (advanced pattern matching), and **Tidy** (cleans up double spaces and stray commas left behind by your edits). The node shows a live before-and-after right on its body so you can see exactly what changed, and that preview saves with your workflow - handy when you want to share an example where the prompt gets rewritten and have it visible the moment someone opens it. A **Reset** button clears everything in one click.
-
-### 🔔 Notify Pixaroma
-A small terminal node that plays a sound when reached during workflow execution, and times how long the run took to get there. Drop one at the end of a workflow to hear "render finished" while you're in another browser tab or app, or branch one off any node mid-graph to be alerted at a checkpoint. Pick from 10 bundled notification sounds (drop more `.mp3`/`.wav`/`.ogg` into `assets/sounds/` to extend), set a per-node volume and an optional label, and tap the **▶ Preview** button to audition a sound without running the workflow. A master toggle in the node's own settings (opened with the gear button on the node toolbar, or by right-clicking the node) silences every Notify node at once for quiet sessions. Each node also has its own enabled toggle. Always re-fires on every Run, even when upstream is fully cached.
-
-Every node is also a **checkpoint timer**: the clock starts when you press **Run** and stops the moment this node is reached, so it answers "how long did it take to get this far". One at the end times the whole run; branch several through the graph and the gaps between their times are the per-segment times. The timing is independent of the sound - it still records with the sound off or the master mute on, so you can time a workflow in silence, and a 🔇 marker on the clock row means the ding won't play. Each node keeps **its own history** of the last 10 times (right-click → **Notify time history**), with the fastest marked, plus Copy, Export `.txt` and Clear; the times live on your machine, so a shared workflow never carries them. A small arrow on the clock row folds the node down to just the clock. Right-click also has **Record time** (per-node timer on/off) and **Mute all Notify sounds**. Works in both the classic and the new node interface.
-
-### ⏱️ Run Timer Pixaroma
-A clock that times how long a workflow takes. It resets to zero the moment you press **Run**, counts up live while the workflow is working, then freezes on the total the instant it finishes and plays a chime, so you know it's done even when you're in another tab or app. The node face shows only the clock - small `m` / `s` / `h` markers sit next to the centered digits, and a long run rolls over to hours automatically. Everything else is in the right-click menu: turn the chime on or off, pick the sound and volume (with a **▶ Preview**) from the same library as Notify Pixaroma, choose how much detail to show (just minutes and seconds, or add hundredths or milliseconds), and set the clock colour with a full colour picker built right into the panel. A master mute for every Run Timer sits at the top of the node's own settings (opened with the gear button on the node toolbar, or by right-clicking the node). Just drop it on the canvas - it doesn't need wiring to anything. Works in both the classic and the new node interface.
-
-### 🗒️ Run Log Pixaroma
-A companion to Run Timer that keeps the last 10 run times right on the node. Every time you press **Run** it times the whole workflow and drops the finished time on top of the list, newest first - the most recent run is highlighted in orange and the quickest of the ten is marked in green, so you can watch a workflow get faster over a session or notice when a change slows it down. It shows only the times, and the list belongs to that one workflow: it is saved with it and travels with it, so a different workflow keeps its own separate list. Two subtle buttons in the corner **export** the list as a `.txt` file or **clear** it, and the same actions plus **Copy** are on the right-click menu. Just drop it on the canvas - it doesn't need wiring to anything. Works in both the classic and the new node interface.
-
-### 🧲 Align Pixaroma
-A canvas-wide smart-snap and alignment-guide system. Toggle it on with the mountain icon in the top toolbar (next to the Manager). Once enabled, dragging or resizing any node makes its edges and centers snap to nearby nodes, with thin orange guide lines showing exactly what aligned with what (Photoshop / Figma style). Multi-selection drags as a rigid bounding box. A column of 3+ nodes sharing an edge gets a single guide spanning the whole column. Hold **Shift** to bypass snap for a single drag (Alt is reserved by ComfyUI for duplicate-during-drag). Snap distance is adjustable (4 to 16 screen pixels) under **Settings → 👑 Pixaroma → Align (advanced)**. Default OFF, zero overhead until you toggle it on.
+## 📖 Need help? Start here
+
+**[workflows.pixaroma.com/help](https://workflows.pixaroma.com/help/)** has short videos with a voice that show every step, the same steps written under each video, **[questions and answers](https://workflows.pixaroma.com/help/faq/)** you can search, and **[a page for every&nbsp;node](https://workflows.pixaroma.com/help/nodes/)**.
+
+| I want&nbsp;to... | Open&nbsp;this |
+|---|---|
+| Install ComfyUI with the Pixaroma nodes&nbsp;(Windows) | [Install with&nbsp;Easy-Install](https://workflows.pixaroma.com/help/install-easy-install/) |
+| Add the Pixaroma nodes to the ComfyUI I&nbsp;have | [Install with&nbsp;git](https://workflows.pixaroma.com/help/install-git/) |
+| Update the Pixaroma&nbsp;nodes | [How to&nbsp;update](https://workflows.pixaroma.com/help/#update) |
+| Fix empty nodes or missing buttons after an&nbsp;update | [The 5 second&nbsp;fix](https://workflows.pixaroma.com/help/refresh/) |
+| Fix red "missing nodes" in a&nbsp;workflow | [Missing&nbsp;nodes](https://workflows.pixaroma.com/help/missing-nodes/) |
+| Find a model file a workflow&nbsp;needs | [Missing&nbsp;models](https://workflows.pixaroma.com/help/missing-models/) |
+| See which version I&nbsp;have | [Check your&nbsp;version](https://workflows.pixaroma.com/help/check-version/) |
+| Read what a node does and how to use&nbsp;it | [Pixaroma&nbsp;nodes](https://workflows.pixaroma.com/help/nodes/) |
+| Ask a question or report a&nbsp;bug | [Ask for&nbsp;help](https://workflows.pixaroma.com/help/report/) |
+
+**Inside ComfyUI:** click the <img src="assets/readme/toolbar-help.svg" height="22" align="absmiddle" alt="?"> button in the top toolbar (or press **Alt+H**). It opens help for every Pixaroma node, with a search that reads the whole text, so you can type the problem ("buttons missing") instead of a node&nbsp;name.
+
+**Questions, bugs and ideas** all go to **[#pixaroma-nodes on Discord](https://discord.com/channels/1245221993746399232/1513481633762775110)** ([join the server first](https://discord.gg/gggpkVgBf3), it is free). Issues and pull requests on GitLab and GitHub are closed, so everything lands in one place and gets an&nbsp;answer.
 
 ---
 
-## 🚀 Getting Started
+## 📥 Install
 
-### 1. Installation
+**ComfyUI Easy-Install (Windows):** the Pixaroma nodes are already included. [Watch how to install&nbsp;it](https://workflows.pixaroma.com/help/install-easy-install/).
 
-#### **Method A: ComfyUI Easy Install (Zero-Config)**
-If you use [ComfyUI Easy Install](https://github.com/Tavris1/ComfyUI-Easy-Install) for Windows, **Pixaroma is already included!** Just update via the built-in updater and you're good to go.
+**With git** (portable ComfyUI or your own install): open your `ComfyUI/custom_nodes` folder, type `cmd` in the address bar, and&nbsp;run:
 
-#### **Method B: ComfyUI Manager**
-1. Search for **Pixaroma** in the ComfyUI Manager.
-2. Click **Install** and restart ComfyUI.
-
-#### **Method C: Manual Installation**
 ```bash
-cd ComfyUI/custom_nodes
 git clone https://gitlab.com/pixaroma/comfyui-pixaroma.git
 ```
 
-> **⚠️ Node looks blank or broken right after updating?** This is almost always your browser cache, not a bug. Hard-refresh with **Ctrl + Shift + R** (Windows / Linux) or **Cmd + Shift + R** (Mac). If a node is still broken after that, see [the help page](https://workflows.pixaroma.com/help/#cache).
+Then restart ComfyUI and press **Ctrl+Shift+R** in the&nbsp;browser.
 
-### 2. Optional: AI Background Removal
-AI Remove Background is used in three places in Pixaroma: the **Remove Background Pixaroma** node, the **Image Composer** editor's AI Background Removal button, and the **Paint Pixaroma** editor's AI Background Removal button.
+**ComfyUI Manager:** searching for Pixaroma works, but the Manager only offers the old version **1.4.144**. The Comfy Registry marked the newer versions as "flagged" with no reason given. The nodes are safe. To get the newest version, use Easy-Install or git, or switch Pixaroma to **nightly** in the Manager. [Read&nbsp;more](https://workflows.pixaroma.com/help/flagged/).
 
-- The **node** uses **Pixaroma BiRefNet only** (`ComfyUI/models/background_removal/*.safetensors`).
-- The two **editors** can use **Pixaroma BiRefNet OR rembg** - their dropdown shows BiRefNet variants on top and rembg options below. Any BiRefNet model you install once works in all three places.
+## 🔄 Update
 
-There are two ways to get AI background removal working: **Pixaroma BiRefNet** (recommended, no extra Python deps, three model variants, works in the node AND the editors) and **rembg** (a separate Python library with four model options, works in the editors only). They can be used side-by-side - install whichever you want from the dropdown.
+- **Easy-Install:** close ComfyUI, open the EZi Launcher and press **Easy-Install** under UPDATE.&nbsp;[Video](https://workflows.pixaroma.com/help/update-easy-install/)
+- **git:** open the `ComfyUI-Pixaroma` folder inside `custom_nodes`, type `cmd` in the address bar, and run `git pull`.&nbsp;[Video](https://workflows.pixaroma.com/help/update-git/)
+- **After every update:** restart ComfyUI, then press **Ctrl+Shift+R** once in the browser (**Cmd+Shift+R** on a Mac). Without it, the browser can keep showing the old version of the nodes.&nbsp;[Why](https://workflows.pixaroma.com/help/refresh/)
+- **Which version do I have?** Click the <img src="assets/readme/toolbar-help.svg" height="22" align="absmiddle" alt="?"> button in the top toolbar: your version is in the bottom right corner of the Help window. Or add the **Version Check Pixaroma**&nbsp;node.
 
-#### Option A: Pixaroma BiRefNet (recommended)
+## 🔍 Find the nodes
 
-Download one of these three `.safetensors` files and drop it into `ComfyUI/models/background_removal/`. The dropdown shows them grouped under "Pixaroma BiRefNet" at the top. **The filename matters** - it controls which preprocessing resolution is used. Rename the downloaded file to one of the names below so the dropdown picks the right one.
-
-| Variant | Filename | VRAM | Best for |
-|---------|----------|------|----------|
-| **Standard** | `birefnet.safetensors` (424 MB) | 4-6 GB | Clean objects, products, logos. Fast everyday cutouts. Default. [Download](https://huggingface.co/Comfy-Org/BiRefNet/tree/main/background_removal) |
-| **High Resolution** | `birefnet-hr.safetensors` (444 MB) | 8 GB+ | Large images with fine outline detail (jewelry, intricate hardware). [Download](https://huggingface.co/ZhengPeng7/BiRefNet_HR) |
-| **Matting (Soft Edges)** | `birefnet-matting.safetensors` (444 MB) | 8 GB+ | Hair, fur, lace, soft fabric. Also worth trying for glass / smoke. [Download](https://huggingface.co/ZhengPeng7/BiRefNet_HR-matting) |
-
-**Important: HR and Matting need renaming after download.** The Standard model from Comfy-Org is already named `birefnet.safetensors` and works as-is. But the HR and Matting variants come from ZhengPeng7's HuggingFace repos as `model.safetensors`, and Pixaroma needs them named correctly to know which preprocessing resolution to use.
-
-- Standard (`birefnet.safetensors`) - **no rename needed**, drop the file in as-is
-- HR (downloaded as `model.safetensors`) - **rename to `birefnet-hr.safetensors`**
-- Matting (downloaded as `model.safetensors`) - **rename to `birefnet-matting.safetensors`**
-
-**Rename steps on Windows**: right-click the file, **Rename**, type the new name (keeping `.safetensors` at the end), press Enter. If Windows hides extensions: View tab → check "File name extensions" first, otherwise the rename can accidentally drop the extension. Why the names matter: filenames containing `matt` or `hr` (case-insensitive) tell Pixaroma to preprocess at 2048×2048; anything else preprocesses at 1024×1024. If you name HR as plain `birefnet.safetensors`, it will load but run at 1024 and you'll lose the whole point of HR.
-
-#### Option B: rembg (alternative)
-
-`rembg` is a separate Python library. Install it once and you get four bundled model options.
-
-```bash
-# Windows Portable (ComfyUI Easy-Install)
-# Open ComfyUI/python_embeded folder, type cmd in the address bar, run:
-python.exe -m pip install rembg
-
-# Standard installation
-pip install rembg
-```
-
-Restart ComfyUI. Once installed, the dropdown shows these under "rembg":
-
-| Option | Size | What it is |
-|--------|------|------------|
-| **rembg Auto** | n/a | Picks the best installed rembg model. |
-| **rembg Fast (u2net)** | ~176 MB | Works on any setup, great for quick cutouts. |
-| **rembg Balanced (isnet)** | ~170 MB | Cleaner edges than u2net. |
-| **rembg Best (BiRefNet via rembg)** | ~900 MB | rembg's own BiRefNet ONNX. Largest, slowest. |
-
-Model files download automatically on first use to `ComfyUI/models/rembg/`. For details and troubleshooting, see [rembg on GitHub](https://github.com/danielgatis/rembg#installation).
-
-#### What gets picked by default?
-
-If you have **at least one BiRefNet variant** installed, the dropdown defaults to BiRefNet Standard (or HR / Matting if Standard isn't installed). Otherwise it falls back to rembg Auto. You can always change the selection manually - the dropdown shows install / download instructions inline for any option that isn't ready to use.
-
-### 🔧 Krea LoRA Converter
-Trained a LoRA for the **Krea 2** model on **fal.ai**? It will not load in ComfyUI on its own, because it names its layers differently than ComfyUI expects. This node fixes that: pick your LoRA, press Convert, and it saves a ready-to-use copy into your LoRAs folder that works with any LoRA loader. The conversion is exact - your training is untouched, the result is identical, just loadable. It reads the file first and tells you what it is (so it will not touch a LoRA that already works), and it only ever reads your file and writes a new one. It never changes the original or downloads anything.
+Double-click an empty spot on the canvas and type **Pixaroma**: every Pixaroma node shows up. You can also open the **Node Library** on the left and the **👑 Pixaroma** folder, where the nodes are sorted into the groups&nbsp;below.
 
 ---
 
-## 📺 Learning Resources
+## 🧩 All nodes at a glance
 
-Master the Pixaroma suite with our video guides and workflow deep-dives:
+The groups are in order of how much they are used in real workflows, and inside each group the most used node comes first. Click a name for its full help on the website: what it does, how to use it, and every input and&nbsp;setting.
 
-📺 **[Visit Pixaroma on YouTube](https://www.youtube.com/@pixaroma)**
+### 🖼️ Image
+
+| Node | What it&nbsp;does |
+|---|---|
+| [Preview Image&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/preview-image/) | Shows your images on the node, one or a whole batch, with Save, Copy and Open&nbsp;buttons. |
+| [Load Image Mini&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/load-image-mini/) | A small Load Image: a picker, a preview and two outputs. Resize lives in the&nbsp;gear. |
+| [Image Info&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/image-info/) | Unpacks Load Image Mini's `image_info` into the mask, width, height and file&nbsp;name. |
+| [Image Compare&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/image-compare/) | Compare two images with a slider, side by side, or see exactly what&nbsp;changed. |
+| [Load Images from Folder&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/load-images-from-folder/) | Runs your workflow once for each picture in any folder you&nbsp;choose. |
+| [Save Image&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/save-image/) | Saves to any folder, with a live preview of the exact file&nbsp;name. |
+| [Save Mp4&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/save-mp4/) | Turns frames and sound into an mp4 and plays it on the&nbsp;node. |
+| [Remove Background&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/remove-background/) | Cuts out the subject with a BiRefNet model: cutout, mask and inverted mask in one&nbsp;node. |
+| [Load Image&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/load-image/) | Load Image with resize built in: max megapixels, longest side, fit inside, crop to fill and&nbsp;more. |
+| [Image Grid&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/image-grid/) | Puts every picture of a Run in one grid image, with each file name under its&nbsp;picture. |
+| [Save 3D&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/save-3d/) | Shows a 3D model, stands it on the ground, and saves it as OBJ, GLB or&nbsp;STL. |
+| [Load Video&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/load-video/) | Loads a video as frames, sound and info, and plays it on the&nbsp;node. |
+| [Pause Image&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/pause-image/) | Stops the Run so you can look at the picture before the slow part&nbsp;runs. |
+| [Load 3D&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/load-3d/) | Loads a 3D model and gives you the model and a picture of&nbsp;it. |
+| [Load Video Frame&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/load-video-frame/) | Picks one exact frame from a video to use as an&nbsp;image. |
+| [First Last Frame&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/first-last-frame/) | Takes the first and the last frame of a video as two&nbsp;images. |
+| [Save Video&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/save-video/) | Saves an mp4 to any folder with your own file name, and plays it on the&nbsp;node. |
+
+### 💬 Prompt and Text
+
+| Node | What it&nbsp;does |
+|---|---|
+| [Prompt&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/prompt/) | A prompt box with saved shortcuts (`@tags`), random picks and&nbsp;lists. |
+| [Show Text&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/show-text/) | Shows any text or value going through a wire, in a box you can copy&nbsp;from. |
+| [Text&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/text/) | A big text box with one text output. Type once, wire it into many&nbsp;nodes. |
+| [Text Join Two, Three and Four&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/text-join-two/) | Joins two, three or four pieces of text into one. Type or wire each&nbsp;one. |
+| [AI Prompt&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/ai-prompt/) | Runs a language model on your own PC with an instruction you save on the&nbsp;node. |
+| [Prompt Each&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/prompt-each/) | Many prompts, one Run, one picture&nbsp;each. |
+| [Prompt Multi&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/prompt-multi/) | Queues one Run per prompt, or sends all the prompts out as a&nbsp;list. |
+| [Prompt From List&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/prompt-from-list/) | Picks one prompt by number from a Prompt Multi&nbsp;list. |
+| [Prompt Pack&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/prompt-pack/) | Paste a block of prompts and queue one Run per&nbsp;prompt. |
+| [Save Text&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/save-text/) | Collects the text of every Run into one list and a .txt&nbsp;file. |
+| [Prompt Reader&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/prompt-reader/) | Reads the prompt saved inside a ComfyUI, Automatic1111 or Civitai&nbsp;picture. |
+| [Prompt Stack&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/prompt-stack/) | Builds one prompt from rows you switch on and&nbsp;off. |
+| [Video Prompt&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/video-prompt/) | Writes a MiniMax H3 video prompt on your own&nbsp;PC. |
+| [Find and Replace&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/find-and-replace/) | Changes words in a text on its way through a&nbsp;wire. |
+| [Load Texts from Folder&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/load-texts-from-folder/) | Sends the .txt files of a folder through the workflow one by&nbsp;one. |
+| [Pause Text&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/pause-text/) | Stops the Run so you can read and fix a text before the rest&nbsp;runs. |
+| [Caption Review&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/caption-review/) | Every picture of a folder with its caption under it, to read and fix a training&nbsp;set. |
+| [Music Prompt&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/music-prompt/) | One idea in, a caption and lyrics out for MiniMax Music&nbsp;3. |
+
+### 📝 Notes and Overlay
+
+| Node | What it&nbsp;does |
+|---|---|
+| [Label&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/label/) | A text caption on the canvas to name parts of your workflow. No wires, it never&nbsp;runs. |
+| [Note&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/note/) | A note with headings, lists, tables, icons, and Download or YouTube&nbsp;buttons. |
+| [Info&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/info/) | A small button that opens a note in a reading window, so big notes do not fill the&nbsp;canvas. |
+| [Text Watermark&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/text-watermark/) | Stamps text in the same spot on every image of a batch, all set up on the&nbsp;node. |
+| [Text Overlay&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/text-overlay/) | Puts styled text on an image, with a full screen editor to place&nbsp;it. |
+
+### 🔢 Values
+
+| Node | What it&nbsp;does |
+|---|---|
+| [Seed&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/seed/) | A seed for your samplers: Random or Fixed, and one click to keep a good&nbsp;result. |
+| [Sizes&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/sizes/) | Your own list of favourite sizes, with a Portrait or Landscape&nbsp;flip. |
+| [Resolution&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/resolution/) | Pick a ratio (1:1, 16:9 and more) and get a width and height that suit AI&nbsp;models. |
+| [Dropdown&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/dropdown/) | A dropdown you fill in yourself: pick a short name, send a long&nbsp;value. |
+| [Duration&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/duration/) | Type a length in seconds, get the frame count your video model&nbsp;wants. |
+| [Number&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/number/) | One number field that sends the same value as a whole number and as a&nbsp;decimal. |
+| [Control Panel&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/control-panel/) | Sliders, switches and dropdowns for settings all over your workflow, in one&nbsp;node. |
+| [Portrait Landscape&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/portrait-landscape/) | Flips a width and height between tall and wide with one&nbsp;click. |
+| [WH&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/wh/) | Two number fields: width and&nbsp;height. |
+| [Number Pick&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/number-pick/) | One number, picked from a row of buttons you choose&nbsp;yourself. |
+
+### 🔀 Logic and Flow
+
+| Node | What it&nbsp;does |
+|---|---|
+| [Run Timer&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/run-timer/) | Times the whole Run and plays a chime when it is done. No wires&nbsp;needed. |
+| [Free VRAM&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/free-vram/) | Frees the graphics card's memory at the exact point you&nbsp;choose. |
+| [Loop Start and Loop End&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/loop-start/) | Repeats part of a workflow a set number of&nbsp;times. |
+| [Combine&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/combine/) | Joins two inputs into one batch: images, frames, latents, numbers or&nbsp;text. |
+| [Switch&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/switch/) | Many inputs, one output: click a row to choose which one goes&nbsp;through. |
+| [Mute Switch&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/mute-switch/) | Switches to turn whole parts of a workflow on and&nbsp;off. |
+| [Monitor&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/monitor/) | A live readout of how hard your computer is&nbsp;working. |
+| [XY Plot&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/xy-plot/) | Compares settings side by side in one labeled grid, with no extra&nbsp;wiring. |
+| [Set and Get&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/set/) | Sends a value across the canvas with no cable: Set stores it under a name, Get reads&nbsp;it. |
+| [Notify&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/notify/) | Plays a sound when the Run reaches this node, and times how long it took to get&nbsp;there. |
+| [Switch WH&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/switch-wh/) | Chooses between two width and height pairs with one&nbsp;click. |
+| [Switch Source&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/switch-source/) | Flips a whole set of wires between setup A and setup&nbsp;B. |
+| [Group Switch&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/group-switch/) | On and off switches for your groups, in one small&nbsp;panel. |
+| [Text Match&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/text-match/) | Does a text contain one of your words? Yes or no, plus gates that let things through only on a&nbsp;match. |
+| [Version Check&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/version-check/) | Shows your Pixaroma, ComfyUI and frontend versions, with a Copy&nbsp;button. |
+| [Run Log&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/run-log/) | Keeps the last 10 Run times of this workflow on the&nbsp;canvas. |
+
+### ✂️ Resize and Crop
+
+| Node | What it&nbsp;does |
+|---|---|
+| [Resize Crop&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/resize-crop/) | Makes an image an exact width and height by cropping, never&nbsp;stretching. |
+| [Longest Side&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/longest-side/) | Makes a picture's longest side the size you click, and can crop it to a&nbsp;shape. |
+| [Image Crop&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/image-crop/) | Draw the crop box on the image, no pixel numbers to&nbsp;type. |
+| [Image Uncrop&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/image-uncrop/) | Puts an edited crop back onto the original, in the exact spot it came&nbsp;from. |
+| [Inpaint Crop&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/inpaint-crop/) | Paint a mask and get a crop sized for the model, ready to&nbsp;inpaint. |
+| [Inpaint Stitch&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/inpaint-stitch/) | Puts the inpainted crop back onto the original so the seam does not&nbsp;show. |
+| [Outpaint&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/outpaint/) | Adds space around an image so a model can paint new scenery&nbsp;there. |
+| [Outpaint Stitch&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/outpaint-stitch/) | Puts your sharp original back onto the outpaint result, keeping only the new&nbsp;area. |
+| [Image Resize&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/image-resize/) | Resizes an image and its mask, with many modes including&nbsp;Pad. |
+
+### 🧰 Utility
+
+| Node | What it&nbsp;does |
+|---|---|
+| [LoRA Loader&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/lora-loader/) | Many LoRAs in one node, with trigger words read from each&nbsp;file. |
+| [Krea LoRA Converter&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/krea-lora-converter/) | Makes a Krea 2 LoRA trained on fal.ai load in&nbsp;ComfyUI. |
+
+### 🎨 Editors
+
+| Node | What it&nbsp;does |
+|---|---|
+| [Paint&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/paint/) | A painting editor with layers, brushes and a smudge&nbsp;tool. |
+| [3D Builder&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/3d-builder/) | Build, light and render a 3D scene inside&nbsp;ComfyUI. |
+| [Image Composer&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/image-composer/) | Arrange, blend and adjust many images on one canvas, in&nbsp;layers. |
+| [Sketch&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/sketch/) | Mark what to change on a picture and write the change beside it, for edit&nbsp;models. |
+| [AudioReact&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/audioreact/) | Turns a still image into a video that moves with the&nbsp;music. |
+
+### 🎵 Audio
+
+| Node | What it&nbsp;does |
+|---|---|
+| [Load Audio&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/load-audio/) | Shows a sound file's shape so you can take just the part you&nbsp;want. |
+| [H3 Audio Sync&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/h3-audio-sync/) | Makes a MiniMax H3 video sing your song instead of one it makes&nbsp;up. |
+
+### 🖱️ Canvas tools (no node needed)
+
+| Tool | What it&nbsp;does |
+|---|---|
+| [Workflows&nbsp;panel](https://workflows.pixaroma.com/help/nodes/workflows-panel/) | <img src="assets/readme/toolbar-workflows.svg" height="22" align="absmiddle" alt="W"> in the top toolbar (or **Alt+W**): find, open and organise your workflow files, with a picture of&nbsp;each. |
+| [Help&nbsp;window](https://workflows.pixaroma.com/help/faq/#q-help-window) | <img src="assets/readme/toolbar-help.svg" height="22" align="absmiddle" alt="?"> in the top toolbar (or **Alt+H**): help for every node, with&nbsp;search. |
+| [Align](https://workflows.pixaroma.com/help/nodes/align/) | <img src="assets/readme/toolbar-align.svg" height="22" align="absmiddle" alt="Align"> in the top toolbar: nodes snap into line as you drag them, with a guide&nbsp;line. |
+| [Pixaroma&nbsp;Group](https://workflows.pixaroma.com/help/nodes/pixaroma-group/) | A group box with Run, Mute, Bypass and Fold buttons in its&nbsp;header. |
+| [Node&nbsp;Colors](https://workflows.pixaroma.com/help/nodes/node-colors/) | Right-click a node or group to recolour it, with favourites and copy and&nbsp;paste. |
+| [Adaptive node&nbsp;titles](https://workflows.pixaroma.com/help/nodes/adaptive-node-titles/) | Title text turns white or dark by itself, so it stays readable on any&nbsp;colour. |
+| [Connection&nbsp;FX](https://workflows.pixaroma.com/help/nodes/connection-fx/) | Slots that fit glow while you drag a wire. Off until you turn it&nbsp;on. |
+| [Run button&nbsp;effects](https://workflows.pixaroma.com/help/nodes/run-button-effects/) | Optional effects on ComfyUI's Run&nbsp;button. |
+| [Your own&nbsp;fonts](https://workflows.pixaroma.com/help/faq/#q-fonts) | Put .ttf or .otf files in `ComfyUI/models/fonts` and Text Overlay and Text Watermark can use&nbsp;them. |
+
+---
+
+## ✂️ Background removal models
+
+**Remove Background Pixaroma** and the AI background buttons in **Image Composer** and **Paint** use a BiRefNet model. Put one of these files in&nbsp;`ComfyUI/models/background_removal/`:
+
+| Model | File&nbsp;name | VRAM | Best&nbsp;for |
+|---|---|---|---|
+| Standard | `birefnet.safetensors` (424&nbsp;MB) | 4 to 6&nbsp;GB | Objects, products, logos. Fast.&nbsp;[Download](https://huggingface.co/Comfy-Org/BiRefNet/tree/main/background_removal) |
+| High&nbsp;Resolution | `birefnet-hr.safetensors` (444&nbsp;MB) | 8&nbsp;GB+ | Big images with fine edges.&nbsp;[Download](https://huggingface.co/ZhengPeng7/BiRefNet_HR) |
+| Matting | `birefnet-matting.safetensors` (444&nbsp;MB) | 8&nbsp;GB+ | Hair, fur, lace, soft fabric.&nbsp;[Download](https://huggingface.co/ZhengPeng7/BiRefNet_HR-matting) |
+
+**Rename the HR and Matting files after you download them.** They arrive as `model.safetensors`; rename them exactly as in the table, because the name tells Pixaroma which size to work at. [FAQ: which model](https://workflows.pixaroma.com/help/faq/#q-bg-models) · [FAQ: HR or Matting not&nbsp;working](https://workflows.pixaroma.com/help/faq/#q-bg-rename)
+
+The two editors can also use **rembg** (`pip install rembg`, then restart ComfyUI). The node does not need it. [FAQ: do I need&nbsp;rembg?](https://workflows.pixaroma.com/help/faq/#q-rembg-needed)
+
+---
+
+## 📺 Learn more
+
+- **[Pixaroma on YouTube](https://www.youtube.com/@pixaroma)**: a free ComfyUI course, with a new episode almost every&nbsp;week.
+- **[workflows.pixaroma.com](https://workflows.pixaroma.com/)**: the workflows from every episode, free to&nbsp;download.
+- **[Help page](https://workflows.pixaroma.com/help/)**: install, update, and fixes for the usual&nbsp;problems.
 
 ---
 
@@ -1091,16 +925,13 @@ Master the Pixaroma suite with our video guides and workflow deep-dives:
 
 ### **April 01, 2026**
 - **Launch Day:** Initial release of the Pixaroma suite! [Watch the video](https://www.youtube.com/watch?v=Lmxf8pK-H1k).
+
 ---
 
-## 📜 About, Feedback & License
+## 📜 About and license
 
-> [!NOTE]
-> This suite was developed with significant AI assistance. While thoroughly tested, we welcome bug reports and feedback from the community!
+- **Home:** ComfyUI-Pixaroma is made on [GitLab](https://gitlab.com/pixaroma/comfyui-pixaroma). The copy on GitHub is a backup that is kept level with&nbsp;it.
+- **License:** [MIT](LICENSE). Free to use, copy, change and share, as long as the copyright notice stays with&nbsp;it.
+- **Made with AI help:** a lot of this pack was written with AI assistance, and every change is tested before it is&nbsp;released.
 
-🏠 **Home:** ComfyUI-Pixaroma is developed on [GitLab](https://gitlab.com/pixaroma/comfyui-pixaroma) - the place for the latest code. Any copy hosted elsewhere (such as a GitHub mirror) is a backup.  
-🐞 **Found a bug, or have an idea?** Both go to the **#pixaroma-nodes** channel on [Discord](https://discord.com/channels/1245221993746399232/1513481633762775110) - the single place for reports, questions and suggestions. ([Join the server](https://discord.gg/gggpkVgBf3) first if you need to.)  
-📖 **Stuck?** The [help page](https://workflows.pixaroma.com/help/) covers installing, updating and the usual "it looks broken" fix.  
-⚖️ **Licensed under [MIT](LICENSE)**
-
-ComfyUI-Pixaroma is an independent, community-made extension. It is not affiliated with, endorsed by, or sponsored by Comfy Org or the ComfyUI project. Product names, logos, and trademarks are the property of their respective owners.
+ComfyUI-Pixaroma is an independent, community-made extension. It is not affiliated with, endorsed by, or sponsored by Comfy Org or the ComfyUI project. Product names, logos, and trademarks are the property of their respective&nbsp;owners.
