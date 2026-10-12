@@ -11,6 +11,7 @@ import { isGraphLoading } from "../shared/graph_loading.mjs";
 import { installCanvasZoomPassthrough } from "../shared/canvas_zoom.mjs";
 import { installResizeFloor } from "../shared/resize_floor.mjs";
 import { onRendererChange } from "../shared/renderer_switch.mjs";
+import { runTab, eachRestoredOutput } from "../shared/run_tab.mjs";
 import { registerNodeHelp } from "../shared/help.mjs";
 import { accentOf, installNodeAccent, registerNodeSettings, repaintAccent } from "../shared/node_settings.mjs";
 import { installNativeTextMenu } from "../shared/native_text_menu.mjs";
@@ -161,8 +162,30 @@ function watchNodes() {
   }, 1000);
 }
 
+function applySave3dRun(node, message) {
+  const report = message?.pixaroma_save3d?.[0];
+  if (!report || typeof report !== "object") return;
+  if (report.skipped || !report.view) {
+    renderFace(node);
+    return;
+  }
+  const prev = readLastRun(node);
+  const replay = !!prev && prev.stamp != null && prev.stamp === report.stamp;
+  // The key of what THIS run wrote comes from its own report. The one stamped in
+  // graphToPrompt belongs to the LAST prompt queued, which can be newer than the run landing
+  // now (queue A, change the Fix, queue B, then A finishes); it is only a fallback.
+  const sent = report.request ? fileKey(report.request) : (node._pixS3dSent || "");
+  if (!replay) writeLastRun(node, report, sent);
+  syncView(node, !replay);
+}
+
 app.registerExtension({
   name: "Pixaroma.Save3D",
+
+  // A Run that ended while another workflow tab was open (js/shared/run_tab.mjs).
+  onNodeOutputsUpdated(nodeOutputs) {
+    eachRestoredOutput(nodeOutputs, CLASS, (node, output) => applySave3dRun(node, output));
+  },
 
   beforeRegisterNodeDef(nodeType, nodeData) {
     if (nodeData?.name !== CLASS) return;
@@ -249,20 +272,14 @@ app.registerExtension({
     const _executed = nodeType.prototype.onExecuted;
     nodeType.prototype.onExecuted = function (message) {
       _executed?.apply(this, arguments);
-      const report = message?.pixaroma_save3d?.[0];
-      if (!report || typeof report !== "object") return;
-      if (report.skipped || !report.view) {
-        renderFace(this);
-        return;
-      }
-      const prev = readLastRun(this);
-      const replay = !!prev && prev.stamp != null && prev.stamp === report.stamp;
-      // The key of what THIS run wrote comes from its own report. The one stamped in
-      // graphToPrompt belongs to the LAST prompt queued, which can be newer than the run landing
-      // now (queue A, change the Fix, queue B, then A finishes); it is only a fallback.
-      const sent = report.request ? fileKey(report.request) : (this._pixS3dSent || "");
-      if (!replay) writeLastRun(this, report, sent);
-      syncView(this, !replay);
+      // Core calls this on the OPEN tab's node with the run's id. A Run that
+      // ended while another workflow tab is open belongs to that tab (decided
+      // once the message's listeners ran); core hands it back when that tab
+      // opens again: onNodeOutputsUpdated above (js/shared/run_tab.mjs).
+      queueMicrotask(() => {
+        if (runTab(message) === "other") return;
+        applySave3dRun(this, message);
+      });
     };
 
     // Classic-only clamps; in Nodes 2.0 the rendered size lives in the Vue layout

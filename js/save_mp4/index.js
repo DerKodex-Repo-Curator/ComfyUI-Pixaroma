@@ -9,6 +9,7 @@ import { installFilenameTokenResolver } from "../shared/filename_tokens.mjs";
 import { buildVolumeControl, applyVideoVolume } from "../shared/video_volume.mjs";
 import { attachVideoSnapshot } from "../shared/video_snapshot.mjs";
 import { nodeSetting } from "../shared/node_settings.mjs";
+import { runTab, eachRestoredOutput } from "../shared/run_tab.mjs";
 
 // Nodes 2.0 renders its own native .image-preview panel because this node
 // emits ui.images (for the Media Assets refresh, Preview Image Pattern #14).
@@ -313,6 +314,13 @@ function restorePreview(node, tries = 0) {
 
 app.registerExtension({
   name: "Pixaroma.SaveMp4",
+  // A Run that ended while another workflow tab was open (js/shared/run_tab.mjs).
+  onNodeOutputsUpdated(nodeOutputs) {
+    eachRestoredOutput(nodeOutputs, "PixaromaSaveMp4", (node, output) => {
+      const entry = pickVideoEntry(output);
+      if (entry) commitVideoEntry(node, entry);
+    });
+  },
   async beforeRegisterNodeDef(nodeType, nodeData) {
     if (nodeData.name !== "PixaromaSaveMp4") return;
 
@@ -700,8 +708,15 @@ app.registerExtension({
     const onExecutedProto = nodeType.prototype.onExecuted;
     nodeType.prototype.onExecuted = function (output) {
       const r = onExecutedProto?.apply(this, arguments);
-      const entry = pickVideoEntry(output);
-      if (entry) commitVideoEntry(this, entry);
+      // A Run that ended while another workflow tab is open belongs to that tab
+      // (core calls this on the OPEN tab's node with the run's id); decided
+      // once the message's listeners ran, handed back when that tab opens
+      // again: onNodeOutputsUpdated above (js/shared/run_tab.mjs).
+      queueMicrotask(() => {
+        if (runTab(output) === "other") return;
+        const entry = pickVideoEntry(output);
+        if (entry) commitVideoEntry(this, entry);
+      });
       return r;
     };
   },
@@ -710,18 +725,25 @@ app.registerExtension({
 // Delivery path 2 of 2: the raw execution event. This is what shipped
 // originally and is what fires on a normal local install.
 api.addEventListener("executed", ({ detail }) => {
-  let node = app.graph.getNodeById(detail?.node);
-  if (!node && typeof detail?.node === "string") {
-    node = app.graph.getNodeById(parseInt(detail.node, 10));
-  }
-  // Resolve the node BEFORE picking an entry, and require it to be ours: the
-  // `images` fallback inside pickVideoEntry would otherwise happily match a
-  // clip reported by somebody else's node.
-  if (!node || node.comfyClass !== "PixaromaSaveMp4") return;
-  const entry = pickVideoEntry(detail?.output);
-  // Show it now (its own loadedmetadata / timeupdate events drive the bar from
-  // here). commitVideoEntry sets the Download basename + kicks the re-fit.
-  if (entry) commitVideoEntry(node, entry);
+  // Decided after this message's listeners ran: a Run that ended while ANOTHER
+  // workflow tab is open belongs to that tab (ids repeat across workflows, so
+  // the lookup below would hit a stranger). Core keeps it and hands it back
+  // when that tab opens again: onNodeOutputsUpdated (js/shared/run_tab.mjs).
+  queueMicrotask(() => {
+    if (runTab(detail?.output) === "other") return;
+    let node = app.graph.getNodeById(detail?.node);
+    if (!node && typeof detail?.node === "string") {
+      node = app.graph.getNodeById(parseInt(detail.node, 10));
+    }
+    // Resolve the node BEFORE picking an entry, and require it to be ours: the
+    // `images` fallback inside pickVideoEntry would otherwise happily match a
+    // clip reported by somebody else's node.
+    if (!node || node.comfyClass !== "PixaromaSaveMp4") return;
+    const entry = pickVideoEntry(detail?.output);
+    // Show it now (its own loadedmetadata / timeupdate events drive the bar from
+    // here). commitVideoEntry sets the Download basename + kicks the re-fit.
+    if (entry) commitVideoEntry(node, entry);
+  });
 });
 
 // The colour option: a right-click "Save Mp4 settings" entry, the gear in the

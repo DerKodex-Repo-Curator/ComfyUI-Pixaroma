@@ -23,6 +23,7 @@ import { pixConfirm, autoGrowAllFields } from "./interaction.mjs";
 import { applyAdaptiveCanvasOnly, installResizeFloor, isVueNodes, closeHelpPopup,
   installCanvasZoomPassthrough, installNativeTextMenu, installNodeAccent, registerNodeAccent,
 } from "../shared/index.mjs";
+import { runTab, eachRestoredOutput } from "../shared/run_tab.mjs";
 
 const DEFAULT_W = 380;
 const DEFAULT_H = 320;
@@ -131,8 +132,32 @@ function makeHandlers(node, root) {
   return { handlers, rerender };
 }
 
+function applyFindReplaceRun(node, message) {
+  try {
+    const data = message?.pixaroma_find_replace?.[0];
+    if (data && typeof data.input === "string") {
+      setPreviewInput(node, data.input, !!data.truncated);
+      if (node._pixFrRefreshPreview) node._pixFrRefreshPreview();
+      // Do NOT resize here. A Run never changes the rule count, so the
+      // height floor is unchanged and the preview (a flex area) absorbs any
+      // slack. Resizing on every Run rewrote node.size, which (a) falsely
+      // flagged the workflow "modified" on a plain Run, and (b) could fire a
+      // setSize mid-interaction and desync Align's resize guard. Just
+      // repaint the preview.
+      node.setDirtyCanvas(true, true);
+    }
+  } catch (err) {
+    console.error("Pixaroma.FindReplace: onExecuted failed", err);
+  }
+}
+
 app.registerExtension({
   name: "Pixaroma.FindReplace",
+
+  // A Run that ended while another workflow tab was open (js/shared/run_tab.mjs).
+  onNodeOutputsUpdated(nodeOutputs) {
+    eachRestoredOutput(nodeOutputs, "PixaromaFindReplace", (node, output) => applyFindReplaceRun(node, output));
+  },
 
   beforeRegisterNodeDef(nodeType, nodeData) {
     if (nodeData.name !== "PixaromaFindReplace") return;
@@ -233,22 +258,14 @@ app.registerExtension({
     const origExecuted = nodeType.prototype.onExecuted;
     nodeType.prototype.onExecuted = function (message) {
       if (origExecuted) origExecuted.apply(this, arguments);
-      try {
-        const data = message?.pixaroma_find_replace?.[0];
-        if (data && typeof data.input === "string") {
-          setPreviewInput(this, data.input, !!data.truncated);
-          if (this._pixFrRefreshPreview) this._pixFrRefreshPreview();
-          // Do NOT resize here. A Run never changes the rule count, so the
-          // height floor is unchanged and the preview (a flex area) absorbs any
-          // slack. Resizing on every Run rewrote node.size, which (a) falsely
-          // flagged the workflow "modified" on a plain Run, and (b) could fire a
-          // setSize mid-interaction and desync Align's resize guard. Just
-          // repaint the preview.
-          this.setDirtyCanvas(true, true);
-        }
-      } catch (err) {
-        console.error("Pixaroma.FindReplace: onExecuted failed", err);
-      }
+      // Core calls this on the OPEN tab's node with the run's id. A Run that
+      // ended while another workflow tab is open belongs to that tab (decided
+      // once the message's listeners ran); core hands it back when that tab
+      // opens again: onNodeOutputsUpdated below (js/shared/run_tab.mjs).
+      queueMicrotask(() => {
+        if (runTab(message) === "other") return;
+        applyFindReplaceRun(this, message);
+      });
     };
 
     const origOnResize = nodeType.prototype.onResize;

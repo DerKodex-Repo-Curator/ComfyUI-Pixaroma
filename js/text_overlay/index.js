@@ -8,6 +8,7 @@ import { app } from "../../../scripts/app.js";
 import { pixApiUrl } from "../shared/api_url.mjs";
 import { api } from "../../../scripts/api.js";
 import { isGraphLoading } from "../shared/graph_loading.mjs";
+import { runTab, eachRestoredOutput } from "../shared/run_tab.mjs";
 import { growToCoreMinHeight, capComputeSizeInNodes2 } from "../shared/core_min_size.mjs";
 import { applyAdaptiveCanvasOnly,
   installCanvasZoomPassthrough,
@@ -26,6 +27,14 @@ const HIDDEN_INPUT_NAME = "TextOverlayState";
 
 app.registerExtension({
   name: "Pixaroma.TextOverlay",
+
+  // A Run that ended while another workflow tab was open (js/shared/run_tab.mjs).
+  onNodeOutputsUpdated(nodeOutputs) {
+    eachRestoredOutput(nodeOutputs, NODE_CLASS, (node, output) => {
+      applyTextOverlayRun(node, output);
+      refreshOpenButton(node);
+    });
+  },
 
   async beforeRegisterNodeDef(nodeType, nodeData) {
     if (nodeData.name !== NODE_CLASS) return;
@@ -359,46 +368,57 @@ function isTextOverlayNode(node) {
 
 api.addEventListener("executed", (e) => {
   const detail = e?.detail || {};
-  const ridRaw = detail.node;
-  let executedNode = null;
-  if (ridRaw != null) {
-    executedNode = app.graph?.getNodeById?.(ridRaw)
-                || app.graph?.getNodeById?.(parseInt(ridRaw, 10))
-                || app.graph?.getNodeById?.(String(ridRaw));
-  }
-  if (isTextOverlayNode(executedNode)) {
-    executedNode._textOverlayHasRun = true;
-    const base = detail.output?.pixaroma_text_overlay_base?.[0];
-    if (base?.filename) {
-      const subfolder = base.subfolder ? `&subfolder=${encodeURIComponent(base.subfolder)}` : "";
-      const type = base.type || "temp";
-      executedNode._textOverlayBaseImageURL =
-        pixApiUrl(`/view?filename=${encodeURIComponent(base.filename)}${subfolder}&type=${encodeURIComponent(type)}&t=${Date.now()}`);
-    }
-    // Python resolved the text position on this run (first-run path for
-    // generative chains where the JS hook couldn't position pre-submit -
-    // covers both auto-center and an explicit "Position on canvas" choice).
-    // Persist the x/y on the node and clear both pending flags so
-    // subsequent runs respect the position.
-    const ac = detail.output?.pixaroma_text_overlay_autocentered?.[0];
-    if (ac && Number.isFinite(ac.x) && Number.isFinite(ac.y)) {
-      const state = executedNode.properties?.[STATE_PROP];
-      if (state) {
-        state.x = ac.x;
-        state.y = ac.y;
-        delete state._autoCenterPending;
-        delete state._alignPending;
-        if (executedNode._textOverlayBodyPanel) {
-          executedNode._textOverlayBodyPanel.setLayer(state);
-        }
-        executedNode.setDirtyCanvas?.(true, true);
+  // Decided after this message's listeners ran: a Run that ended while ANOTHER
+  // workflow tab is open belongs to that tab. The lookup below would find a
+  // stranger with the same id and move ITS text (x/y are saved state). Core
+  // keeps the result and hands it back when that tab opens again:
+  // onNodeOutputsUpdated (js/shared/run_tab.mjs).
+  queueMicrotask(() => {
+    if (runTab(detail.output) !== "other") {
+      const ridRaw = detail.node;
+      let executedNode = null;
+      if (ridRaw != null) {
+        executedNode = app.graph?.getNodeById?.(ridRaw)
+                    || app.graph?.getNodeById?.(parseInt(ridRaw, 10))
+                    || app.graph?.getNodeById?.(String(ridRaw));
       }
+      if (isTextOverlayNode(executedNode)) applyTextOverlayRun(executedNode, detail.output);
+    }
+    for (const n of (app.graph?._nodes || app.graph?.nodes || [])) {
+      if (isTextOverlayNode(n)) refreshOpenButton(n);
+    }
+  });
+});
+
+function applyTextOverlayRun(executedNode, output) {
+  executedNode._textOverlayHasRun = true;
+  const base = output?.pixaroma_text_overlay_base?.[0];
+  if (base?.filename) {
+    const subfolder = base.subfolder ? `&subfolder=${encodeURIComponent(base.subfolder)}` : "";
+    const type = base.type || "temp";
+    executedNode._textOverlayBaseImageURL =
+      pixApiUrl(`/view?filename=${encodeURIComponent(base.filename)}${subfolder}&type=${encodeURIComponent(type)}&t=${Date.now()}`);
+  }
+  // Python resolved the text position on this run (first-run path for
+  // generative chains where the JS hook couldn't position pre-submit -
+  // covers both auto-center and an explicit "Position on canvas" choice).
+  // Persist the x/y on the node and clear both pending flags so
+  // subsequent runs respect the position.
+  const ac = output?.pixaroma_text_overlay_autocentered?.[0];
+  if (ac && Number.isFinite(ac.x) && Number.isFinite(ac.y)) {
+    const state = executedNode.properties?.[STATE_PROP];
+    if (state) {
+      state.x = ac.x;
+      state.y = ac.y;
+      delete state._autoCenterPending;
+      delete state._alignPending;
+      if (executedNode._textOverlayBodyPanel) {
+        executedNode._textOverlayBodyPanel.setLayer(state);
+      }
+      executedNode.setDirtyCanvas?.(true, true);
     }
   }
-  for (const n of (app.graph?._nodes || app.graph?.nodes || [])) {
-    if (isTextOverlayNode(n)) refreshOpenButton(n);
-  }
-});
+}
 
 // Belt-and-braces: workflow-level success event. When ANY workflow run
 // completes, mark every Text Overlay node as "has run". Less precise

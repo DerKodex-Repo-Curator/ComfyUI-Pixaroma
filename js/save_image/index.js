@@ -16,6 +16,7 @@ import {
   installCanvasZoomPassthrough,
 } from "../shared/index.mjs";
 import { isGraphLoading } from "../shared/graph_loading.mjs";
+import { runTab, eachRestoredOutput } from "../shared/run_tab.mjs";
 import { registerNodeSettings, installNodeAccent } from "../shared/node_settings.mjs";
 import { applyFilenameTokenRefs } from "../shared/filename_tokens.mjs";
 import { resolveWiredName, setPreviewPath, WIRED_TIP } from "../shared/wired_name.mjs";
@@ -1144,15 +1145,33 @@ function installExecutedListener() {
   _executedInstalled = true;
   api.addEventListener("executed", ({ detail }) => {
     if (!detail) return;
-    let node = app.graph?.getNodeById?.(detail.node);
-    if (!node && typeof detail.node === "string") {
-      node = app.graph?.getNodeById?.(parseInt(detail.node, 10));
-    }
-    if (!node || node.comfyClass !== COMFY_CLASS || !node._pixSiUI) return;
-    const out = detail.output || {};
-    const frames = out.pixaroma_save_frames || out.images;
-    if (!Array.isArray(frames) || !frames.length) return;
-    applyRunFrames(node, frames);
+    // Decided after this message's listeners ran: a Run that ended while
+    // ANOTHER workflow tab is open belongs to that tab (ids repeat across
+    // workflows, so the lookup below would hit a stranger). Core keeps it and
+    // hands it back when that tab opens again: restoreSaveImageOutputs
+    // (js/shared/run_tab.mjs).
+    queueMicrotask(() => {
+      if (runTab(detail.output) === "other") return;
+      let node = app.graph?.getNodeById?.(detail.node);
+      if (!node && typeof detail.node === "string") {
+        node = app.graph?.getNodeById?.(parseInt(detail.node, 10));
+      }
+      if (!node || node.comfyClass !== COMFY_CLASS || !node._pixSiUI) return;
+      const out = detail.output || {};
+      const frames = out.pixaroma_save_frames || out.images;
+      if (!Array.isArray(frames) || !frames.length) return;
+      applyRunFrames(node, frames);
+    });
+  });
+}
+
+// A Run that ended while another workflow tab was open (core's
+// onNodeOutputsUpdated, js/shared/run_tab.mjs): applied like a fresh one.
+function restoreSaveImageOutputs(nodeOutputs) {
+  eachRestoredOutput(nodeOutputs, COMFY_CLASS, (node, output) => {
+    if (!node._pixSiUI) return;
+    const frames = output?.pixaroma_save_frames || output?.images;
+    if (Array.isArray(frames) && frames.length) applyRunFrames(node, frames);
   });
 }
 
@@ -1288,6 +1307,11 @@ app.registerExtension({
   setup() {
     installGraphToPromptHook();
     installExecutedListener();
+  },
+
+  // A Run that ended while another workflow tab was open (js/shared/run_tab.mjs).
+  onNodeOutputsUpdated(nodeOutputs) {
+    restoreSaveImageOutputs(nodeOutputs);
   },
 
   getNodeMenuItems(node) {

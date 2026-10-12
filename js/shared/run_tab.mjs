@@ -32,9 +32,12 @@ import { app } from "../../../scripts/app.js";
 import { api } from "../../../scripts/api.js";
 
 const MAX_PENDING = 1000;
-// workflow -> file keys ("type/subfolder/filename") of runs that ended while
-// that workflow was not the open tab. Weak: a closed workflow takes its own.
+// workflow -> keys of runs that ended while that workflow was not the open
+// tab: file keys ("type/subfolder/filename"), or a content key for a result
+// with no file (contentKey). Weak: a closed workflow takes its own.
 const pending = new WeakMap();
+// workflow -> (execution id -> that node's newest pending content key).
+const lastContent = new WeakMap();
 
 function filesOf(output) {
   const out = [];
@@ -48,6 +51,37 @@ function filesOf(output) {
     }
   }
   return out;
+}
+
+// A result with no file (text, numbers: Show Text, AI Prompt, Image Resize's
+// sizes...) is known by its node id and its CONTENT: core clones every output
+// when it stores and restores a tab, so the object itself cannot be the key.
+// The id keeps two nodes of one graph level with the same text apart (it is
+// the INNER id, see keysOf).
+function contentKey(id, output) {
+  let s;
+  try { s = JSON.stringify(output); } catch { return null; }
+  if (typeof s !== "string") return null;
+  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  for (let i = 0; i < s.length; i++) {
+    const c = s.charCodeAt(i);
+    h1 = Math.imul(h1 ^ c, 2654435761);
+    h2 = Math.imul(h2 ^ c, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return `#${id}:${s.length}:${(h2 >>> 0).toString(36)}${(h1 >>> 0).toString(36)}`;
+}
+
+// Only the node's OWN id goes into a content key: a run is recorded under its
+// EXECUTION id ("12:5" inside a subgraph) and handed back re-keyed by LOCATOR
+// id ("<subgraph uuid>:5", core's replaceOutputsFromLegacy), and the part after
+// the last ":" is the same in both.
+function keysOf(id, output) {
+  const files = filesOf(output);
+  if (files.length || id == null) return files;
+  const k = contentKey(String(id).split(":").pop(), output);
+  return k ? [k] : [];
 }
 
 function trackerHolds(workflow, output) {
@@ -85,7 +119,20 @@ api.addEventListener("executed", ({ detail }) => {
     if (!owner || owner === app.extensionManager?.workflow?.activeWorkflow) return;
     let set = pending.get(owner);
     if (!set) pending.set(owner, (set = new Set()));
-    for (const f of filesOf(output)) set.add(f);
+    const keys = keysOf(detail.node, output);
+    if (keys.length === 1 && keys[0].startsWith("#")) {
+      // Core keeps only a node's NEWEST output, so only its newest content key
+      // can ever come back. An older one left pending matched a LATER run that
+      // gave the same text and re-applied it on a plain tab switch (measured:
+      // a Pause Text edit overwritten). Files never repeat, so file keys are
+      // left alone.
+      let last = lastContent.get(owner);
+      if (!last) lastContent.set(owner, (last = new Map()));
+      const old = last.get(String(detail.node));
+      if (old && old !== keys[0]) set.delete(old);
+      last.set(String(detail.node), keys[0]);
+    }
+    for (const f of keys) set.add(f);
     while (set.size > MAX_PENDING) set.delete(set.values().next().value);
   });
 });
@@ -94,6 +141,14 @@ export function runTab(output) {
   const owner = ownerOf(output);
   if (!owner) return "unknown";
   return owner === app.extensionManager?.workflow?.activeWorkflow ? "active" : "other";
+}
+
+// The workflow (tab) a run's result belongs to, or null when it cannot be
+// placed. Same timing rule as runTab. For a node that must act on its own tab's
+// saved state while that tab is closed (Notify files the time under the node's
+// own id, read from changeTracker.activeState).
+export function runWorkflow(output) {
+  return ownerOf(output);
 }
 
 // The node an onNodeOutputsUpdated key names: "id" on the root graph, or
@@ -112,11 +167,13 @@ export function eachRestoredOutput(nodeOutputs, comfyClass, fn) {
   if (!set?.size) return;
   for (const [locatorId, output] of Object.entries(nodeOutputs)) {
     if (!output || typeof output !== "object") continue;
-    const files = filesOf(output);
-    if (!files.some((f) => set.has(f))) continue;
+    // The node's class first: every node type calls this from its own hook,
+    // so hashing a text result before knowing it is ours is wasted work.
     const node = nodeByLocator(locatorId);
     if (!node || (node.comfyClass || node.type) !== comfyClass) continue;
+    const keys = keysOf(locatorId, output);
+    if (!keys.some((f) => set.has(f))) continue;
     fn(node, output);
-    for (const f of files) set.delete(f);
+    for (const f of keys) set.delete(f);
   }
 }

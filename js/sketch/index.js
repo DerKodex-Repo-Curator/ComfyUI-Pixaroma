@@ -17,6 +17,7 @@ import { closeNodeSettingsFor, registerNodeAccent } from "../shared/node_setting
 import { isVueNodes } from "../shared/nodes2.mjs";
 import { onRendererChange } from "../shared/renderer_switch.mjs";
 import { onRouterChanged } from "../shared/router_changed.mjs";
+import { runTab, eachRestoredOutput } from "../shared/run_tab.mjs";
 import { CLASS, HIDDEN_INPUT, SETTING_AUTO, injectedState, nextAutoColor, readState } from "./core.mjs";
 import { autoColor, uiState } from "./actions.mjs";
 import { closeBig, openBig } from "./big.mjs";
@@ -91,8 +92,22 @@ function chromeH(node) {
   return y + 2 * m;
 }
 
+function applySketchRun(node, message) {
+  const entry = message?.pixaroma_sketch?.[0];
+  if (!entry) return;
+  // Runtime only, never serialized: the temp copy does not outlive the
+  // server, so after a reload the node goes back to the upstream picture.
+  node._pixSkRun = runSource(entry, upstreamPicture(node)?.key ?? null);
+  refreshSource(node);
+}
+
 app.registerExtension({
   name: "Pixaroma.Sketch",
+
+  // A Run that ended while another workflow tab was open (js/shared/run_tab.mjs).
+  onNodeOutputsUpdated(nodeOutputs) {
+    eachRestoredOutput(nodeOutputs, CLASS, (node, output) => applySketchRun(node, output));
+  },
 
   beforeRegisterNodeDef(nodeType, nodeData) {
     if (nodeData?.name !== CLASS) return;
@@ -165,12 +180,14 @@ app.registerExtension({
     const _executed = nodeType.prototype.onExecuted;
     nodeType.prototype.onExecuted = function (message) {
       _executed?.apply(this, arguments);
-      const entry = message?.pixaroma_sketch?.[0];
-      if (!entry) return;
-      // Runtime only, never serialized: the temp copy does not outlive the
-      // server, so after a reload the node goes back to the upstream picture.
-      this._pixSkRun = runSource(entry, upstreamPicture(this)?.key ?? null);
-      refreshSource(this);
+      // Core calls this on the OPEN tab's node with the run's id. A Run that
+      // ended while another workflow tab is open belongs to that tab (decided
+      // once the message's listeners ran); core hands it back when that tab
+      // opens again: onNodeOutputsUpdated above (js/shared/run_tab.mjs).
+      queueMicrotask(() => {
+        if (runTab(message) === "other") return;
+        applySketchRun(this, message);
+      });
     };
 
     // Classic-only clamps, never during a load (convention #7 + Vue Compat #18).

@@ -10,6 +10,7 @@ import { isGraphLoading } from "../shared/graph_loading.mjs";
 import { registerNodeHelp } from "../shared/help.mjs";
 import { registerNodeSettings, repaintAccent } from "../shared/node_settings.mjs";
 import { onRendererChange } from "../shared/renderer_switch.mjs";
+import { runTab, eachRestoredOutput } from "../shared/run_tab.mjs";
 import {
   CLASS, DEFAULT_W, HIDDEN_INPUT, MIN_W,
   contentHeight, injectedState, readState, writeReport,
@@ -125,8 +126,23 @@ function syncSize(node) {
   node.setSize?.([Math.max(MIN_W, node.size?.[0] ?? DEFAULT_W), want]);
 }
 
+function applyFreeVramRun(node, message) {
+  const report = message?.pixaroma_free_vram?.[0];
+  if (!report || typeof report !== "object") return;
+  const previous = node._pixFvReport;
+  const replayed = previous && previous.stamp != null && previous.stamp === report.stamp;
+  writeReport(node, { ...report, cached: !!replayed });
+  renderFace(node);
+}
+
 app.registerExtension({
   name: "Pixaroma.FreeVram",
+
+  // A Run that ended while another workflow tab was open (js/shared/run_tab.mjs).
+  // The report stays runtime-only (#6): it shows until the next tab switch.
+  onNodeOutputsUpdated(nodeOutputs) {
+    eachRestoredOutput(nodeOutputs, CLASS, (node, output) => applyFreeVramRun(node, output));
+  },
 
   beforeRegisterNodeDef(nodeType, nodeData) {
     if (nodeData?.name !== CLASS) return;
@@ -203,12 +219,14 @@ app.registerExtension({
     const _executed = nodeType.prototype.onExecuted;
     nodeType.prototype.onExecuted = function (message) {
       _executed?.apply(this, arguments);
-      const report = message?.pixaroma_free_vram?.[0];
-      if (!report || typeof report !== "object") return;
-      const previous = this._pixFvReport;
-      const replayed = previous && previous.stamp != null && previous.stamp === report.stamp;
-      writeReport(this, { ...report, cached: !!replayed });
-      renderFace(this);
+      // Core calls this on the OPEN tab's node with the run's id. A Run that
+      // ended while another workflow tab is open belongs to that tab (decided
+      // once the message's listeners ran); core hands it back when that tab
+      // opens again: onNodeOutputsUpdated above (js/shared/run_tab.mjs).
+      queueMicrotask(() => {
+        if (runTab(message) === "other") return;
+        applyFreeVramRun(this, message);
+      });
     };
 
     // Classic-only clamps. In Nodes 2.0 the RENDERED size lives in the Vue

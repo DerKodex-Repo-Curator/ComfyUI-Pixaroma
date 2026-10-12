@@ -22,6 +22,7 @@ import {
 import { installNodeAccent, registerNodeAccent } from "../shared/node_settings.mjs";
 import { pixApiUrl } from "../shared/api_url.mjs";
 import { isGraphLoading } from "../shared/graph_loading.mjs";
+import { runTab } from "../shared/run_tab.mjs";
 import { growToCoreMinHeight, capComputeSizeInNodes2 } from "../shared/core_min_size.mjs";
 
 const NODE = "KreaLoraConvertPixaroma";
@@ -193,6 +194,11 @@ async function doConvert(node) {
   }
 }
 
+function applyKreaRun(node, output) {
+  const out = output?.pixaroma_krea_convert;
+  if (Array.isArray(out) && out.length) renderResult(node, out[0]);
+}
+
 app.registerExtension({
   name: "Pixaroma.KreaLoraConvert",
 
@@ -275,8 +281,16 @@ app.registerExtension({
     const origExecuted = nodeType.prototype.onExecuted;
     nodeType.prototype.onExecuted = function (output) {
       origExecuted?.apply(this, arguments);
-      const out = output?.pixaroma_krea_convert;
-      if (Array.isArray(out) && out.length) renderResult(this, out[0]);
+      // Core calls this on the OPEN tab's node with the run's id. A Run that
+      // ended while another workflow tab is open belongs to that tab (decided
+      // once the message's listeners ran, js/shared/run_tab.mjs). It is NOT
+      // handed back on the way in: opening a tab re-inspects the LoRA
+      // (onConfigure -> doInspect), whose answer replaces the status line
+      // anyway, exactly as after a run in the same tab (measured).
+      queueMicrotask(() => {
+        if (runTab(output) === "other") return;
+        applyKreaRun(this, output);
+      });
     };
 
     // Re-inspect when a saved workflow restores this node.

@@ -11,6 +11,7 @@ import { applyAdaptiveCanvasOnly, isVueNodes, closeHelpPopup, installCanvasZoomP
 import { isQueueLoopActive, runQueueLoop, feedsOnlyInactiveSwitch } from "../shared/queue_drivers.mjs";
 import { sweepProviderFor, anyProviderOwns } from "../shared/sweep_targets.mjs";
 import { isGraphLoading } from "../shared/graph_loading.mjs";
+import { runTab, eachRestoredOutput } from "../shared/run_tab.mjs";
 import { installNodeAccent, registerNodeAccent } from "../shared/node_settings.mjs";
 
 const NODE = "PixaromaXYPlot";
@@ -186,6 +187,13 @@ function makeHandlers(node, root) {
 
 app.registerExtension({
   name: "Pixaroma.XYPlot",
+
+  // A grid that landed while another workflow tab was open (js/shared/run_tab.mjs).
+  onNodeOutputsUpdated(nodeOutputs) {
+    eachRestoredOutput(nodeOutputs, NODE, (node, output) => {
+      try { applyXyGrid(node, output); } catch (e) { console.error("Pixaroma.XYPlot: restored grid failed", e); }
+    });
+  },
 
   beforeRegisterNodeDef(nodeType, nodeData) {
     if (nodeData.name !== NODE) return;
@@ -666,32 +674,45 @@ app.queuePrompt = async function (...args) {
 // ── grid delivery (executed event) ────────────────────────────────────────────
 
 api.addEventListener("executed", ({ detail }) => {
-  try {
-    let node = app.graph?.getNodeById?.(detail.node);
-    if (!node && typeof detail.node === "string") node = app.graph?.getNodeById?.(parseInt(detail.node, 10));
-    if (!node || (node.comfyClass !== NODE && node.type !== NODE)) return;
-    const frames = detail?.output?.pixaroma_xy_grid;
-    if (!frames || !frames.length) return;
-    const f = frames[0];
-    const url = buildViewUrl(f);
-    node._pixXyLastGrid = { sessionId: f._xy?.sessionId || null, filename: f.filename, url };
-    // Capture the EXECUTION-time prompt + workflow so Save Output embeds the
-    // seed that ACTUALLY produced the grid (the live graph's seed has already
-    // been bumped by 'control after generate: randomize' by save-click time).
-    // Runtime-only - never persist to node.properties (Preview Pattern #13).
-    const meta = f._pixaroma_meta;
-    if (meta && typeof meta === "object") {
-      node._pixXyExecPrompt = meta.prompt || null;
-      node._pixXyExecWorkflow = meta.workflow || null;
+  if (!detail?.output?.pixaroma_xy_grid?.length) return;
+  // Decided after this message's listeners ran: a grid that landed while
+  // ANOTHER workflow tab is open belongs to that tab (ids repeat across
+  // workflows, so the lookup below would hit a stranger). Core keeps it and
+  // hands it back when that tab opens again: onNodeOutputsUpdated
+  // (js/shared/run_tab.mjs).
+  queueMicrotask(() => {
+    try {
+      if (runTab(detail.output) === "other") return;
+      let node = app.graph?.getNodeById?.(detail.node);
+      if (!node && typeof detail.node === "string") node = app.graph?.getNodeById?.(parseInt(detail.node, 10));
+      if (!node || (node.comfyClass !== NODE && node.type !== NODE)) return;
+      applyXyGrid(node, detail.output);
+    } catch (e) {
+      console.error("Pixaroma.XYPlot: executed handler failed", e);
     }
-    node._pixXyGrid?.setGrid(url);
-    // The node's actual resize-to-fit happens in the grid <img> onload handler
-    // (grid.mjs -> _pixXyFit); here we just request a repaint.
-    requestAnimationFrame(() => { try { node.setDirtyCanvas?.(true, true); } catch (_e) {} });
-  } catch (e) {
-    console.error("Pixaroma.XYPlot: executed handler failed", e);
-  }
+  });
 });
+
+function applyXyGrid(node, output) {
+  const frames = output?.pixaroma_xy_grid;
+  if (!frames || !frames.length) return;
+  const f = frames[0];
+  const url = buildViewUrl(f);
+  node._pixXyLastGrid = { sessionId: f._xy?.sessionId || null, filename: f.filename, url };
+  // Capture the EXECUTION-time prompt + workflow so Save Output embeds the
+  // seed that ACTUALLY produced the grid (the live graph's seed has already
+  // been bumped by 'control after generate: randomize' by save-click time).
+  // Runtime-only - never persist to node.properties (Preview Pattern #13).
+  const meta = f._pixaroma_meta;
+  if (meta && typeof meta === "object") {
+    node._pixXyExecPrompt = meta.prompt || null;
+    node._pixXyExecWorkflow = meta.workflow || null;
+  }
+  node._pixXyGrid?.setGrid(url);
+  // The node's actual resize-to-fit happens in the grid <img> onload handler
+  // (grid.mjs -> _pixXyFit); here we just request a repaint.
+  requestAnimationFrame(() => { try { node.setDirtyCanvas?.(true, true); } catch (_e) {} });
+}
 
 // The colour option: a right-click "XY Plot settings" entry, the gear in the
 // selection toolbar, and the shared colour panel behind both.

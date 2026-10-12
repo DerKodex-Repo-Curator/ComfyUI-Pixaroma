@@ -16,6 +16,7 @@ import { isGraphLoading } from "../shared/graph_loading.mjs";
 import { registerNodeHelp } from "../shared/help.mjs";
 import { registerNodeSettings, repaintAccent } from "../shared/node_settings.mjs";
 import { isVueNodes } from "../shared/nodes2.mjs";
+import { runTab, eachRestoredOutput } from "../shared/run_tab.mjs";
 import {
   CLASS, DEFAULT_H, DEFAULT_W, HIDDEN_INPUT, MIN_H, MIN_W, injectedState,
 } from "./core.mjs";
@@ -57,6 +58,14 @@ registerNodeSettings(CLASS, {
 
 app.registerExtension({
   name: "Pixaroma.VideoPrompt",
+
+  // A Run that ended while another workflow tab was open (js/shared/run_tab.mjs).
+  onNodeOutputsUpdated(nodeOutputs) {
+    eachRestoredOutput(nodeOutputs, CLASS, (node, output) => {
+      const payload = output?.pixaroma_video_prompt?.[0];
+      if (payload) applyResult(node, payload, null);
+    });
+  },
 
   beforeRegisterNodeDef(nodeType, nodeData) {
     if (nodeData?.name !== CLASS) return;
@@ -190,12 +199,19 @@ api.addEventListener("executed", (e) => {
   const detail = e?.detail;
   const payload = detail?.output?.pixaroma_video_prompt?.[0];
   if (!payload) return;
-  const node = findById(detail.node);
-  if (!node) return;
   const t0 = STARTED.get(String(detail.node));
   STARTED.delete(String(detail.node));
   const elapsed = t0 ? Math.max(0, Math.round((Date.now() - t0) / 100) / 10) : null;
-  applyResult(node, payload, elapsed);
+  // Decided after this message's listeners ran: a Run that ended while ANOTHER
+  // workflow tab is open belongs to that tab (findById looks in the OPEN tab,
+  // and ids repeat across workflows). Core keeps the result and hands it back
+  // when that tab opens again: onNodeOutputsUpdated (js/shared/run_tab.mjs).
+  queueMicrotask(() => {
+    if (runTab(detail.output) === "other") return;
+    const node = findById(detail.node);
+    if (!node) return;
+    applyResult(node, payload, elapsed);
+  });
 });
 
 // ---------------------------------------------------------------------------

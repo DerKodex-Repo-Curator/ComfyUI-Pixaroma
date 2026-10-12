@@ -5,6 +5,7 @@ import { installNodeAccent, registerNodeAccent } from "../shared/node_settings.m
 import { api } from "../../../scripts/api.js";
 import { applyAdaptiveCanvasOnly, isVueNodes } from "../shared/nodes2.mjs";
 import { isGraphLoading } from "../shared/graph_loading.mjs";
+import { runTab, eachRestoredOutput } from "../shared/run_tab.mjs";
 import { growToCoreMinHeight } from "../shared/core_min_size.mjs";
 import { getState, setGate, STATE_PROP } from "./state.mjs";
 import { applyGateMode } from "./prune.mjs";
@@ -255,6 +256,14 @@ function restore(node) {
 app.registerExtension({
   name: "Pixaroma.PauseImage",
 
+  // A Run that ended while another workflow tab was open (js/shared/run_tab.mjs).
+  onNodeOutputsUpdated(nodeOutputs) {
+    eachRestoredOutput(nodeOutputs, CLASS, (node, output) => {
+      const frames = output?.pixaroma_pause_frame;
+      if (Array.isArray(frames) && frames.length) applyPauseFrame(node, frames);
+    });
+  },
+
   async beforeRegisterNodeDef(nodeType, nodeData) {
     if (nodeData.name !== CLASS) return;
 
@@ -311,10 +320,22 @@ api.addEventListener("executed", (e) => {
   const d = e.detail;
   const frames = d?.output?.pixaroma_pause_frame;
   if (!frames || !frames.length) return;
-  // Node id may be a number (legacy) or string (Vue) - try both.
-  let node = app.graph.getNodeById(d.node);
-  if (!node && typeof d.node === "string") node = app.graph.getNodeById(parseInt(d.node, 10));
-  if (!node || node.comfyClass !== CLASS) return;
+  // Decided after this message's listeners ran: a gate that paused while
+  // ANOTHER workflow tab is open belongs to that tab. The lookup below would
+  // find a stranger with the same id and give IT this snapshot (saved state).
+  // Core keeps the result and hands it back when that tab opens again:
+  // onNodeOutputsUpdated (js/shared/run_tab.mjs).
+  queueMicrotask(() => {
+    if (runTab(d.output) === "other") return;
+    // Node id may be a number (legacy) or string (Vue) - try both.
+    let node = app.graph.getNodeById(d.node);
+    if (!node && typeof d.node === "string") node = app.graph.getNodeById(parseInt(d.node, 10));
+    if (!node || node.comfyClass !== CLASS) return;
+    applyPauseFrame(node, frames);
+  });
+});
+
+function applyPauseFrame(node, frames) {
   const f = frames[0];
   // Capture the execution-time workflow for the Save buttons (runtime-only -
   // never persisted to node.properties, it would bloat the saved workflow).
@@ -324,7 +345,7 @@ api.addEventListener("executed", (e) => {
   const s = getState(node);
   s.frame = { filename: f.filename, subfolder: f.subfolder || "", type: f.type || "temp" };
   showFrame(node, s.frame);
-});
+}
 
 // ── app.graphToPrompt hook: prune + inject mode (Pattern #9, Switch-style) ──
 function buildNodeIndex() {

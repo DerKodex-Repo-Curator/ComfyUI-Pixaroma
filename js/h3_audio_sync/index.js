@@ -8,6 +8,7 @@
 import { app } from "../../../scripts/app.js";
 import { isVueNodes, applyAdaptiveCanvasOnly } from "../shared/nodes2.mjs";
 import { isGraphLoading } from "../shared/graph_loading.mjs";
+import { runTab, eachRestoredOutput } from "../shared/run_tab.mjs";
 import { installCanvasZoomPassthrough } from "../shared/canvas_zoom.mjs";
 import { registerNodeHelp } from "../shared/help.mjs";
 import { installNodeAccent, registerNodeAccent } from "../shared/node_settings.mjs";
@@ -50,8 +51,18 @@ registerNodeAccent(CLASS, {
   onChange: (node) => renderFace(node),
 });
 
+function applyH3Run(node, message) {
+  const info = message?.pixaroma_h3_sync?.[0];
+  if (info) { node._pixH3sRun = info; renderFace(node); }
+}
+
 app.registerExtension({
   name: "Pixaroma.H3AudioSync",
+
+  // A Run that ended while another workflow tab was open (js/shared/run_tab.mjs).
+  onNodeOutputsUpdated(nodeOutputs) {
+    eachRestoredOutput(nodeOutputs, CLASS, (node, output) => applyH3Run(node, output));
+  },
 
   beforeRegisterNodeDef(nodeType, nodeData) {
     if (nodeData?.name !== CLASS) return;
@@ -96,8 +107,14 @@ app.registerExtension({
     const _executed = nodeType.prototype.onExecuted;
     nodeType.prototype.onExecuted = function (message) {
       const r = _executed?.apply(this, arguments);
-      const info = message?.pixaroma_h3_sync?.[0];
-      if (info) { this._pixH3sRun = info; renderFace(this); }
+      // Core calls this on the OPEN tab's node with the run's id. A Run that
+      // ended while another workflow tab is open belongs to that tab (decided
+      // once the message's listeners ran); core hands it back when that tab
+      // opens again: onNodeOutputsUpdated above (js/shared/run_tab.mjs).
+      queueMicrotask(() => {
+        if (runTab(message) === "other") return;
+        applyH3Run(this, message);
+      });
       return r;
     };
 

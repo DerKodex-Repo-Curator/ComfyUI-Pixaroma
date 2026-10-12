@@ -20,6 +20,7 @@ import { registerNodeSettings, globalAccent } from "../shared/node_settings.mjs"
 import { installCanvasZoomPassthrough } from "../shared/canvas_zoom.mjs";
 import { onRendererChange } from "../shared/renderer_switch.mjs";
 import { isLiveNode } from "../shared/live_node.mjs";
+import { runTab, eachRestoredOutput } from "../shared/run_tab.mjs";
 import { attachCanvasSnapshot } from "../shared/canvas_snapshot.mjs";
 import {
   ACCENT_SETTING, BRAND, DEFAULT_STATE, MAX_PAD, STATE_PROP,
@@ -1376,6 +1377,11 @@ function setupNode(node) {
 app.registerExtension({
   name: "Pixaroma.Outpaint",
 
+  // A Run that ended while another workflow tab was open (js/shared/run_tab.mjs).
+  onNodeOutputsUpdated(nodeOutputs) {
+    eachRestoredOutput(nodeOutputs, CLASS, (node, output) => applyOutpaintBase(node, output));
+  },
+
   // No Settings-panel row: this node's colour lives in its OWN panel (the gear /
   // right-click entry). It used to be registered here with defaultValue BRAND,
   // which made getSettingValue ALWAYS return the orange - so the node-type
@@ -1490,43 +1496,57 @@ app.registerExtension({
 // (KSampler -> VAE Decode) nothing upstream ever populates imgs[0] and tier 1
 // finds nothing. Python writes the run's INPUT frame to temp/ and names it in
 // its ui payload; this turns that name into the picture the preview draws.
+function applyOutpaintBase(node, output) {
+  try {
+    const entry = output?.pixaroma_outpaint_base?.[0];
+    if (!entry || !entry.filename) return;
+    // Python cannot know whether the browser already has a picture, so it
+    // stashes on every run. Decode it only when TIER 1 came up empty: with a
+    // Load Image upstream the frame is already on screen, and decoding a
+    // full-size PNG each run to throw it away would be pure waste. Rewiring to
+    // a generated source simply means the next run supplies it.
+    // upstreamImage, NOT sourceImage: the latter counts our own cached base
+    // frame, so it would answer "already got one" from the second run onward
+    // and freeze the preview on the first generated image.
+    if (upstreamImage(node)) return;
+    const img = new Image();
+    img.onload = () => {
+      if (!node.graph) return; // deleted while it loaded
+      node._pixOpBaseImg = img;
+      // Keep the watcher in step, or it repaints the same picture again 400ms
+      // later for nothing.
+      node._pixOpSrcSig = sourceSig(node);
+      renderFace(node);
+    };
+    img.src = pixApiUrl("/view?filename=" + encodeURIComponent(entry.filename) +
+      "&type=" + encodeURIComponent(entry.type || "temp") +
+      "&subfolder=" + encodeURIComponent(entry.subfolder || ""));
+  } catch (e) {
+    // A preview is never worth breaking the executed handler for - every other
+    // node's listener runs off this same event.
+    console.warn("[Outpaint Pixaroma] base preview failed:", (e && e.message) || e);
+  }
+}
+
 if (!app._pixOpExecPatched) {
   app._pixOpExecPatched = true;   // hot-reload guard: one listener, not one per load
   api.addEventListener("executed", ({ detail }) => {
-    try {
-      const entry = detail?.output?.pixaroma_outpaint_base?.[0];
-      if (!entry || !entry.filename) return;
+    const entry = detail?.output?.pixaroma_outpaint_base?.[0];
+    if (!entry || !entry.filename) return;
+    // Decided after this message's listeners ran: a Run that ended while
+    // ANOTHER workflow tab is open belongs to that tab (ids repeat across
+    // workflows, so the lookup below would hit a stranger). Core keeps it and
+    // hands it back when that tab opens again: onNodeOutputsUpdated
+    // (js/shared/run_tab.mjs).
+    queueMicrotask(() => {
+      if (runTab(detail.output) === "other") return;
       // Vue hands the node id over as a string, legacy as a number.
       const graph = app.graph;
       const node = graph?.getNodeById?.(detail.node) ??
                    graph?.getNodeById?.(parseInt(detail.node, 10));
       if (!node || node.comfyClass !== CLASS) return;
-      // Python cannot know whether the browser already has a picture, so it
-      // stashes on every run. Decode it only when TIER 1 came up empty: with a
-      // Load Image upstream the frame is already on screen, and decoding a
-      // full-size PNG each run to throw it away would be pure waste. Rewiring to
-      // a generated source simply means the next run supplies it.
-      // upstreamImage, NOT sourceImage: the latter counts our own cached base
-      // frame, so it would answer "already got one" from the second run onward
-      // and freeze the preview on the first generated image.
-      if (upstreamImage(node)) return;
-      const img = new Image();
-      img.onload = () => {
-        if (!node.graph) return; // deleted while it loaded
-        node._pixOpBaseImg = img;
-        // Keep the watcher in step, or it repaints the same picture again 400ms
-        // later for nothing.
-        node._pixOpSrcSig = sourceSig(node);
-        renderFace(node);
-      };
-      img.src = pixApiUrl("/view?filename=" + encodeURIComponent(entry.filename) +
-        "&type=" + encodeURIComponent(entry.type || "temp") +
-        "&subfolder=" + encodeURIComponent(entry.subfolder || ""));
-    } catch (e) {
-      // A preview is never worth breaking the executed handler for - every other
-      // node's listener runs off this same event.
-      console.warn("[Outpaint Pixaroma] base preview failed:", (e && e.message) || e);
-    }
+      applyOutpaintBase(node, detail.output);
+    });
   });
 }
 

@@ -24,6 +24,7 @@ import { app } from "../../../scripts/app.js";
 import { api } from "../../../scripts/api.js";
 import { applyAdaptiveCanvasOnly, isVueNodes } from "../shared/index.mjs";
 import { isGraphLoading } from "../shared/graph_loading.mjs";
+import { runWorkflow, eachRestoredOutput } from "../shared/run_tab.mjs";
 import { growToCoreMinHeight, capComputeSizeInNodes2 } from "../shared/core_min_size.mjs";
 import {
   openNotifyHistory,
@@ -487,8 +488,83 @@ async function playSound(filename, volume01) {
   }
 }
 
+function timeName(out) {
+  const ev = out[0] || {};
+  return (ev.label || "").trim() ||
+    (ev.sound ? String(ev.sound).replace(/\.[^.]+$/, "") : "Notify");
+}
+
+// Times of checkpoints reached while their workflow was not the open tab:
+// workflow -> (node id -> ms), shown on the face when that tab opens again
+// (onNodeOutputsUpdated). Weak: a closed workflow takes its own.
+const _missedTimes = new WeakMap();
+
+function recordTiming(detail, out, ms) {
+  if (ms == null) return;
+  const owner = runWorkflow(detail.output);
+  if (owner && owner !== app.extensionManager?.workflow?.activeWorkflow) {
+    recordOtherTab(owner, detail.node, out, ms);
+    return;
+  }
+  // Resolve the firing node. detail.node is usually a number; some builds
+  // send a numeric string. Only coerce a pure-digit string - a subgraph
+  // path id like "12:5" must NOT be truncated to a wrong root node.
+  let node = app.graph?.getNodeById?.(detail.node);
+  if (!node && typeof detail.node === "string" && /^\d+$/.test(detail.node)) {
+    node = app.graph?.getNodeById?.(parseInt(detail.node, 10));
+  }
+  // Confirm we resolved OUR node type - a mis-resolved id must never write
+  // timing state onto some unrelated node.
+  const isNotify =
+    !!node && (node.comfyClass === NODE_NAME || node.type === NODE_NAME);
+  // The on-node readout is per-node object state; the history entry is
+  // recorded at most once per Run (guarded by pixNotifyId).
+  if (!isNotify || !isTimingOn(node)) return;
+  const id = ensureId(node);
+  // FIRST reach wins, for the face as well as the history - so the number
+  // on the node and the history's newest row always agree, even if a node
+  // is somehow reached twice in one Run.
+  if (!id || _recordedThisRun.has(id)) return;
+  _recordedThisRun.add(id);
+  node._pixNtLastMs = ms;
+  updateReadout(node);
+  recordNodeHistory(id, ms, timeName(out));
+}
+
+// The node lives in a tab that is not open: read its id and timing switch from
+// that tab's saved state (never written), file the time under ITS id, and keep
+// it for the face until the tab opens again.
+function recordOtherTab(owner, nodeId, out, ms) {
+  const nodes = owner.changeTracker?.activeState?.nodes;
+  const saved = Array.isArray(nodes) ? nodes.find((n) => String(n?.id) === String(nodeId)) : null;
+  if (!saved || saved.type !== NODE_NAME) return;
+  const props = saved.properties || {};
+  if (props[TIMING_PROP] === false) return;
+  const id = props[ID_PROP];
+  if (!id || _recordedThisRun.has(id)) return;
+  _recordedThisRun.add(id);
+  recordNodeHistory(id, ms, timeName(out));
+  let times = _missedTimes.get(owner);
+  if (!times) _missedTimes.set(owner, (times = new Map()));
+  times.set(String(nodeId), ms);
+}
+
 app.registerExtension({
   name: "Pixaroma.Notify",
+
+  // A checkpoint reached while another workflow tab was open: its time is on
+  // the face when that tab opens again (js/shared/run_tab.mjs).
+  onNodeOutputsUpdated(nodeOutputs) {
+    const times = _missedTimes.get(app.extensionManager?.workflow?.activeWorkflow);
+    if (!times?.size) return;
+    eachRestoredOutput(nodeOutputs, NODE_NAME, (node) => {
+      const ms = times.get(String(node.id));
+      if (ms == null) return;
+      times.delete(String(node.id));
+      node._pixNtLastMs = ms;
+      updateReadout(node);
+    });
+  },
 
   // No Settings-panel rows: this node's options live on the node itself (the
   // gear in the selection toolbar / the right-click entry). The setting ids are
@@ -511,44 +587,19 @@ app.registerExtension({
       const out = detail && detail.output && detail.output.pixaroma_notify;
       if (!Array.isArray(out) || out.length === 0) return;
 
-      // Resolve the firing node. detail.node is usually a number; some builds
-      // send a numeric string. Only coerce a pure-digit string - a subgraph
-      // path id like "12:5" must NOT be truncated to a wrong root node.
-      let node = app.graph?.getNodeById?.(detail.node);
-      if (!node && typeof detail.node === "string" && /^\d+$/.test(detail.node)) {
-        node = app.graph?.getNodeById?.(parseInt(detail.node, 10));
-      }
-      // Confirm we resolved OUR node type - a mis-resolved id must never write
-      // timing state onto some unrelated node.
-      const isNotify =
-        !!node && (node.comfyClass === NODE_NAME || node.type === NODE_NAME);
+      // 1) Checkpoint timing - independent of the sound. Measured NOW, filed
+      // once the message's listeners ran: a checkpoint reached while ANOTHER
+      // workflow tab is open belongs to that tab, and the id lookup in the open
+      // tab would put the time on a stranger with the same id (and in ITS
+      // history). js/shared/run_tab.mjs, recordTiming below.
+      const ms = _runStart != null ? performance.now() - _runStart : null;
+      queueMicrotask(() => recordTiming(detail, out, ms));
 
-      // Master sound switch (isMasterOn reads defensively, so a settings hiccup
-      // can never take timing down with it).
+      // 2) Sound - gated on the per-node sound toggle AND the master switch
+      // (isMasterOn reads defensively, so a settings hiccup can never take
+      // timing down with it). Plays whichever tab is open: it is the alert.
       const masterOn = isMasterOn();
-
       for (const ev of out) {
-        // 1) Checkpoint timing - independent of the sound. The on-node readout
-        // is per-node object state, so it updates on every fire; the history
-        // entry is recorded at most once per Run (guarded by pixNotifyId).
-        if (isNotify && _runStart != null && isTimingOn(node)) {
-          const id = ensureId(node);
-          // FIRST reach wins, for the face as well as the history - so the number
-          // on the node and the history's newest row always agree, even if a node
-          // is somehow reached twice in one Run.
-          if (id && !_recordedThisRun.has(id)) {
-            _recordedThisRun.add(id);
-            const ms = performance.now() - _runStart;
-            node._pixNtLastMs = ms;
-            updateReadout(node);
-            const name =
-              (ev.label || "").trim() ||
-              (ev.sound ? String(ev.sound).replace(/\.[^.]+$/, "") : "Notify");
-            recordNodeHistory(id, ms, name);
-          }
-        }
-
-        // 2) Sound - gated on the per-node sound toggle AND the master switch.
         if (ev.enabled !== false && masterOn) {
           console.log(
             `[Notify Pixaroma] ▶ ${ev.label}  (${ev.sound} @ ${ev.volume}%)`

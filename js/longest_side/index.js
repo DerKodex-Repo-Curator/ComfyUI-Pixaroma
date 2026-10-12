@@ -13,6 +13,7 @@ import {
 } from "../shared/index.mjs";
 import { isGraphLoading } from "../shared/graph_loading.mjs";
 import { onRendererChange } from "../shared/renderer_switch.mjs";
+import { runTab, eachRestoredOutput } from "../shared/run_tab.mjs";
 import { installNodeAccent, registerNodeSettings } from "../shared/node_settings.mjs";
 import { HIDDEN_INPUT_NAME, runState } from "./core.mjs";
 import { inputSizeKey } from "./input_size.mjs";
@@ -311,8 +312,23 @@ function startWatchdog() {
   }
 }
 
+function applyLastIn(node, message) {
+  try {
+    const info = message?.pixaroma_longest_side?.[0];
+    if (info?.in_w > 0 && info?.in_h > 0) {
+      node._pixLsLastIn = { w: info.in_w, h: info.in_h };
+      node._pixLsRefresh?.();
+    }
+  } catch {}
+}
+
 app.registerExtension({
   name: "Pixaroma.LongestSide",
+
+  // A Run that ended while another workflow tab was open (js/shared/run_tab.mjs).
+  onNodeOutputsUpdated(nodeOutputs) {
+    eachRestoredOutput(nodeOutputs, CLASS_NAME, (node, output) => applyLastIn(node, output));
+  },
 
   beforeRegisterNodeDef(nodeType, nodeData) {
     if (nodeData.name !== CLASS_NAME) return;
@@ -336,13 +352,14 @@ app.registerExtension({
     const _origExecuted = nodeType.prototype.onExecuted;
     nodeType.prototype.onExecuted = function (message) {
       const r = _origExecuted?.apply(this, arguments);
-      try {
-        const info = message?.pixaroma_longest_side?.[0];
-        if (info?.in_w > 0 && info?.in_h > 0) {
-          this._pixLsLastIn = { w: info.in_w, h: info.in_h };
-          this._pixLsRefresh?.();
-        }
-      } catch {}
+      // Core calls this on the OPEN tab's node with the run's id. A Run that
+      // ended while another workflow tab is open belongs to that tab (decided
+      // once the message's listeners ran); core hands it back when that tab
+      // opens again: onNodeOutputsUpdated above (js/shared/run_tab.mjs).
+      queueMicrotask(() => {
+        if (runTab(message) === "other") return;
+        applyLastIn(this, message);
+      });
       return r;
     };
 

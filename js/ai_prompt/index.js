@@ -38,6 +38,7 @@ import { expandAll } from "../prompt/expand.mjs";
 // floated and the gear, seed and join segment were invisible and unreachable
 // until a page refresh (reference_renderer_flip_breaks_per_renderer_ui).
 import { onRendererChange } from "../shared/renderer_switch.mjs";
+import { runTab, eachRestoredOutput } from "../shared/run_tab.mjs";
 import {
   applyError, applyResult, buildFace, destroyFace, injectCSS, placeBand,
   renderFace,
@@ -132,6 +133,15 @@ function scheduleImageSync(node) {
 
 app.registerExtension({
   name: "Pixaroma.AIPrompt",
+
+  // A Run that ended while another workflow tab was open (js/shared/run_tab.mjs).
+  // No elapsed time for it: the answer's own `seconds` is shown when present.
+  onNodeOutputsUpdated(nodeOutputs) {
+    eachRestoredOutput(nodeOutputs, CLASS, (node, output) => {
+      const payload = output?.pixaroma_ai_prompt?.[0];
+      if (payload) applyResult(node, payload, null);
+    });
+  },
 
   beforeRegisterNodeDef(nodeType, nodeData) {
     if (nodeData?.name !== CLASS) return;
@@ -277,12 +287,19 @@ api.addEventListener("executed", (e) => {
   const detail = e?.detail;
   const payload = detail?.output?.pixaroma_ai_prompt?.[0];
   if (!payload) return;
-  const node = findById(detail.node);
-  if (!node) return;
   const t0 = STARTED.get(String(detail.node));
   STARTED.delete(String(detail.node));
   const elapsed = t0 ? Math.max(0, Math.round((Date.now() - t0) / 100) / 10) : null;
-  applyResult(node, payload, elapsed);
+  // Decided after this message's listeners ran: a Run that ended while ANOTHER
+  // workflow tab is open belongs to that tab (findById looks in the OPEN tab,
+  // and ids repeat across workflows). Core keeps the result and hands it back
+  // when that tab opens again: onNodeOutputsUpdated (js/shared/run_tab.mjs).
+  queueMicrotask(() => {
+    if (runTab(detail.output) === "other") return;
+    const node = findById(detail.node);
+    if (!node) return;
+    applyResult(node, payload, elapsed);
+  });
 });
 
 // ---------------------------------------------------------------------------

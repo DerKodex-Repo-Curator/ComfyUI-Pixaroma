@@ -6,6 +6,7 @@ import { pixApiUrl } from "../shared/api_url.mjs";
 import { api } from "../../../scripts/api.js";
 import { isGraphLoading } from "../shared/graph_loading.mjs";
 import { isLiveNode } from "../shared/live_node.mjs";
+import { runTab, eachRestoredOutput } from "../shared/run_tab.mjs";
 import { growToCoreMinHeight, capComputeSizeInNodes2 } from "../shared/core_min_size.mjs";
 import { CropEditor } from "./core.mjs";
 import "./interaction.mjs"; // mixin: mouse/keyboard events
@@ -269,6 +270,11 @@ function findActiveCropNode() {
 
 app.registerExtension({
   name: "Pixaroma.Crop",
+
+  // A Run that ended while another workflow tab was open (js/shared/run_tab.mjs).
+  onNodeOutputsUpdated(nodeOutputs) {
+    eachRestoredOutput(nodeOutputs, "PixaromaCrop", (node, output) => node._pixCropApplyRun?.(output));
+  },
 
   async beforeRegisterNodeDef(nodeType, nodeData, app) {
     if (nodeData.name !== "PixaromaCrop") return;
@@ -714,14 +720,8 @@ app.registerExtension({
     // ── Cache source URL emitted by Python on each execute ──
     // Works for any IMAGE upstream (VAE Decode etc.) — without this, only
     // LoadImage chains can resolve a usable preview URL.
-    const onExec = (event) => {
-      const detail = event?.detail;
-      if (!detail?.output) return;
-      // Cross-version node-id resolution (Vue passes string, legacy passes number).
-      const matched = app.graph.getNodeById(detail.node)
-                  || app.graph.getNodeById(parseInt(detail.node, 10));
-      if (matched !== node) return;
-      const frames = detail.output.pixaroma_crop_source;
+    const applyRunSource = (output) => {
+      const frames = output?.pixaroma_crop_source;
       if (!frames?.length) return;
       const f = frames[0];
       const part = { filename: f.filename, subfolder: f.subfolder || "", type: f.type || "temp" };
@@ -731,6 +731,24 @@ app.registerExtension({
       // Drop the legacy full-URL field if present (back-compat cleanup).
       delete node.properties.pixaromaCropSourceURL;
       rebuildPreviewFromUpstream();
+    };
+    // The extension's onNodeOutputsUpdated hands a missed run back through this.
+    node._pixCropApplyRun = applyRunSource;
+    const onExec = (event) => {
+      const detail = event?.detail;
+      if (!detail?.output) return;
+      // Cross-version node-id resolution (Vue passes string, legacy passes number).
+      const matched = app.graph.getNodeById(detail.node)
+                  || app.graph.getNodeById(parseInt(detail.node, 10));
+      if (matched !== node) return;
+      // A Run that ended while another workflow tab is open belongs to that tab:
+      // the id above found a stranger with the same id. Decided once the
+      // message's listeners ran; core hands the result back when that tab opens
+      // again (js/shared/run_tab.mjs).
+      queueMicrotask(() => {
+        if (runTab(detail.output) === "other") return;
+        applyRunSource(detail.output);
+      });
     };
     api.addEventListener("executed", onExec);
 

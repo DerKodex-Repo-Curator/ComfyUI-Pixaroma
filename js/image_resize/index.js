@@ -6,6 +6,7 @@ import { hideJsonWidget, BRAND,
 import { isVueNodes, applyAdaptiveCanvasOnly, canvasBackingScale } from "../shared/nodes2.mjs";
 import { onRendererChange } from "../shared/renderer_switch.mjs";
 import { isLiveNode } from "../shared/live_node.mjs";
+import { runTab, eachRestoredOutput } from "../shared/run_tab.mjs";
 import { attachCanvasSnapshot } from "../shared/canvas_snapshot.mjs";
 import { buildModePanel, previewResize, injectResizePanelCSS } from "../shared/resize_panel.mjs";
 import {
@@ -877,6 +878,13 @@ function applyImageResizeRenderer(node, vue) {
 
 app.registerExtension({
   name: "Pixaroma.ImageResize",
+  // A Run that ended while another workflow tab was open (js/shared/run_tab.mjs).
+  onNodeOutputsUpdated(nodeOutputs) {
+    eachRestoredOutput(nodeOutputs, "PixaromaImageResize", (node, output) => {
+      const frames = output?.pixaroma_image_resize;
+      if (Array.isArray(frames) && frames.length) applyResizeDims(node, frames);
+    });
+  },
   beforeRegisterNodeDef(nodeType, nodeData) {
     if (nodeData.name !== "PixaromaImageResize") return;
 
@@ -1088,15 +1096,27 @@ app.registerExtension({
 api.addEventListener("executed", ({ detail }) => {
   const frames = detail?.output?.pixaroma_image_resize;
   if (!frames || !frames.length) return;
-  let node = app.graph.getNodeById(detail.node);
-  if (!node && typeof detail.node === "string") node = app.graph.getNodeById(parseInt(detail.node, 10));
-  if (!node || node.comfyClass !== "PixaromaImageResize") return;
+  // Decided after this message's listeners ran: a Run that ended while ANOTHER
+  // workflow tab is open belongs to that tab (ids repeat across workflows, so
+  // the lookup below would hit a stranger with the same id). Core keeps it and
+  // hands it back when that tab opens again: onNodeOutputsUpdated below
+  // (js/shared/run_tab.mjs).
+  queueMicrotask(() => {
+    if (runTab(detail.output) === "other") return;
+    let node = app.graph.getNodeById(detail.node);
+    if (!node && typeof detail.node === "string") node = app.graph.getNodeById(parseInt(detail.node, 10));
+    if (!node || node.comfyClass !== "PixaromaImageResize") return;
+    applyResizeDims(node, frames);
+  });
+});
+
+function applyResizeDims(node, frames) {
   const f = frames[0];
   if (!node.properties) node.properties = {};
   node.properties.pixIrDims = { in_w: f.in_w, in_h: f.in_h, out_w: f.out_w, out_h: f.out_h };
   node.setDirtyCanvas(true, true);
   node._pixIrRenderCards?.(true); // Nodes 2.0: refresh the cards canvas now (no-op in legacy)
-});
+}
 
 // ── graphToPrompt: inject state into the hidden input (subgraph-safe) ──
 const _origG2P_fn = app.graphToPrompt;

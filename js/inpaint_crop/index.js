@@ -5,6 +5,7 @@ import { app } from "../../../scripts/app.js";
 import { api } from "../../../scripts/api.js";
 import { pixApiUrl } from "../shared/api_url.mjs";
 import { isGraphLoading } from "../shared/graph_loading.mjs";
+import { runTab, eachRestoredOutput } from "../shared/run_tab.mjs";
 import { growToCoreMinHeight, capComputeSizeInNodes2 } from "../shared/core_min_size.mjs";
 import { InpaintCropEditor, INPAINT_PREVIEW_COLORS } from "./core.mjs";
 import { registerNodeAccent } from "../shared/node_settings.mjs";
@@ -349,6 +350,11 @@ function findActiveNode() {
 app.registerExtension({
   name: "Pixaroma.InpaintCrop",
 
+  // A Run that ended while another workflow tab was open (js/shared/run_tab.mjs).
+  onNodeOutputsUpdated(nodeOutputs) {
+    eachRestoredOutput(nodeOutputs, "PixaromaInpaintCrop", (node, output) => node._pixInpaintApplyRun?.(output));
+  },
+
   // No Settings-panel row: the mask preview colour lives on the node itself (the
   // gear in the selection toolbar / the right-click entry). The setting id is
   // unchanged and merely unregistered, so an existing choice carries over; the
@@ -536,12 +542,8 @@ app.registerExtension({
       // - e.g. a source loaded via the editor's Load Image, where the wire is gone.
       else restoreNodePreview(parts, stateJson, node);
     };
-    const onExec = (event) => {
-      const detail = event?.detail;
-      if (!detail?.output) return;
-      const matched = app.graph.getNodeById(detail.node) || app.graph.getNodeById(parseInt(detail.node, 10));
-      if (matched !== node) return;
-      const frames = detail.output.pixaroma_inpaint_source;
+    const applyRunSource = (output) => {
+      const frames = output?.pixaroma_inpaint_source;
       if (!frames?.length) return;
       const f = frames[0];
       const part = { filename: f.filename, subfolder: f.subfolder || "", type: f.type || "temp" };
@@ -549,6 +551,22 @@ app.registerExtension({
       if (!node.properties) node.properties = {};
       node.properties.pixInpaintSource = part;
       refreshSourcePreview();
+    };
+    // The extension's onNodeOutputsUpdated hands a missed run back through this.
+    node._pixInpaintApplyRun = applyRunSource;
+    const onExec = (event) => {
+      const detail = event?.detail;
+      if (!detail?.output) return;
+      const matched = app.graph.getNodeById(detail.node) || app.graph.getNodeById(parseInt(detail.node, 10));
+      if (matched !== node) return;
+      // A Run that ended while another workflow tab is open belongs to that tab:
+      // the id above found a stranger with the same id. Decided once the
+      // message's listeners ran; core hands the result back when that tab opens
+      // again (js/shared/run_tab.mjs).
+      queueMicrotask(() => {
+        if (runTab(detail.output) === "other") return;
+        applyRunSource(detail.output);
+      });
     };
     api.addEventListener("executed", onExec);
 

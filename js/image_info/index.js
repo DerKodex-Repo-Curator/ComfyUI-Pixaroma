@@ -13,6 +13,7 @@ import { app } from "../../../scripts/app.js";
 import { api } from "../../../scripts/api.js";
 import { isVueNodes } from "../shared/nodes2.mjs";
 import { isGraphLoading } from "../shared/graph_loading.mjs";
+import { runTab, eachRestoredOutput } from "../shared/run_tab.mjs";
 
 const CLASS = "PixaromaImageInfo";
 const MIN_W = 190;
@@ -70,6 +71,11 @@ function paintReadout(node, ctx) {
 app.registerExtension({
   name: "Pixaroma.ImageInfo",
 
+  // A Run that ended while another workflow tab was open (js/shared/run_tab.mjs).
+  onNodeOutputsUpdated(nodeOutputs) {
+    eachRestoredOutput(nodeOutputs, CLASS, (node, output) => applyInfo(node, output));
+  },
+
   beforeRegisterNodeDef(nodeType, nodeData) {
     if (nodeData.name !== CLASS) return;
     if (nodeType.prototype._pixInfoPatched) return;
@@ -105,24 +111,37 @@ app.registerExtension({
 
 // One app-level `executed` listener: stash the width/height/filename this node
 // reported so the face can paint them. Hot-reload guarded.
+function applyInfo(node, output) {
+  const entry = output?.pixaroma_image_info?.[0];
+  if (!entry) return;
+  node._pixInfoData = { width: entry.width, height: entry.height, filename: entry.filename };
+  node.setDirtyCanvas?.(true, true);
+}
+
 if (!app._pixInfoExecPatched) {
   app._pixInfoExecPatched = true;
   api.addEventListener("executed", ({ detail }) => {
-    try {
-      const entry = detail?.output?.pixaroma_image_info?.[0];
-      if (!entry) return;
-      const graph = app.graph;
-      // Exact lookup handles string AND numeric ids (getNodeById keys by
-      // string-coerced id). Only fall back to parseInt for a plain numeric id,
-      // NOT a subgraph exec id like "5:12" (parseInt would resolve node 5).
-      const rawId = detail.node;
-      let node = graph?.getNodeById?.(rawId);
-      if (!node && !String(rawId).includes(":")) node = graph?.getNodeById?.(parseInt(rawId, 10));
-      if (!node || node.comfyClass !== CLASS) return;
-      node._pixInfoData = { width: entry.width, height: entry.height, filename: entry.filename };
-      node.setDirtyCanvas?.(true, true);
-    } catch (e) {
-      console.warn("[Image Info Pixaroma] readout failed:", (e && e.message) || e);
-    }
+    if (!detail?.output?.pixaroma_image_info?.[0]) return;
+    // Decided after this message's listeners ran: a Run that ended while
+    // ANOTHER workflow tab is open belongs to that tab (ids repeat across
+    // workflows, so the lookup below would hit a stranger). Core keeps it and
+    // hands it back when that tab opens again: onNodeOutputsUpdated
+    // (js/shared/run_tab.mjs).
+    queueMicrotask(() => {
+      try {
+        if (runTab(detail.output) === "other") return;
+        const graph = app.graph;
+        // Exact lookup handles string AND numeric ids (getNodeById keys by
+        // string-coerced id). Only fall back to parseInt for a plain numeric id,
+        // NOT a subgraph exec id like "5:12" (parseInt would resolve node 5).
+        const rawId = detail.node;
+        let node = graph?.getNodeById?.(rawId);
+        if (!node && !String(rawId).includes(":")) node = graph?.getNodeById?.(parseInt(rawId, 10));
+        if (!node || node.comfyClass !== CLASS) return;
+        applyInfo(node, detail.output);
+      } catch (e) {
+        console.warn("[Image Info Pixaroma] readout failed:", (e && e.message) || e);
+      }
+    });
   });
 }

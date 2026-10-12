@@ -2,6 +2,7 @@ import { app } from "../../../scripts/app.js";
 import { BRAND, applyAdaptiveCanvasOnly,
   installCanvasZoomPassthrough, installNativeTextMenu, installNodeAccent, registerNodeAccent,
 } from "../shared/index.mjs";
+import { runTab, eachRestoredOutput } from "../shared/run_tab.mjs";
 
 // Resize clamp - user verified 210 x 118 as the smallest comfortable
 // size for a compact label/readout. WIDGET_MIN_H is kept smaller than
@@ -62,8 +63,21 @@ function injectCSS() {
   document.head.appendChild(style);
 }
 
+// A run's text into the box (the widget is serialized, so it survives a tab
+// switch and a reload).
+function showRunText(node, output) {
+  const text = (output?.text || []).join("\n");
+  if (node._pixTextEl) node._pixTextEl.value = text;
+  if (node._pixTextWidget) node._pixTextWidget.value = text;
+}
+
 app.registerExtension({
   name: "Pixaroma.ShowText",
+
+  // A Run that ended while another workflow tab was open (js/shared/run_tab.mjs).
+  onNodeOutputsUpdated(nodeOutputs) {
+    eachRestoredOutput(nodeOutputs, "PixaromaShowText", (node, output) => showRunText(node, output));
+  },
 
   async beforeRegisterNodeDef(nodeType, nodeData) {
     if (nodeData.name !== "PixaromaShowText") return;
@@ -180,9 +194,14 @@ app.registerExtension({
     };
 
     nodeType.prototype.onExecuted = function (output) {
-      const text = (output?.text || []).join("\n");
-      if (this._pixTextEl) this._pixTextEl.value = text;
-      if (this._pixTextWidget) this._pixTextWidget.value = text;
+      // Core calls this on the OPEN tab's node with the run's id. A Run that
+      // ended while another workflow tab is open belongs to that tab (decided
+      // once the message's listeners ran); core hands it back when that tab
+      // opens again: onNodeOutputsUpdated above (js/shared/run_tab.mjs).
+      queueMicrotask(() => {
+        if (runTab(output) === "other") return;
+        showRunText(this, output);
+      });
     };
 
     const origOnResize = nodeType.prototype.onResize;

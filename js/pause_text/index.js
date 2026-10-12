@@ -9,6 +9,7 @@ import { rollNodeSeed } from "../shared/seed_roll.mjs";
 import { isLightTheme } from "../shared/light_theme.mjs";
 import { onRendererChange } from "../shared/renderer_switch.mjs";
 import { isLiveNode } from "../shared/live_node.mjs";
+import { runTab, eachRestoredOutput } from "../shared/run_tab.mjs";
 import {
   getState, setGate, setText, setModelText, revertText, STATE_PROP,
 } from "./state.mjs";
@@ -321,6 +322,14 @@ function restore(node) {
 app.registerExtension({
   name: "Pixaroma.PauseText",
 
+  // A Run that ended while another workflow tab was open (js/shared/run_tab.mjs).
+  onNodeOutputsUpdated(nodeOutputs) {
+    eachRestoredOutput(nodeOutputs, CLASS, (node, output) => {
+      const payload = output?.pixaroma_pause_text;
+      if (Array.isArray(payload) && payload.length) applyModelText(node, payload);
+    });
+  },
+
   async beforeRegisterNodeDef(nodeType, nodeData) {
     if (nodeData.name !== CLASS) return;
 
@@ -384,14 +393,27 @@ api.addEventListener("executed", (e) => {
   const d = e.detail;
   const payload = d?.output?.pixaroma_pause_text;
   if (!payload || !payload.length) return;
-  let node = app.graph.getNodeById(d.node);
-  if (!node && typeof d.node === "string") node = app.graph.getNodeById(parseInt(d.node, 10));
-  if (!node || node.comfyClass !== CLASS) return;
+  // Decided after this message's listeners ran: a Run that ended while ANOTHER
+  // workflow tab is open belongs to that tab. The lookup below would find a
+  // stranger with the same id and REPLACE its box (that tab's own text lost),
+  // while this gate kept the old text and Continue would send it. Core keeps
+  // the result and hands it back when that tab opens again:
+  // onNodeOutputsUpdated below (js/shared/run_tab.mjs).
+  queueMicrotask(() => {
+    if (runTab(d.output) === "other") return;
+    let node = app.graph.getNodeById(d.node);
+    if (!node && typeof d.node === "string") node = app.graph.getNodeById(parseInt(d.node, 10));
+    if (!node || node.comfyClass !== CLASS) return;
+    applyModelText(node, payload);
+  });
+});
+
+function applyModelText(node, payload) {
   const text = typeof payload[0] === "string" ? payload[0] : String(payload[0] ?? "");
   setModelText(node, text);   // replace box + revert baseline
   syncText(node);
   renderPause(node);
-});
+}
 
 // ── app.graphToPrompt hook: prune + inject mode/text (Pattern #9) ──
 function buildNodeIndex() {

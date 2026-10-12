@@ -16,6 +16,7 @@ import {
   installCanvasZoomPassthrough,
 } from "../shared/index.mjs";
 import { isGraphLoading } from "../shared/graph_loading.mjs";
+import { runTab, eachRestoredOutput } from "../shared/run_tab.mjs";
 import { registerNodeSettings, installNodeAccent } from "../shared/node_settings.mjs";
 import { applyFilenameTokenRefs } from "../shared/filename_tokens.mjs";
 import { resolveWiredName, setPreviewPath, WIRED_TIP } from "../shared/wired_name.mjs";
@@ -723,13 +724,21 @@ function installExecutedListener() {
   api.addEventListener("executed", ({ detail }) => {
     const id = detail?.node;
     if (id == null) return;
-    const graph = app.graph;
-    const node = graph?.getNodeById?.(id) ?? graph?.getNodeById?.(parseInt(id, 10));
-    // The gate that makes the `images` fallback safe: without it, a clip
-    // reported by ANYONE else's node could match.
-    if (!node || node.comfyClass !== COMFY_CLASS) return;
-    const entry = pickEntry(detail?.output);
-    if (entry) commitEntry(node, entry);
+    // Decided after this message's listeners ran: a Run that ended while
+    // ANOTHER workflow tab is open belongs to that tab (ids repeat across
+    // workflows, so the lookup below would hit a stranger). Core keeps it and
+    // hands it back when that tab opens again: onNodeOutputsUpdated
+    // (js/shared/run_tab.mjs).
+    queueMicrotask(() => {
+      if (runTab(detail?.output) === "other") return;
+      const graph = app.graph;
+      const node = graph?.getNodeById?.(id) ?? graph?.getNodeById?.(parseInt(id, 10));
+      // The gate that makes the `images` fallback safe: without it, a clip
+      // reported by ANYONE else's node could match.
+      if (!node || node.comfyClass !== COMFY_CLASS) return;
+      const entry = pickEntry(detail?.output);
+      if (entry) commitEntry(node, entry);
+    });
   });
 }
 
@@ -748,6 +757,14 @@ app.registerExtension({
   setup() {
     installGraphToPromptHook();
     installExecutedListener();
+  },
+
+  // A Run that ended while another workflow tab was open (js/shared/run_tab.mjs).
+  onNodeOutputsUpdated(nodeOutputs) {
+    eachRestoredOutput(nodeOutputs, COMFY_CLASS, (node, output) => {
+      const entry = pickEntry(output);
+      if (entry) commitEntry(node, entry);
+    });
   },
 
   getNodeMenuItems(node) {
@@ -972,8 +989,14 @@ function setupNode(node) {
   const origExec = node.onExecuted;
   node.onExecuted = function (output) {
     const r = origExec?.apply(this, arguments);
-    const entry = pickEntry(output);
-    if (entry) commitEntry(this, entry);
+    // A Run that ended while another workflow tab is open belongs to that tab
+    // (core calls this on the OPEN tab's node with the run's id); decided once
+    // the message's listeners ran (js/shared/run_tab.mjs).
+    queueMicrotask(() => {
+      if (runTab(output) === "other") return;
+      const entry = pickEntry(output);
+      if (entry) commitEntry(this, entry);
+    });
     return r;
   };
 }

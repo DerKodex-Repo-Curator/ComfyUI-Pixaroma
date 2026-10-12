@@ -19,6 +19,7 @@ import {
   notifyGraphChanged,
 } from "../shared/index.mjs";
 import { isGraphLoading } from "../shared/graph_loading.mjs";
+import { runTab, eachRestoredOutput } from "../shared/run_tab.mjs";
 import { registerNodeSettings, installNodeAccent } from "../shared/node_settings.mjs";
 import { pixConfirm } from "../shared/confirm_dialog.mjs";
 import { registerNodeHelp } from "../shared/help.mjs";
@@ -948,14 +949,30 @@ function installExecutedListener() {
   api.addEventListener("executed", ({ detail }) => {
     const id = detail?.node;
     if (id == null) return;
-    const graph = app.graph;
-    const node = graph?.getNodeById?.(id) ?? graph?.getNodeById?.(parseInt(id, 10));
-    if (!node || node.comfyClass !== COMFY_CLASS) return;
-    const rows = pickRows(detail?.output);
-    if (!rows.length) return;
-    if (!acceptDelivery(node, rows.map((r) => r.text), rows.map((r) => r.name))) return;
-    collectDelivery(node, rows);
+    // Decided after this message's listeners ran: a Run that ended while
+    // ANOTHER workflow tab is open belongs to that tab. The lookup below would
+    // find a stranger with the same id and collect into ITS list and .txt file.
+    // Core keeps the result and hands it back when that tab opens again:
+    // onNodeOutputsUpdated (js/shared/run_tab.mjs).
+    queueMicrotask(() => {
+      if (runTab(detail?.output) === "other") return;
+      const graph = app.graph;
+      const node = graph?.getNodeById?.(id) ?? graph?.getNodeById?.(parseInt(id, 10));
+      if (!node || node.comfyClass !== COMFY_CLASS) return;
+      deliverRows(node, detail?.output);
+    });
   });
+}
+
+// One delivery of a run's rows, through the delivery gates (acceptDelivery).
+// A run handed back by onNodeOutputsUpdated goes through the same gates, so a
+// cached REPLAY that ended on another tab is still refused while that run's
+// cached-id list stands.
+function deliverRows(node, output) {
+  const rows = pickRows(output);
+  if (!rows.length) return;
+  if (!acceptDelivery(node, rows.map((r) => r.text), rows.map((r) => r.name))) return;
+  collectDelivery(node, rows);
 }
 
 registerNodeSettings(COMFY_CLASS, {
@@ -970,6 +987,11 @@ app.registerExtension({
   setup() {
     installCacheTracker();
     installExecutedListener();
+  },
+
+  // A Run that ended while another workflow tab was open (js/shared/run_tab.mjs).
+  onNodeOutputsUpdated(nodeOutputs) {
+    eachRestoredOutput(nodeOutputs, COMFY_CLASS, (node, output) => deliverRows(node, output));
   },
 
   getNodeMenuItems(node) {
@@ -1066,8 +1088,15 @@ app.registerExtension({
     const origExec = nodeType.prototype.onExecuted;
     nodeType.prototype.onExecuted = function (output) {
       const r = origExec?.apply(this, arguments);
-      const rows = pickRows(output);
-      if (rows.length && acceptDelivery(this, rows.map((x) => x.text), rows.map((x) => x.name))) collectDelivery(this, rows);
+      // A Run that ended while another workflow tab is open belongs to that tab
+      // (core calls this on the OPEN tab's node with the run's id, which would
+      // collect it into THAT node's list and file); decided once the message's
+      // listeners ran, handed back when its tab opens again: onNodeOutputsUpdated
+      // (js/shared/run_tab.mjs).
+      queueMicrotask(() => {
+        if (runTab(output) === "other") return;
+        deliverRows(this, output);
+      });
       return r;
     };
   },

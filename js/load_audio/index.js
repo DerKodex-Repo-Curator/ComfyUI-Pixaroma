@@ -6,6 +6,7 @@
 import { app } from "../../../scripts/app.js";
 import { isVueNodes, applyAdaptiveCanvasOnly, installZoomRepaint } from "../shared/nodes2.mjs";
 import { isGraphLoading } from "../shared/graph_loading.mjs";
+import { runTab, eachRestoredOutput } from "../shared/run_tab.mjs";
 import { installCanvasZoomPassthrough } from "../shared/canvas_zoom.mjs";
 import { installResizeFloor } from "../shared/resize_floor.mjs";
 import { registerNodeHelp } from "../shared/help.mjs";
@@ -125,8 +126,21 @@ function openPanel(node) {
   });
 }
 
+function applyLoadAudioRun(node, message) {
+  const info = message?.pixaroma_load_audio?.[0];
+  if (info) {
+    node._pixLaRun = info;
+    renderFace(node);
+  }
+}
+
 app.registerExtension({
   name: "Pixaroma.LoadAudio",
+
+  // A Run that ended while another workflow tab was open (js/shared/run_tab.mjs).
+  onNodeOutputsUpdated(nodeOutputs) {
+    eachRestoredOutput(nodeOutputs, CLASS, (node, output) => applyLoadAudioRun(node, output));
+  },
 
   beforeRegisterNodeDef(nodeType, nodeData) {
     if (nodeData?.name !== CLASS) return;
@@ -213,11 +227,14 @@ app.registerExtension({
     const _executed = nodeType.prototype.onExecuted;
     nodeType.prototype.onExecuted = function (message) {
       const r = _executed?.apply(this, arguments);
-      const info = message?.pixaroma_load_audio?.[0];
-      if (info) {
-        this._pixLaRun = info;
-        renderFace(this);
-      }
+      // Core calls this on the OPEN tab's node with the run's id. A Run that
+      // ended while another workflow tab is open belongs to that tab (decided
+      // once the message's listeners ran); core hands it back when that tab
+      // opens again: onNodeOutputsUpdated above (js/shared/run_tab.mjs).
+      queueMicrotask(() => {
+        if (runTab(message) === "other") return;
+        applyLoadAudioRun(this, message);
+      });
       return r;
     };
 
