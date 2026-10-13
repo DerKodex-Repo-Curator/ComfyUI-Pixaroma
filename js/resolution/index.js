@@ -637,6 +637,15 @@ function sizePreviewRect(el, pw, ph) {
   el.style.flex = `0 1 ${ph}px`;
 }
 
+// The "W × H" line under the custom panels' preview, built from TEXT nodes.
+// w / h come from the saved state, which a shared workflow controls: written
+// into innerHTML, a w of "<img onerror=...>" ran as soon as the workflow opened
+// (resolution.md #3). textContent can never be markup.
+function setSizeLabel(el, w, h) {
+  const part = (v) => { const s = document.createElement("span"); s.className = "accent"; s.textContent = String(v); return s; };
+  el.replaceChildren(part(w), " × ", part(h));
+}
+
 // Bounding box for the in-chip ratio rectangle. 14 × 11 fits comfortably next
 // to the longest label ("16:9", ~24 px) inside the ~66 px ratio chip.
 const CHIP_SHAPE_MAX_W = 14;
@@ -825,7 +834,7 @@ function renderCustomPanel(node, state) {
       pw = PREVIEW_MAX_H * aspect;
     }
     sizePreviewRect(previewRect, pw, ph);
-    previewLabel.innerHTML = `<span class="accent">${w}</span> × <span class="accent">${h}</span>`;
+    setSizeLabel(previewLabel, w, h);
   }
   refreshPreview(state.w, state.h);
 
@@ -1062,7 +1071,7 @@ function renderCustomRatioPanel(node, state) {
       pw = PREVIEW_MAX_H * aspect;
     }
     sizePreviewRect(previewRect, pw, ph);
-    previewLabel.innerHTML = `<span class="accent">${w}</span> × <span class="accent">${h}</span>`;
+    setSizeLabel(previewLabel, w, h);
   }
 
   function refreshReadout(w, h) {
