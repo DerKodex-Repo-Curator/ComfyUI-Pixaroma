@@ -230,6 +230,7 @@ export function openSizesPanel(node, onChange) {
   let dragFrom = -1;
   let addMsgEl = null;
   let addMsgTimer = null;
+  let common = null;   // the footer's "Add common sizes" button (built after the first buildBody)
 
   // Subtle "why nothing was added" line under the add field.
   function showAddMsg(text) {
@@ -269,6 +270,9 @@ export function openSizesPanel(node, onChange) {
     hIn.addEventListener("keydown", keepKey);
     const addBtn = el("button", "pix-szp-addbtn", "add");
     addBtn.disabled = st.sizes.length >= MAX_SIZES;
+    // The footer button follows every add / remove, not only the panel opening
+    // (a full list stayed "full" after a size was removed: sizes.md #12).
+    if (common) common.disabled = st.sizes.length >= MAX_SIZES;
     const doAdd = () => {
       // Only plain whole numbers. sanitizePair turns anything else into 1024
       // (right for a damaged saved state, wrong for typing): "1,920" x 1080
@@ -313,6 +317,9 @@ export function openSizesPanel(node, onChange) {
         dragFrom = i;
         try { e.dataTransfer.setData("text/plain", String(i)); e.dataTransfer.effectAllowed = "move"; } catch {}
       });
+      // A drag released outside the list never gets a drop: forget it, or the
+      // next drop on a row (even a file dragged in) reorders the list (sizes.md #12).
+      grip.addEventListener("dragend", () => { dragFrom = -1; });
 
       const v = el("span", "v", `${pair[0]} × ${pair[1]}`);
 
@@ -408,12 +415,11 @@ export function openSizesPanel(node, onChange) {
   buildBody();
 
   // ── footer ────────────────────────────────────────────────────────────────
-  const common = el("button", "pix-szp-common", "＋ Add common sizes (512 to 2048)");
+  common = el("button", "pix-szp-common", "＋ Add common sizes (512 to 2048)");
   common.disabled = readState(node).sizes.length >= MAX_SIZES;
   common.addEventListener("click", () => {
     addCommonSizes(node);
-    fire({ structural: true }); buildBody();
-    common.disabled = readState(node).sizes.length >= MAX_SIZES;
+    fire({ structural: true }); buildBody();   // buildBody refreshes common.disabled
   });
 
   const mkDefault = el("button", "pix-szp-btn", "Colour as default");
