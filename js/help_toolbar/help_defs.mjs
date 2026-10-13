@@ -1859,7 +1859,11 @@ const HELP = {
     sections: [
       {
         heading: "What it does",
-        body: "Shows a grid of aspect-ratio chips (1:1, 16:9, 9:16, 2:1, 3:2, 2:3, 4:3, 3:4, 4:5). Click a ratio to see its most popular sizes, then click a size to set it. Outputs `width` and `height` as integers ready to wire into an Empty Latent Image or any size input.",
+        body: "Shows a grid of aspect-ratio chips (1:1, 16:9, 9:16, 2:1, 3:2, 2:3, 4:3, 3:4, 4:5). Click a ratio to see its most popular sizes, then click a size to set it. Outputs `width` and `height` as integers for any size input, plus an empty `latent` at that size.",
+      },
+      {
+        heading: "The latent output",
+        body: "The latent is the same as ComfyUI's Empty Latent Image (batch 1), so you can wire it straight into the KSampler and skip that node. It works for image models: SD 1.5, SDXL, SD3, Flux, Flux 2, Qwen Image and others, because the KSampler adapts it to the model.\n\nFor video models, or a batch of more than one image, wire `width` and `height` into that model's own latent node instead. For Flux 2, a size that is a multiple of 16 gives exactly the same size as its own latent node.",
       },
       {
         heading: "Modes",
@@ -1871,13 +1875,14 @@ const HELP = {
       },
       {
         heading: "Snap",
-        body: "The `16`, `32`, and `64` snap chips round the output to that multiple (VAE-friendly). Use `none` to turn it off.",
+        body: "In the two Custom modes, the `8`, `16`, `32` and `64` buttons round the width and height to that multiple (VAE-friendly). 16 is the default.",
       },
       {
         heading: "Outputs",
         defs: [
           ["width", "Chosen width in pixels."],
           ["height", "Chosen height in pixels."],
+          ["latent", "An empty latent at this size, batch 1. Wire it into the KSampler's latent_image."],
         ],
       },
     ],

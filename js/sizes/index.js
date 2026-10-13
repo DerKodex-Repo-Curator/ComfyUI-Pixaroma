@@ -1,6 +1,6 @@
 // Sizes Pixaroma - an editable list of exact resolutions with a Portrait /
-// Landscape flip. One DOM widget (pills + gear + size list), two outputs
-// (width, height). Works in BOTH renderers.
+// Landscape flip. One DOM widget (pills + gear + size list), three outputs
+// (width, height, latent). Works in BOTH renderers.
 //
 // Architecture mirrors Resolution Pixaroma: state on node.properties.sizesState,
 // injected into the hidden SizesState input by the graphToPrompt hook below
@@ -29,7 +29,7 @@ const HINT_H = 16;      // one-line hint, shown only when the list has one size
 const PAD = 9;          // inner padding (top + bottom)
 const LIST_PAD = 2;     // the list's top + bottom border
 const MAX_VISIBLE = 14; // auto-fit shows up to this many rows; beyond it scrolls
-const CHROME = 46;      // legacy fallback: title + 2 output slot rows + margins
+const CHROME = 66;      // legacy fallback: the 3 output slot rows (width, height, latent) + margins
 const VUE_CHROME = 52;  // Nodes 2.0 fallback: title + category chip
 
 // The height the node WANTS in order to show all its content. Collapsed = the
@@ -42,7 +42,7 @@ function contentWidgetH(node) {
   return PAD + HEADER_H + GAP + listH + hint + PAD;
 }
 function fitNodeH(node) {
-  // Delegate the chrome (title + the two output slot rows + margins) to
+  // Delegate the chrome (title + the three output slot rows + margins) to
   // LiteGraph instead of guessing it: computeSize sums the slot rows + the DOM
   // widget's getMinHeight (== contentWidgetH), so the node is exactly tall enough
   // to show every row with no scrollbar. Fall back to a constant estimate only if
@@ -444,8 +444,18 @@ registerNodeHelp(CLASS, {
     {
       heading: "What it does",
       body:
-        "Keep the exact width x height sizes you use in one list, pick one, and it outputs width and height. " +
-        "Wire those into an Empty Latent Image (or anywhere a width and height are needed).",
+        "Keep the exact width x height sizes you use in one list, pick one, and it outputs width and height, " +
+        "plus an empty latent at that size. Wire width and height anywhere a size is needed.",
+    },
+    {
+      heading: "The latent output",
+      body:
+        "The latent is the same as ComfyUI's Empty Latent Image (batch 1), so you can wire it straight into the " +
+        "KSampler and skip that node. It works for image models: SD 1.5, SDXL, SD3, Flux, Flux 2, Qwen Image and " +
+        "others, because the KSampler adapts it to the model.\n\n" +
+        "For video models, or a batch of more than one image, wire width and height into that model's own latent " +
+        "node instead. For Flux 2, keep the size a multiple of 16 (turn on Snap 16 in settings) to get exactly " +
+        "the same size as its own latent node.",
     },
     {
       heading: "Portrait and Landscape",

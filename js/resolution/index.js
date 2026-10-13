@@ -4,13 +4,48 @@ import { BRAND, hideJsonWidget, applyAdaptiveCanvasOnly,
 } from "../shared/index.mjs";
 import { pixAsset } from "../shared/api_url.mjs";
 
+// Node dimensions are LOCKED — width and height. The original "make it
+// resizable" attempt was a workaround for the default height being too small
+// to show all 8 preset rows; once that's fixed, there's no real reason to
+// resize, and a resizable node just produces an awkward dark empty band when
+// dragged taller. Locking matches the canvas-side res-node pattern and is
+// honest: the node draws exactly what fits its content.
+//
+// NODE_H is EXACT (Classic px): every height below is fixed in the CSS, none
+// depends on a font, so no safety margin is needed. The old 5-px margin and the
+// root's 8-px top / bottom padding showed as extra space under the output dots
+// and below the list (the root is the same colour as the node body).
+//   chip grid (4 rows × CHIP_H 28 + 3 × 5 gap) ...... 127
+//     ├─ row 1: 1:1 / 16:9 / 9:16
+//     ├─ row 2: 2:1 / 3:2 / 2:3
+//     ├─ row 3: 4:3 / 3:4 / 4:5
+//     └─ row 4: Custom Ratio / Custom Resolution (half-width chips)
+//   gap between chips and list ..................... 8
+//   size list ..................................... 226
+//     ├─ borders (1 top + 1 bottom) ........  2
+//     └─ rows (8 × 28, border-box: each row's 1-px divider is inside it) 224
+//   DOM widget `margin: 4` (top + bottom) ........... 8
+//                                                  ----
+//   WIDGET_H ..................................... 369
+//   chrome: 3 output rows (width, height, latent) .. 66
+//                                                  ----
+//   NODE_H ....................................... 435
+// Add or remove an output and the chrome moves by 20 (one slot row).
+const NODE_W = 240;
+const CHIP_H = 28;
+const WIDGET_H = 4 * CHIP_H + 3 * 5 + 8 + (8 * 28 + 2) + 8; // 369
+const NODE_H = WIDGET_H + 66; // 435
+
 function injectCSS() {
   if (document.getElementById("pixaroma-resolution-css")) return;
   const css = `
     .pix-res-root {
       width: 100%;
       box-sizing: border-box;
-      padding: 8px;
+      /* No top / bottom padding: the root is the same colour as the node body,
+         so padding there only showed as extra space under the output dots and
+         below the list. The chips now start where Sizes Pixaroma's panel does. */
+      padding: 0 8px;
       background: #2a2a2a;
       border-radius: 4px;
       color: #ddd;
@@ -32,7 +67,12 @@ function injectCSS() {
       background: #1d1d1d;
       border: 1px solid #444;
       border-radius: 4px;
-      padding: 6px 4px;
+      /* A FIXED height, not padding around the text: the text height differs
+         per font and renderer (measured 28 in Classic, 27.3 in Nodes 2.0), and
+         the node height (WIDGET_H) is computed from this number. */
+      box-sizing: border-box;
+      height: ${CHIP_H}px;
+      padding: 0 4px;
       font-size: 10px;
       color: #ccc;
       cursor: pointer;
@@ -81,9 +121,11 @@ function injectCSS() {
       overflow-y: auto;
       /* Preset list takes its natural size (8 fixed-height rows + borders);
          since the widget is sized to exactly accommodate that, no extra space
-         appears in either direction. Custom panel overrides to flex:1 so its
+         appears in either direction. It never shrinks: the widget has no
+         safety margin any more, and a sub-pixel shortfall would otherwise
+         squeeze it into a scrollbar. Custom panel overrides to flex:1 so its
          preview rect can absorb the panel's vertical space. */
-      flex: 0 1 auto;
+      flex: 0 0 auto;
       display: flex;
       flex-direction: column;
     }
@@ -347,38 +389,6 @@ function injectCSS() {
   document.head.appendChild(style);
 }
 injectCSS();
-
-// Node dimensions are LOCKED — width and height. The original "make it
-// resizable" attempt was a workaround for the default height being too small
-// to show all 8 preset rows; once that's fixed, there's no real reason to
-// resize, and a resizable node just produces an awkward dark empty band when
-// dragged taller. Locking matches the canvas-side res-node pattern and is
-// honest: the node draws exactly what fits its content.
-//
-// NODE_H sized so all 8 preset rows fit at 100% browser zoom with NO
-// scrollbar — exact content breakdown (in pixels of widget area):
-//   root padding (8 top + 8 bottom) ............... 16
-//   chip grid (4 rows × 26 + 3 × 5 gap) ............ 119
-//     ├─ row 1: 1:1 / 16:9 / 9:16
-//     ├─ row 2: 2:1 / 3:2 / 2:3
-//     ├─ row 3: 4:3 / 3:4 / 4:5
-//     └─ row 4: Custom Ratio / Custom Resolution (half-width chips)
-//   gap between chips and list ..................... 8
-//   size list ..................................... 233
-//     ├─ borders (1 top + 1 bottom) ........  2
-//     ├─ rows (8 × 28 fixed-height) ....... 224
-//     └─ inter-row borders (7 × 1) .........  7
-//   DOM widget `margin: 4` (top + bottom) ........... 8
-//                                                  ----
-//   widget content total ......................... 384
-//   chrome (titlebar + port row + frame margins) ... 46
-//                                                  ----
-//   NODE_H ....................................... 430
-//
-// 435 chosen with a 5-px safety margin for sub-pixel rounding, font metric
-// variance across browsers, and the focus-state border swap.
-const NODE_W = 240;
-const NODE_H = 435;
 
 // Python uses `hidden` inputs (no widget, no slot dot). State lives on
 // node.properties[STATE_PROP] which LiteGraph serializes natively in the
@@ -1259,10 +1269,10 @@ function setupResolutionNode(node) {
   const root = document.createElement("div");
   root.className = "pix-res-root";
 
-  // DOM widget gets a constant slot of space — chrome (titlebar + ports +
-  // margins) takes the rest. Both callbacks return the same value so the
-  // widget exactly fills the area between titlebar and node bottom.
-  const WIDGET_H = NODE_H - 46; // 358 — keep in sync with the chrome estimate in NODE_H comment
+  // DOM widget gets a constant slot of space (WIDGET_H, top of the file);
+  // chrome (the output rows) takes the rest. Both callbacks return the same
+  // value so the widget exactly fills the area between the slots and the node
+  // bottom.
   installCanvasZoomPassthrough(root);
   installNodeAccent(node, root);   // the face follows this node's accent colour
   const _widget = node.addDOMWidget("resolution_ui", "custom", root, {

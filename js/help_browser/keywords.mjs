@@ -80,8 +80,8 @@ export const KEYWORDS = {
   PixaromaTextWatermark: "signature logo copyright brand stamp font ttf otf typeface custom font own font install font fonts folder",
 
   // ── Values ──
-  PixaromaResolution: "size width height ratio dimensions aspect",
-  PixaromaSizes: "preset list dimensions size resolution star starred recommended favourite favorite mark best supported",
+  PixaromaResolution: "size width height ratio dimensions aspect latent empty latent image",
+  PixaromaSizes: "preset list dimensions size resolution star starred recommended favourite favorite mark best supported latent empty latent image",
   PixaromaSliders: "slider knob dashboard remote control panel dropdown checkpoint list filter",
   PixaromaSeed: "random fixed number sampler noise",
   PixaromaNumber: "int float value amount",

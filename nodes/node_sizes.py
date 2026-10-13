@@ -1,5 +1,6 @@
 """Sizes Pixaroma — an editable list of exact resolutions with a Portrait /
-Landscape flip. Outputs width + height ints chosen via the JS UI.
+Landscape flip. Outputs width + height ints chosen via the JS UI, plus an empty
+latent at that size.
 
 All UI lives on the JS side; the only Python input is a hidden serialized state
 string injected at execution time via app.graphToPrompt (same pattern as
@@ -42,7 +43,12 @@ class PixaromaSizes:
     DESCRIPTION = (
         "Sizes Pixaroma - your own list of favourite resolutions. Add the exact "
         "width x height sizes you use, pick one from the list, and it outputs "
-        "width and height as INT.\n\n"
+        "width and height as INT, plus an empty latent at that size.\n\n"
+        "The latent output is the same as ComfyUI's Empty Latent Image (batch "
+        "1), so it can go straight into a KSampler for image models (SD 1.5, "
+        "SDXL, SD3, Flux, Flux 2, Qwen Image and others). For video models, or "
+        "a batch of more than one, use width and height with that model's own "
+        "latent node.\n\n"
         "The Portrait / Landscape buttons flip the chosen size, so you add a "
         "size like 1024 x 1536 once and reuse it in either orientation (square "
         "sizes are unaffected). A fresh node starts with just 1024 x 1024; open "
@@ -64,38 +70,57 @@ class PixaromaSizes:
             },
         }
 
-    RETURN_TYPES = ("INT", "INT")
-    RETURN_NAMES = ("width", "height")
-    OUTPUT_TOOLTIPS = ("The chosen width in pixels.", "The chosen height in pixels.")
+    # latent is appended LAST: a saved workflow keeps its width / height wires
+    # by slot index, and an old file shows the new dot (the frontend copies
+    # the saved outputs over the def-built list by index).
+    RETURN_TYPES = ("INT", "INT", "LATENT")
+    RETURN_NAMES = ("width", "height", "latent")
+    OUTPUT_TOOLTIPS = (
+        "The chosen width in pixels.",
+        "The chosen height in pixels.",
+        "An empty latent at this size, batch 1: the same as ComfyUI's Empty "
+        "Latent Image. A KSampler adapts it to most image models.",
+    )
     FUNCTION = "get_size"
     CATEGORY = "👑 Pixaroma/🔢 Values"
 
     def get_size(self, SizesState: str):
-        # js/load_3d/size.mjs mirrors this function so Load 3D can read the size in
-        # the browser before Run. Keep the two in step; the harness
-        # D:/Claude Tests/_load3d_size_parity.py runs both on the same states.
-        try:
-            state = json.loads(SizesState)
-            # JS keeps state.w / state.h as the final oriented + snapped values;
-            # trust them when present, otherwise recompute defensively (e.g. an
-            # API prompt hand-built without the JS layer).
-            if "w" in state and "h" in state:
-                w = int(state.get("w", 1024))
-                h = int(state.get("h", 1024))
-            else:
-                sizes = state.get("sizes") or [[1024, 1024]]
-                idx = int(state.get("selected", 0))
-                if idx < 0 or idx >= len(sizes):
-                    idx = 0
-                w, h = _orient(sizes[idx], state.get("orientation", "portrait"))
-                step = int(state.get("snap", 0) or 0)
-                w, h = _snap(w, step), _snap(h, step)
-        except Exception:
-            print("[PixaromaSizes] Malformed state, falling back to 1024x1024")
-            w, h = 1024, 1024
-        w = _clamp(int(w), 64, 16384)
-        h = _clamp(int(h), 64, 16384)
-        return (w, h)
+        w, h = sizes_wh(SizesState)
+        # Imported here, not at the top: the size maths (sizes_wh, below) stays
+        # loadable as a plain file (the parity harness loads it outside the package).
+        from ._empty_latent import empty_latent
+        return (w, h, empty_latent(w, h))
+
+
+def sizes_wh(SizesState: str):
+    """The (width, height) the node outputs for a serialized state.
+
+    js/load_3d/size.mjs mirrors this function so Load 3D can read the size in
+    the browser before Run. Keep the two in step; the harness
+    D:/Claude Tests/_load3d_size_parity.py runs both on the same states.
+    """
+    try:
+        state = json.loads(SizesState)
+        # JS keeps state.w / state.h as the final oriented + snapped values;
+        # trust them when present, otherwise recompute defensively (e.g. an
+        # API prompt hand-built without the JS layer).
+        if "w" in state and "h" in state:
+            w = int(state.get("w", 1024))
+            h = int(state.get("h", 1024))
+        else:
+            sizes = state.get("sizes") or [[1024, 1024]]
+            idx = int(state.get("selected", 0))
+            if idx < 0 or idx >= len(sizes):
+                idx = 0
+            w, h = _orient(sizes[idx], state.get("orientation", "portrait"))
+            step = int(state.get("snap", 0) or 0)
+            w, h = _snap(w, step), _snap(h, step)
+    except Exception:
+        print("[PixaromaSizes] Malformed state, falling back to 1024x1024")
+        w, h = 1024, 1024
+    w = _clamp(int(w), 64, 16384)
+    h = _clamp(int(h), 64, 16384)
+    return w, h
 
 
 NODE_CLASS_MAPPINGS = {"PixaromaSizes": PixaromaSizes}

@@ -1,4 +1,5 @@
-"""Resolution Pixaroma — outputs width + height ints chosen via the JS UI."""
+"""Resolution Pixaroma: outputs width + height ints chosen via the JS UI, plus an
+empty latent at that size."""
 
 import json
 
@@ -31,10 +32,15 @@ class PixaromaResolution:
         "Custom Ratio mode lets you type any W:H (21:9, 16:10, anything) and "
         "get auto-computed AI-friendly sizes. Custom Resolution mode lets you "
         "type exact dimensions; math expressions like '1024+128' or '512*2' "
-        "work in the W / H fields. The Snap chips (16 / 32 / 64 / no snap) "
-        "round outputs to multiples that VAE encoders prefer.\n\n"
-        "Outputs width and height as INT. State saves and restores with the "
-        "workflow.\n\n"
+        "work in the W / H fields. In both custom modes the Snap chips "
+        "(8 / 16 / 32 / 64) round outputs to multiples that VAE encoders "
+        "prefer.\n\n"
+        "Outputs width and height as INT, plus an empty latent at that size. "
+        "The latent output is the same as ComfyUI's Empty Latent Image (batch "
+        "1), so it can go straight into a KSampler for image models (SD 1.5, "
+        "SDXL, SD3, Flux, Flux 2, Qwen Image and others). For video models, or "
+        "a batch of more than one, use width and height with that model's own "
+        "latent node. State saves and restores with the workflow.\n\n"
         "All UI lives on the JS side; the only Python input is a hidden "
         "serialized state string that gets injected at execution time."
     )
@@ -57,23 +63,40 @@ class PixaromaResolution:
             },
         }
 
-    RETURN_TYPES = ("INT", "INT")
-    RETURN_NAMES = ("width", "height")
-    OUTPUT_TOOLTIPS = ("The chosen width in pixels.", "The chosen height in pixels.")
+    # latent is appended LAST: a saved workflow keeps its width / height wires
+    # by slot index, and an old file shows the new dot (the frontend copies
+    # the saved outputs over the def-built list by index).
+    RETURN_TYPES = ("INT", "INT", "LATENT")
+    RETURN_NAMES = ("width", "height", "latent")
+    OUTPUT_TOOLTIPS = (
+        "The chosen width in pixels.",
+        "The chosen height in pixels.",
+        "An empty latent at this size, batch 1: the same as ComfyUI's Empty "
+        "Latent Image. A KSampler adapts it to most image models.",
+    )
     FUNCTION = "get_resolution"
     CATEGORY = "👑 Pixaroma/🔢 Values"
 
     def get_resolution(self, ResolutionState: str):
-        try:
-            state = json.loads(ResolutionState)
-            w = int(state.get("w", 1024))
-            h = int(state.get("h", 1024))
-        except Exception:
-            print("[PixaromaResolution] Malformed state, falling back to 1024x1024")
-            w, h = 1024, 1024
-        w = _clamp(w, 64, 16384)
-        h = _clamp(h, 64, 16384)
-        return (w, h)
+        w, h = resolution_wh(ResolutionState)
+        # Imported here, not at the top, so the size maths stays loadable as a
+        # plain file outside the package (same as node_sizes).
+        from ._empty_latent import empty_latent
+        return (w, h, empty_latent(w, h))
+
+
+def resolution_wh(ResolutionState: str):
+    """The (width, height) the node outputs for a serialized state."""
+    try:
+        state = json.loads(ResolutionState)
+        w = int(state.get("w", 1024))
+        h = int(state.get("h", 1024))
+    except Exception:
+        print("[PixaromaResolution] Malformed state, falling back to 1024x1024")
+        w, h = 1024, 1024
+    w = _clamp(w, 64, 16384)
+    h = _clamp(h, 64, 16384)
+    return w, h
 
 
 NODE_CLASS_MAPPINGS = {"PixaromaResolution": PixaromaResolution}
