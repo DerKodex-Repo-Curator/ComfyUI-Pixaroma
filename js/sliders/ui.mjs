@@ -432,12 +432,17 @@ function makeRowEl(node, index) {
     if (apply) {
       const v = parseInt(sedit.value, 10);
       const s = slider();
-      if (s && Number.isFinite(v) && v >= 0) {
-        // Cap at Python's own value clamp (1e12) - same as ensureSeed - so the
-        // face shows exactly the number that runs (an uncapped 13-digit seed
-        // displayed one value while Python clamped to another), and reopening the
-        // saved workflow doesn't re-clamp it and flag the file "modified".
-        s.value = Math.min(Math.floor(v), 1e12);
+      // Cap at Python's own value clamp (1e12) - same as ensureSeed - so the
+      // face shows exactly the number that runs (an uncapped 13-digit seed
+      // displayed one value while Python clamped to another), and reopening the
+      // saved workflow doesn't re-clamp it and flag the file "modified".
+      const nv = Number.isFinite(v) && v >= 0 ? Math.min(Math.floor(v), 1e12) : null;
+      // Only a CHANGED number locks the seed. The editor opens with the stored
+      // value, so confirming it untouched (Enter, a click away, Ctrl+Enter to
+      // run) used to flip a Random seed to Fixed. Same baseline guard as the
+      // Seed node's commitNum (sliders.md #31).
+      if (s && nv !== null && nv !== s.value) {
+        s.value = nv;
         s.mode = "fixed";
         if (node._pixSeedRun) delete node._pixSeedRun[index];
       }

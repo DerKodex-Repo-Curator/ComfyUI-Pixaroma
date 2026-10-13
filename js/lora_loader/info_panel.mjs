@@ -8,6 +8,7 @@ import { readState, patchLora, accentOf, BRAND } from "./core.mjs";
 import { loraInfo, thumbUrl, civitaiLookup, invalidateInfo, deleteCivitai, saveCustomTriggers,
          saveLoraPreview, deleteLoraPreview } from "./api.mjs";
 import { getNodeRect } from "./settings.mjs";
+import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
 
 let _panel = null;
 let _cleanup = null;
@@ -823,6 +824,9 @@ export async function openInfoPanel(node, id, refresh) {
     inp.type = "text";
     inp.placeholder = "add your own trigger word…";
     inp.addEventListener("keydown", (ev) => {
+      // ComfyUI's save / run go on (UI#44), before Enter-adds: the typed word is a
+      // draft, so no blur, and Ctrl+Enter runs instead of adding it
+      if (passComfyShortcut(ev, inp)) return;
       ev.stopPropagation();
       if (ev.key === "Enter") { ev.preventDefault(); addCustom(inp.value); }
     });

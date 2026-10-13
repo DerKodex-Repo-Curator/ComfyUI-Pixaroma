@@ -16,6 +16,7 @@
 
 import { el, markRendering, isRendering } from "./window.mjs";
 import { FOLDER_MIME, isFolderDrag, DROP_TARGET_ATTR } from "./drag.mjs";
+import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
 
 // Two clicks on the same folder row this close together mean "rename". Module
 // scope on purpose: the row element does not survive the first click, so the
@@ -396,6 +397,9 @@ export function beginFolderRename(row, path, commit) {
     if (save && value && value !== current) commit(value);
   };
   input.addEventListener("keydown", (e) => {
+    // ComfyUI's save / run go on (UI#44). NO blur: the blur handler tells a
+    // column rebuild from the user clicking away; a forced blur would rename early.
+    if (passComfyShortcut(e, input)) return;
     e.stopPropagation();                  // Escape here must not close the panel
     if (e.key === "Enter") finish(true);
     else if (e.key === "Escape") finish(false);

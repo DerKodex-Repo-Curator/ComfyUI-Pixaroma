@@ -10,6 +10,7 @@
 
 import { el, markRendering, isRendering } from "./window.mjs";
 import { drawMap, coverFor } from "./cover.mjs";
+import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
 
 const fmtWhen = (secs) => {
   if (!secs) return "";
@@ -223,6 +224,9 @@ export function beginRename(main, rel, currentName, commit, startValue) {
     if (activeRename) activeRename.value = input.value;
   });
   input.addEventListener("keydown", (e) => {
+    // ComfyUI's save / run go on (UI#44). NO blur: this box's blur handler tells
+    // a re-render from the user clicking away, and a forced blur would rename early.
+    if (passComfyShortcut(e, input)) return;
     e.stopPropagation();                       // Escape here must not close the window
     if (e.key === "Enter") finish(true);
     else if (e.key === "Escape") finish(false);
