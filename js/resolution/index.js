@@ -519,7 +519,28 @@ function megapixels(w, h) {
 }
 
 function snapTo(n, step) { return Math.round(n / step) * step; }
-function clampDim(n) { return Math.max(256, Math.min(4096, n)); }
+// The custom modes' size range. 64 is the node's real floor (Python clamps to
+// 64..16384); it was 256, which broke Custom Ratio's small sizes (#5). 4096 stays
+// as a typo guard. Both are multiples of every snap step (8 / 16 / 32 / 64).
+const MIN_DIM = 64;
+const MAX_DIM = 4096;
+function clampDim(n) { return Math.max(MIN_DIM, Math.min(MAX_DIM, n)); }
+
+// Custom Ratio: the DRIVING side (the one typed or clicked) snapped, the other
+// side from the ratio, and when either leaves MIN_DIM..MAX_DIM the PAIR is
+// scaled to fit, so the typed ratio always holds. Clamping one side alone gave
+// 512 x 256 for 21:9 + the 512 button and 4096 x 4096 for 16:9 + H 4096, both
+// under a "21:9" / "16:9" label (resolution.md #5). In range it is exactly the
+// old maths (snap the driver, derive and snap the other side).
+function ratioPair(raw, fromW, rW, rH, step) {
+  const other = (v) => (fromW ? (v * rH) / rW : (v * rW) / rH);
+  const make = (v) => { const a = snapTo(v, step); const b = snapTo(other(a), step); return fromW ? [a, b] : [b, a]; };
+  let [w, h] = make(raw);
+  if (Math.max(w, h) > MAX_DIM) [w, h] = make((raw * MAX_DIM) / Math.max(raw, other(raw)));
+  else if (Math.min(w, h) < MIN_DIM) [w, h] = make((raw * MIN_DIM) / Math.min(raw, other(raw)));
+  // a ratio beyond 64:1 cannot fit both limits: the clamp is the last word
+  return [clampDim(w), clampDim(h)];
+}
 
 // Return v if it's a finite positive integer, otherwise fallback. Used for
 // `custom_ratio_w` / `custom_ratio_h` reads — a corrupted/malicious workflow
@@ -1114,8 +1135,7 @@ function renderCustomRatioPanel(node, state) {
     const step = cur.snap || 16;
     const rW = safePositiveInt(cur.custom_ratio_w, 4);
     const rH = safePositiveInt(cur.custom_ratio_h, 3);
-    const w = clampDim(snapTo(rawW, step));
-    const h = clampDim(snapTo((w * rH) / rW, step));
+    const [w, h] = ratioPair(rawW, true, rW, rH, step);
     wInput.value = String(w);
     hInput.value = String(h);
     refreshReadout(w, h);
@@ -1128,8 +1148,7 @@ function renderCustomRatioPanel(node, state) {
     const step = cur.snap || 16;
     const rW = safePositiveInt(cur.custom_ratio_w, 4);
     const rH = safePositiveInt(cur.custom_ratio_h, 3);
-    const h = clampDim(snapTo(rawH, step));
-    const w = clampDim(snapTo((h * rW) / rH, step));
+    const [w, h] = ratioPair(rawH, false, rW, rH, step);
     wInput.value = String(w);
     hInput.value = String(h);
     refreshReadout(w, h);
@@ -1215,8 +1234,7 @@ function renderCustomRatioPanel(node, state) {
       // matches what the workflow will receive. Single combined write so
       // the workflow can never observe a half-updated state mid-blur.
       const step = cur.snap || 16;
-      const w = clampDim(snapTo(cur.w, step));
-      const h = clampDim(snapTo((w * rH) / rW, step));
+      const [w, h] = ratioPair(cur.w, true, rW, rH, step);
       wInput.value = String(w);
       hInput.value = String(h);
       writeState(node, { ...cur, custom_ratio_w: rW, custom_ratio_h: rH, w, h });
@@ -1346,8 +1364,7 @@ function setupResolutionNode(node) {
         const rW = safePositiveInt(cur.custom_ratio_w, 4);
         const rH = safePositiveInt(cur.custom_ratio_h, 3);
         const step = cur.snap || 16;
-        const w = clampDim(snapTo(cur.w >= 256 ? cur.w : 1024, step));
-        const h = clampDim(snapTo((w * rH) / rW, step));
+        const [w, h] = ratioPair(cur.w >= 256 ? cur.w : 1024, true, rW, rH, step);
         writeState(node, { ...cur, mode: "custom_ratio", w, h });
       } else {
         const sizes = SIZES[id];
