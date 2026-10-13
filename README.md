@@ -244,6 +244,9 @@ The two editors can also use **rembg** (`pip install rembg`, then restart ComfyU
 
 ## 🛠 Changelog
 
+### **October 13, 2026 · v1.4.213**
+- **Load Images from Folder: a new folder starts with every picture picked,** so Browse then Run does the whole folder. Use Pick images to choose fewer.
+
 ### **October 12, 2026 · v1.4.210-v1.4.212**
 - **Preview Image and Image Compare: a Run that ends while another workflow tab is open** now shows up when you switch back, and never lands on the other tab.
 - **The same fix for every other node that shows a result** (Show Text, Pause Text, Save Text, Save Image, AI Prompt, Notify and 20 more): the other tab's nodes are never touched.
