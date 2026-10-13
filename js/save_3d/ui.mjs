@@ -12,6 +12,7 @@ import { pixAsset } from "../shared/api_url.mjs";
 import { ACC, applyAccent } from "../shared/node_settings.mjs";
 import { placeZoomedPopup } from "../shared/popup_zoom.mjs";
 import { notifyGraphChanged } from "../shared/graph_changed.mjs";
+import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
 import { isVueNodes } from "../shared/nodes2.mjs";
 import { statusOf, requestDraw, animateView, panScale, drawBlocked } from "../load_3d/engine.mjs";
 import {
@@ -471,6 +472,8 @@ function wireFace(node, els, handlers) {
   };
   els.nameInput.addEventListener("change", commitName);
   els.nameInput.addEventListener("keydown", (e) => {
+    // ComfyUI's save / run go on, after the blur commits the name (change) (UI#44).
+    if (passComfyShortcut(e, els.nameInput, { blur: true })) return;
     // Keep ComfyUI's own shortcuts (Delete removes the node!) out of the field.
     e.stopPropagation();
     if (e.key === "Enter" || e.keyCode === 13) {

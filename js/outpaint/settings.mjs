@@ -8,6 +8,7 @@ import { app } from "../../../scripts/app.js";
 import { isVueNodes } from "../shared/nodes2.mjs";
 import { openPixaromaColorPickerPopup, BUTTON_PALETTE } from "../shared/color_picker.mjs";
 import { GLOBAL_ACCENT_SETTING, repaintAllAccents } from "../shared/node_settings.mjs";
+import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
 import {
   ACCENT_SETTING, BRAND, MAX_LIMITS, MAX_MP, MAX_RATIOS, RATIO_LIBRARY, SNAPS,
   addLimit, limitsOf, ratiosOf, readState, removeLimit, toggleRatio, writeState,
@@ -329,6 +330,8 @@ export function openOutpaintSettings(node, ctx) {
     inp.placeholder = "e.g. 1.3";
     inp.title = "A megapixel value to add";
     inp.addEventListener("keydown", (e) => {
+      // ComfyUI's save / run go on (UI#44), before Enter-adds: Ctrl+Enter runs, adds nothing
+      if (passComfyShortcut(e, inp)) return;
       e.stopPropagation(); // keep typing out of the canvas shortcuts
       if (e.key === "Enter") { e.preventDefault(); doAddMp(); }
     });

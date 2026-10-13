@@ -3,6 +3,7 @@ import { installCanvasZoomPassthrough } from "../shared/canvas_zoom.mjs";
 import { isVueNodes, applyAdaptiveCanvasOnly } from "../shared/nodes2.mjs";
 import { installResizeFloor } from "../shared/resize_floor.mjs";
 import { isGraphLoading } from "../shared/graph_loading.mjs";
+import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
 import {
   registerNodeSettings, createAccentSection, applyAccent, installNodeAccent,
 } from "../shared/node_settings.mjs";
@@ -396,7 +397,8 @@ function buildPickArea(node, body) {
   const search = el("div", "pix-gs-search");
   const sicon = el("span", "pix-gs-sicon"); sicon.innerHTML = SEARCH_SVG; search.appendChild(sicon);
   const inp = el("input"); inp.placeholder = "Search groups..."; inp.value = node._pixGsQuery || "";
-  inp.addEventListener("keydown", (e) => e.stopPropagation());
+  // ComfyUI's save / run go on (UI#44); everything else stays in the search box
+  inp.addEventListener("keydown", (e) => { if (passComfyShortcut(e, inp)) return; e.stopPropagation(); });
   search.appendChild(inp);
   wrap.appendChild(search);
 

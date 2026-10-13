@@ -6,6 +6,7 @@
 
 import { app } from "../../../scripts/app.js";
 import { createAccentSection, accentOf } from "../shared/node_settings.mjs";
+import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
 import {
   PICK_CHIPS, PICK_SLIDER, PICK_NUMBER, readState, writeState, clampToPick,
 } from "./core.mjs";
@@ -113,6 +114,7 @@ function field(label, value, onChange, title) {
   if (title) f.title = title;
   i.addEventListener("change", () => { const v = num(i); if (v !== null) onChange(v); });
   i.addEventListener("keydown", (e) => {
+    if (passComfyShortcut(e, i, { blur: true })) return;   // save / run after the commit (UI#44)
     e.stopPropagation();
     if (e.key === "Enter") { e.preventDefault(); i.blur(); }
   });
@@ -345,6 +347,7 @@ function fill(bd, node, changed) {
     input.value = st.values.join(", ");
     input.title = "The lengths to offer, in seconds, separated by commas";
     input.addEventListener("keydown", (e) => {
+      if (passComfyShortcut(e, input, { blur: true })) return;   // save / run after the commit (UI#44)
       e.stopPropagation();
       if (e.key === "Enter") { e.preventDefault(); input.blur(); }
     });
@@ -411,7 +414,7 @@ function fill(bd, node, changed) {
     ta.value = st.formula;
     ta.placeholder = "max(5, round(a * 24))";
     ta.title = "a is the length in seconds. fps and seconds are available too.";
-    ta.addEventListener("keydown", (e) => e.stopPropagation());
+    ta.addEventListener("keydown", (e) => { if (passComfyShortcut(e, ta, { blur: true })) return; e.stopPropagation(); });
     ta.addEventListener("change", () => { writeState(node, { formula: ta.value }); changed(); });
     conv.appendChild(ta);
     const note = document.createElement("div");

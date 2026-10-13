@@ -5,7 +5,7 @@
 // ComfyUI's canvas keybindings (Load Image Pattern #6).
 
 import { setLabel, setText } from "./core.mjs";
-import { isComfyTextShortcut } from "../shared/text_shortcuts.mjs";
+import { isComfyTextShortcut, passComfyShortcut } from "../shared/text_shortcuts.mjs";
 
 export function attachLabelEditor(node, inputEl, rowId) {
   const original = inputEl.value;
@@ -27,8 +27,9 @@ export function attachLabelEditor(node, inputEl, rowId) {
   });
 
   inputEl.addEventListener("keydown", (e) => {
-    // Let Ctrl/Cmd+Enter bubble to ComfyUI's "run workflow" shortcut (issue #41).
-    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") return;
+    // Let Ctrl/Cmd+Enter (run, issue #41) AND Ctrl/Cmd+S (save) bubble to
+    // ComfyUI, after the blur commits the name so the saved file has it (UI#44).
+    if (passComfyShortcut(e, inputEl, { blur: true })) return;
     e.stopImmediatePropagation();
     if (e.key === "Enter") {
       e.preventDefault();

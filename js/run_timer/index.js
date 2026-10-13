@@ -3,6 +3,7 @@ import { installCanvasZoomPassthrough } from "../shared/canvas_zoom.mjs";
 import { api } from "../../../scripts/api.js";
 import { isVueNodes, applyAdaptiveCanvasOnly } from "../shared/nodes2.mjs";
 import { installResizeFloor } from "../shared/resize_floor.mjs";
+import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
 import { isGraphLoading } from "../shared/graph_loading.mjs";
 import { removeNodeWidget } from "../shared/remove_widget.mjs";
 import { onRendererChange } from "../shared/renderer_switch.mjs";
@@ -1070,7 +1071,7 @@ function renderPanelBody(node, body) {
   const sRow = row("Sound");
   sRow.title = "The sound this timer plays when the workflow finishes. Drop your own .mp3, .wav or .ogg files into the assets/sounds folder to add more.";
   const sel = el("select", "pix-rt-select");
-  sel.addEventListener("keydown", (e) => e.stopPropagation());
+  sel.addEventListener("keydown", (e) => { if (passComfyShortcut(e, sel)) return; e.stopPropagation(); });   // save / run go on (UI#44)
   const fillSounds = () => {
     sel.innerHTML = "";
     const cur = readState(node).sound || defaultSound();

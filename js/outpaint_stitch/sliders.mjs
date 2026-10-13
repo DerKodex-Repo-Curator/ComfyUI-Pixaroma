@@ -17,6 +17,7 @@ import { widgetOf, accentOf } from "./core.mjs";
 import { applyAdaptiveCanvasOnly, isVueNodes } from "../shared/nodes2.mjs";
 import { installResizeFloor } from "../shared/resize_floor.mjs";
 import { installCanvasZoomPassthrough } from "../shared/canvas_zoom.mjs";
+import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
 
 export const ROW_H = 23;
 export const ROW_GAP = 6;
@@ -206,6 +207,7 @@ function makeSliderRow(node, cfg) {
     paintRows(node);
   };
   edit.addEventListener("keydown", (e) => {
+    if (passComfyShortcut(e, edit, { blur: true })) return;   // blur = closeEdit(true), then save / run (UI#44)
     e.stopPropagation();
     if (e.key === "Enter") { e.preventDefault(); closeEdit(true); }
     else if (e.key === "Escape") { e.preventDefault(); closeEdit(false); }

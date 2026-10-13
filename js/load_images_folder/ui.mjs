@@ -2,6 +2,7 @@
 
 import { thumbURL, browseFolder } from "./api.mjs";
 import { readState, writeState, sortFiles } from "./state.mjs";
+import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
 
 // folder.svg (assets/icons/ui/folder.svg) inlined so the Browse button + browser
 // rows draw the real icon without a network fetch. fill:currentColor follows text.
@@ -358,6 +359,7 @@ export function openPickGallery(node, anchorEl, ctx) {
   });
   firstInput.addEventListener("change", () => flushFirst(true)); // blur / spinner caps the box
   firstInput.addEventListener("keydown", (e) => {
+    if (passComfyShortcut(e, firstInput, { blur: true })) return;   // save / run after the commit (UI#44)
     e.stopImmediatePropagation();
     if (e.key === "Enter") { e.preventDefault(); flushFirst(true); }
   });
@@ -408,6 +410,7 @@ export function openPickGallery(node, anchorEl, ctx) {
   };
   doneInput.addEventListener("change", commitDoneFolder);
   doneInput.addEventListener("keydown", (e) => {
+    if (passComfyShortcut(e, doneInput, { blur: true })) return;   // save / run after the commit (UI#44)
     e.stopImmediatePropagation(); // typing here must not reach canvas shortcuts
     if (e.key === "Enter") { e.preventDefault(); commitDoneFolder(); doneInput.blur(); }
   });

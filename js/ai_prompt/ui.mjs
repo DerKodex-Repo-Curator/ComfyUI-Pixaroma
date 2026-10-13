@@ -23,6 +23,7 @@ import { installCanvasZoomPassthrough } from "../shared/canvas_zoom.mjs";
 import { installNativeTextMenu } from "../shared/native_text_menu.mjs";
 import { installResizeFloor } from "../shared/resize_floor.mjs";
 import { notifyGraphChanged } from "../shared/graph_changed.mjs";
+import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
 // Safe: settings.mjs does not import this file, so there is no cycle.
 import { askName } from "./settings.mjs";
 // The @tag / *category / #list layer, shared with Prompt Pixaroma so the two nodes
@@ -570,8 +571,13 @@ export function buildFace(node, openPanel, openIdeaEditor) {
   });
   idea.addEventListener("keydown", (e) => {
     // The autocomplete gets first refusal. It deliberately does not claim
-    // Ctrl/Cmd+Enter, so running the workflow from the idea box still works.
+    // Ctrl/Cmd+Enter, and passComfyShortcut lets it (and Ctrl+S) on to ComfyUI:
+    // the blanket stop below used to eat them (UI#44). NOT the Ctrl+Arrow
+    // word-weight shortcut: this is an instruction to a language model, where
+    // "(word:1.05)" means nothing, and on a Mac Cmd+Up/Down must keep jumping
+    // the caret. The idea commits as you type, so the box keeps the focus.
     if (acKeydown(e)) return;
+    if (passComfyShortcut(e, idea)) return;
     e.stopPropagation();
   });
   // Keep the visible layer scrolled with the invisible one, or the caret leaves the
@@ -585,7 +591,7 @@ export function buildFace(node, openPanel, openIdeaEditor) {
   // the ResizeObserver would not hear about.
   idea.addEventListener("focus", () => syncColumns(idea, ideabd));
   idea.addEventListener("blur", () => closeAC());
-  out.addEventListener("keydown", (e) => e.stopPropagation());
+  out.addEventListener("keydown", (e) => { if (passComfyShortcut(e, out)) return; e.stopPropagation(); });
 
   tagsBtn.addEventListener("click", (e) => {
     e.stopPropagation();

@@ -32,6 +32,7 @@ import {
 import { openLibraryEditor, closeLibraryEditorFor } from "../prompt/library_editor.mjs";
 import { applyAdaptiveCanvasOnly } from "../shared/nodes2.mjs";
 import { installCanvasZoomPassthrough } from "../shared/canvas_zoom.mjs";
+import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
 import { installNativeTextMenu } from "../shared/native_text_menu.mjs";
 import { installResizeFloor } from "../shared/resize_floor.mjs";
 import { notifyGraphChanged } from "../shared/graph_changed.mjs";
@@ -513,8 +514,13 @@ export function buildFace(node, openPanel, openIdeaEditor) {
   });
   idea.addEventListener("keydown", (e) => {
     // The autocomplete gets first refusal. It deliberately does not claim
-    // Ctrl/Cmd+Enter, so running the workflow from the idea box still works.
+    // Ctrl/Cmd+Enter, and passComfyShortcut lets it (and Ctrl+S) on to ComfyUI:
+    // the blanket stop below used to eat them (UI#44). NOT the Ctrl+Arrow
+    // word-weight shortcut: this is an instruction to a language model, where
+    // "(word:1.05)" means nothing, and on a Mac Cmd+Up/Down must keep jumping
+    // the caret. The idea commits as you type, so the box keeps the focus.
     if (acKeydown(e)) return;
+    if (passComfyShortcut(e, idea)) return;
     e.stopPropagation();
   });
   // Keep the visible layer scrolled with the invisible one, or the caret leaves the
@@ -544,6 +550,8 @@ export function buildFace(node, openPanel, openIdeaEditor) {
     + "a ceiling, so a longer lyric is simply cut off part way through.";
   secs.addEventListener("focus", () => secs.select());
   secs.addEventListener("keydown", (e) => {
+    // save / run reach ComfyUI, after the blur commits the number (UI#44)
+    if (passComfyShortcut(e, secs, { blur: true })) return;
     // ComfyUI binds keys on the document; a field inside a node body has to
     // keep its own typing to itself.
     e.stopPropagation();
@@ -686,6 +694,7 @@ export function buildFace(node, openPanel, openIdeaEditor) {
   seed.size = 1;
   seed.addEventListener("focus", () => seed.select());
   seed.addEventListener("keydown", (e) => {
+    if (passComfyShortcut(e, seed, { blur: true })) return;   // save / run, after the commit (UI#44)
     e.stopPropagation();
     if (e.key === "Enter") { e.preventDefault(); seed.blur(); }
     if (e.key === "Escape") { e.preventDefault(); renderFace(node); seed.blur(); }

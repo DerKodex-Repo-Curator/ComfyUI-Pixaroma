@@ -11,6 +11,7 @@ import { app } from "../../../scripts/app.js";
 import { isVueNodes } from "../shared/nodes2.mjs";
 import { openPixaromaColorPickerPopup, BUTTON_PALETTE } from "../shared/color_picker.mjs";
 import { GLOBAL_ACCENT_SETTING, repaintAllAccents } from "../shared/node_settings.mjs";
+import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
 import {
   readState, normalizeSliders, addSlider, removeSlider, syncOutputs,
   accentOf, BRAND, ACCENT_SETTING, MAX_SLIDERS, clampValue, ensureToggle,
@@ -448,7 +449,8 @@ export function openSlidersPanel(node, onChange) {
       name.value = s.name || "";
       name.placeholder = `Value ${i + 1}`;
       name.maxLength = 40;
-      name.addEventListener("keydown", (e) => e.stopPropagation());
+      // ComfyUI's save / run go on, after the blur commits (UI#44)
+      name.addEventListener("keydown", (e) => { if (passComfyShortcut(e, name, { blur: true })) return; e.stopPropagation(); });
       // A manual rename takes ownership of the name (autoName off) so a later
       // re-wire won't overwrite it; clearing it hands the name back to auto.
       const applyName = () => { s.name = name.value.trim(); s.autoName = (s.name === ""); fire(); };
@@ -539,7 +541,7 @@ export function openSlidersPanel(node, onChange) {
           inp.value = String(s[key] ?? "");
           inp.placeholder = ph;
           inp.maxLength = 16;
-          inp.addEventListener("keydown", (e) => e.stopPropagation());
+          inp.addEventListener("keydown", (e) => { if (passComfyShortcut(e, inp, { blur: true })) return; e.stopPropagation(); });
           const apply = () => { s[key] = inp.value; fire(); };  // labels are display-only
           inp.addEventListener("change", apply);
           inp.addEventListener("blur", apply);
@@ -565,7 +567,7 @@ export function openSlidersPanel(node, onChange) {
           const inp = el("input");
           inp.type = "text";
           inp.value = String(s[key]);
-          inp.addEventListener("keydown", (e) => e.stopPropagation());
+          inp.addEventListener("keydown", (e) => { if (passComfyShortcut(e, inp, { blur: true })) return; e.stopPropagation(); });
           const apply = () => {
             const v = parseFloat(inp.value);
             if (Number.isFinite(v)) s[key] = v;

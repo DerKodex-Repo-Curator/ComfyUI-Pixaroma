@@ -30,3 +30,18 @@ export function isComfyTextShortcut(e) {
   if ((e.key === "s" || e.key === "S") && !e.shiftKey && !e.altKey) return true;
   return e.key === "Enter" || e.key === "ArrowUp" || e.key === "ArrowDown";
 }
+
+// For a field whose keydown handler stops EVERY key (UI#44): call it first and
+// `return` when it answers true, so ComfyUI's Ctrl/Cmd+S (save) and
+// Ctrl/Cmd+Enter (run) go on to its window listener instead of dying here.
+//   blur:   true for a field that commits on blur / change, so the save or run
+//           sees the typed value (blur fires the commit synchronously). Leave it
+//           false for a field that commits as you type: it keeps the focus.
+//   arrows: true lets Ctrl+ArrowUp/Down out too (ComfyUI's word-weight shortcut,
+//           for prompt text). Leave it false where the arrows step a number.
+export function passComfyShortcut(e, field, { blur = false, arrows = false } = {}) {
+  if (!isComfyTextShortcut(e)) return false;
+  if (!arrows && (e.key === "ArrowUp" || e.key === "ArrowDown")) return false;
+  if (blur) field?.blur?.();
+  return true;
+}

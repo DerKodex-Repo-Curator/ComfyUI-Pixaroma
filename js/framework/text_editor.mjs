@@ -17,6 +17,7 @@
 import { getFontCatalog, loadFontForLayer } from "./fonts.mjs";
 import { openPixaromaColorPickerModal } from "../shared/color_picker.mjs";
 import { pixAsset } from "../shared/api_url.mjs";
+import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
 // The font popup + its CSS live in js/shared/font_picker.mjs so Run Timer's
 // clock-font picker is the SAME control, not a copy that drifts (2026-08-16).
 import { openFontPopup, injectFontPickerCSS } from "../shared/font_picker.mjs";
@@ -55,7 +56,10 @@ export function createTextEditorPanel({ mount, onChange, onReset, onAlignCanvas,
   ui.textArea.placeholder = "Your text here";
   root.appendChild(ui.textArea);
   ui.textArea.addEventListener("input", () => { const l = layerNow(); if (l) l.text = ui.textArea.value; fireChange(); });
-  ui.textArea.addEventListener("keydown", (e) => e.stopImmediatePropagation());
+  // ComfyUI's save / run go through on a NODE FACE (Text Overlay / Watermark,
+  // UI#44). Inside a fullscreen editor nothing changes: layout.mjs's window
+  // capture blocker stops every key before it reaches this field.
+  ui.textArea.addEventListener("keydown", (e) => { if (passComfyShortcut(e, ui.textArea)) return; e.stopImmediatePropagation(); });
 
   // Font picker + Bold/Italic toggles in one row. The font dropdown grows
   // to fill, B and I sit on the right as compact square toggle buttons.
@@ -527,6 +531,7 @@ function inputCell(parent, label, min, max, value, step, onChange) {
   });
   input.addEventListener("blur", commit);
   input.addEventListener("keydown", (e) => {
+    if (passComfyShortcut(e, input, { blur: true })) return;   // save / run after the commit (UI#44)
     e.stopImmediatePropagation();
     if (e.key === "Enter") { e.preventDefault(); input.blur(); return; }
     if (e.key === "Tab") { commit(); return; }

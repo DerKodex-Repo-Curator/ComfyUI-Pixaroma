@@ -13,6 +13,7 @@
 //     click on the canvas while working fine on DOM elsewhere.
 
 import { installGraphUndoGuard } from "../shared/graph_undo_guard.mjs";
+import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
 import { createAccentSection } from "../shared/node_settings.mjs";
 import { followNode, getNodeScreenRect, makeDraggable, placeBeside } from "../shared/node_panel.mjs";
 import { formatModelSize } from "../shared/utils.mjs";
@@ -464,6 +465,9 @@ function openPop(anchor, values, current, onPick, opts) {
     // Never let a keystroke reach the canvas: ComfyUI binds single letters to
     // commands, so typing "b" here would otherwise also toggle bypass.
     filter.addEventListener("keydown", (e) => {
+      // ComfyUI's save / run go through (UI#44), and BEFORE the Enter-picks
+      // branch, so Ctrl+Enter runs instead of picking the only row.
+      if (passComfyShortcut(e, filter)) return;
       e.stopPropagation();
       if (e.key === "Escape") { e.preventDefault(); closePop(); return; }
       // Typing until one row is left and pressing Enter is the natural way to
@@ -934,7 +938,8 @@ function numField(node, label, key, opts) {
   };
   input.addEventListener("change", commit);
   input.addEventListener("blur", commit);
-  input.addEventListener("keydown", (e) => e.stopPropagation());
+  // save / run reach ComfyUI, after the blur commits the typed number (UI#44)
+  input.addEventListener("keydown", (e) => { if (passComfyShortcut(e, input, { blur: true })) return; e.stopPropagation(); });
   wrap.append(tag, input);
   return wrap;
 }

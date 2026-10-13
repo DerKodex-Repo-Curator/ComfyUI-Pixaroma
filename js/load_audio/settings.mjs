@@ -8,6 +8,7 @@
 
 import { app } from "../../../scripts/app.js";
 import { accentOf, createAccentSection } from "../shared/node_settings.mjs";
+import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
 import { readState, writeState } from "./core.mjs";
 
 let PANEL = null;
@@ -245,6 +246,7 @@ function fill(bd, node, changed) {
   inp.type = "text";
   inp.value = String(st.length);
   inp.addEventListener("keydown", (e) => {
+    if (passComfyShortcut(e, inp, { blur: true })) return;   // save / run after the commit (UI#44)
     e.stopPropagation();
     if (e.key === "Enter") { e.preventDefault(); inp.blur(); }
   });

@@ -41,6 +41,7 @@ import { deletePreset, fetchPresets, savePreset } from "./api.mjs";
 import { askConfirm, askName, openEditor, sayIt } from "../ai_prompt/settings.mjs";
 import { followNode, getNodeScreenRect, makeDraggable, placeBeside } from "../shared/node_panel.mjs";
 import { formatModelSize } from "../shared/utils.mjs";
+import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
 import {
   ACC,
   createAccentSection,
@@ -307,6 +308,8 @@ function openPop(anchor, values, current, onPick, opts = {}) {
   paint();
   filter.addEventListener("input", paint);
   filter.addEventListener("keydown", (e) => {
+    // save / run still reach ComfyUI (UI#44), BEFORE Enter-picks, so Ctrl+Enter runs
+    if (passComfyShortcut(e, filter)) return;
     // ComfyUI binds keys on the document, including Ctrl+V to paste NODES, so a
     // field inside a floating panel has to keep its typing to itself.
     e.stopPropagation();
@@ -498,6 +501,7 @@ function numberField(label, value, onCommit, opts = {}) {
     onCommit(Number.isFinite(n) ? n : null);
   };
   inp.addEventListener("keydown", (e) => {
+    if (passComfyShortcut(e, inp, { blur: true })) return;   // save / run, after the commit (UI#44)
     // ComfyUI binds keys on the document, Ctrl+V to paste NODES included.
     e.stopPropagation();
     if (e.key === "Enter") { e.preventDefault(); inp.blur(); }

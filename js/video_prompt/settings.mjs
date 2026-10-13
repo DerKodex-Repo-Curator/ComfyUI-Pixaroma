@@ -17,6 +17,7 @@ import {
   followNode, getNodeScreenRect, makeDraggable, placeBeside,
 } from "../shared/node_panel.mjs";
 import { formatModelSize } from "../shared/utils.mjs";
+import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
 import { looksVision } from "../shared/model_kinds.mjs";
 // Duration Pixaroma's recipe list, shared rather than copied: it is pure data
 // with no imports and no side effects, and one list means the two nodes cannot
@@ -281,6 +282,7 @@ function openPop(anchor, values, current, onPick, opts) {
     // Never let a keystroke reach the canvas: ComfyUI binds single letters to
     // commands, so typing "b" here would otherwise also toggle bypass.
     filter.addEventListener("keydown", (e) => {
+      if (passComfyShortcut(e, filter)) return;   // ComfyUI's save / run (UI#44)
       e.stopPropagation();
       if (e.key === "Escape") { e.preventDefault(); closePop(); }
     });

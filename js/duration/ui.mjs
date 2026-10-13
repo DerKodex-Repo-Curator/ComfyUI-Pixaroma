@@ -9,6 +9,7 @@ import { pixAsset } from "../shared/api_url.mjs";
 import { applyAdaptiveCanvasOnly, isVueNodes } from "../shared/nodes2.mjs";
 import { installCanvasZoomPassthrough } from "../shared/canvas_zoom.mjs";
 import { installNodeAccent, ACC } from "../shared/node_settings.mjs";
+import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
 import { installResizeFloor } from "../shared/resize_floor.mjs";
 import {
   ROW_H, READOUT_H, BODY_PAD, PICK_CHIPS, PICK_SLIDER,
@@ -287,6 +288,7 @@ function renderNumber(node, st, pickRow) {
   input.addEventListener("change", commit);
   input.addEventListener("blur", commit);
   input.addEventListener("keydown", (e) => {
+    if (passComfyShortcut(e, input, { blur: true })) return;   // save / run after the commit (UI#44)
     e.stopPropagation();
     if (e.key === "Enter") { e.preventDefault(); input.blur(); }
   });

@@ -8,6 +8,7 @@ import {
   setAllOn, countOn, accentOf, MAX_LORAS,
 } from "./core.mjs";
 import { openLoraDropdown } from "./dropdown.mjs";
+import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
 import { hasLora } from "./api.mjs";
 import { openInfoPanel, autoTickAfterPick } from "./info_panel.mjs";
 import { openLoraPanel } from "./settings.mjs";
@@ -187,6 +188,8 @@ export function attachInteractions(node, widgetEl, refresh) {
   widgetEl.addEventListener("keydown", (ev) => {
     const act = ev.target?.dataset?.act;
     if (act !== "wval" && act !== "wcval") return;
+    // ComfyUI's save / run go on, after the blur commits the weight (change) (UI#44)
+    if (passComfyShortcut(ev, ev.target, { blur: true })) return;
     ev.stopPropagation();
     if (ev.key === "Enter") { ev.preventDefault(); ev.target.blur(); }
   });

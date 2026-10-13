@@ -7,6 +7,7 @@ import { openSeedSettings, closeSeedSettingsFor } from "./settings.mjs";
 import { openSeedHistory, closeSeedHistoryFor, refreshSeedHistory } from "./history.mjs";
 import { registerRunWorkflowPatcher, readNodeProp, writeNodeProp } from "../shared/run_seed_embed.mjs";
 import { isGraphLoading } from "../shared/graph_loading.mjs";
+import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
 
 // ─────────────────────────────────────────────────────────────────────────
 // Seed Pixaroma — a seed source with Random / Fixed modes + buttons.
@@ -753,6 +754,8 @@ function makeSeedNumberInput(node, root, compact) {
     refreshLastRun(node);
   };
   num.addEventListener("keydown", (e) => {
+    // ComfyUI's save / run go on, after the blur commits the typed seed (UI#44)
+    if (passComfyShortcut(e, num, { blur: true })) return;
     e.stopPropagation(); // keep ComfyUI canvas shortcuts from firing while typing
     if (e.key === "Enter") { e.preventDefault(); num.blur(); }
   });

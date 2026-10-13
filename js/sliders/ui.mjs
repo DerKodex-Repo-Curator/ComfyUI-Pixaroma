@@ -20,6 +20,7 @@
 //             return to the top-right corner and the node keeps working.
 
 import { isVueNodes, applyAdaptiveCanvasOnly } from "../shared/nodes2.mjs";
+import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
 import { installCanvasZoomPassthrough } from "../shared/canvas_zoom.mjs";
 import { removeNodeWidget } from "../shared/remove_widget.mjs";
 import { readState, accentOf, clampValue, decimalsOf, rangeOf, comboVisible, randomSeed, MAX_SLIDERS } from "./core.mjs";
@@ -343,6 +344,7 @@ function makeRowEl(node, index) {
     paintRow(node, index);
   };
   edit.addEventListener("keydown", (e) => {
+    if (passComfyShortcut(e, edit, { blur: true })) return;   // blur = closeEdit(true), then save / run (UI#44)
     e.stopPropagation(); // keep typing out of the canvas shortcuts
     if (e.key === "Enter") { e.preventDefault(); closeEdit(true); }
     else if (e.key === "Escape") { e.preventDefault(); closeEdit(false); }
@@ -445,6 +447,7 @@ function makeRowEl(node, index) {
     node.graph?.setDirtyCanvas?.(true, true);
   };
   sedit.addEventListener("keydown", (e) => {
+    if (passComfyShortcut(e, sedit, { blur: true })) return;   // blur = commitSeed(true), then save / run (UI#44)
     e.stopPropagation();
     if (e.key === "Enter") { e.preventDefault(); commitSeed(true); }
     else if (e.key === "Escape") { e.preventDefault(); commitSeed(false); }
@@ -456,7 +459,8 @@ function makeRowEl(node, index) {
   const txin = text.querySelector(".pix-sld-txin");
   text.addEventListener("pointerdown", (e) => e.stopPropagation());
   txin.addEventListener("pointerdown", (e) => e.stopPropagation());
-  txin.addEventListener("keydown", (e) => e.stopPropagation());   // keep typing out of canvas shortcuts
+  // keep typing out of canvas shortcuts; ComfyUI's save / run go on (UI#44), the field commits as you type
+  txin.addEventListener("keydown", (e) => { if (passComfyShortcut(e, txin)) return; e.stopPropagation(); });
   txin.addEventListener("input", () => {
     const s = slider();
     if (s && s.type === "text") s.value = txin.value;

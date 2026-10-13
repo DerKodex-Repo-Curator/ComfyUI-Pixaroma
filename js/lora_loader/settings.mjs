@@ -5,6 +5,7 @@
 import { app } from "../../../scripts/app.js";
 import { openPixaromaColorPickerPopup, BUTTON_PALETTE } from "../shared/color_picker.mjs";
 import { GLOBAL_ACCENT_SETTING, repaintAllAccents } from "../shared/node_settings.mjs";
+import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
 import {
   readState, writeState, accentOf, saveDefaults, roundStrength, BRAND,
 } from "./core.mjs";
@@ -284,7 +285,8 @@ export function openLoraPanel(node, refresh) {
     const inp = el("input", "pix-llp-num");
     inp.type = "text";
     inp.value = String(readState(node)[key]);
-    inp.addEventListener("keydown", (e) => e.stopPropagation());
+    // ComfyUI's save / run go on after the blur commits (change) (UI#44)
+    inp.addEventListener("keydown", (e) => { if (passComfyShortcut(e, inp, { blur: true })) return; e.stopPropagation(); });
     inp.addEventListener("change", () => {
       let v = parseFloat(inp.value);
       if (!Number.isFinite(v)) v = readState(node)[key];
@@ -310,7 +312,7 @@ export function openLoraPanel(node, refresh) {
   sepIn.type = "text";
   sepIn.value = readState(node).sep;
   sepIn.title = "Text placed between trigger words in the output (e.g. \", \")";
-  sepIn.addEventListener("keydown", (e) => e.stopPropagation());
+  sepIn.addEventListener("keydown", (e) => { if (passComfyShortcut(e, sepIn, { blur: true })) return; e.stopPropagation(); });
   sepIn.addEventListener("change", () => { set({ sep: sepIn.value }); fire(); });
   sepRow.appendChild(sepIn);
   body.appendChild(sepRow);
@@ -440,6 +442,8 @@ export function openLoraPanel(node, refresh) {
       // Without this, typing in here reaches ComfyUI's global shortcuts - and
       // Delete there removes the selected node while you are mid-paste.
       inp.addEventListener("keydown", (e) => {
+        // save / run reach ComfyUI (UI#44); this box only saves on its own Save / Enter
+        if (passComfyShortcut(e, inp)) return;
         e.stopPropagation();
         if (e.key === "Enter") { e.preventDefault(); commit(); }
       });

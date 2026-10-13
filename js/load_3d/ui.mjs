@@ -11,6 +11,7 @@ import { app } from "../../../scripts/app.js";
 import { ACC, applyAccent } from "../shared/node_settings.mjs";
 import { placeZoomedPopup } from "../shared/popup_zoom.mjs";
 import { notifyGraphChanged } from "../shared/graph_changed.mjs";
+import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
 import { isVueNodes } from "../shared/nodes2.mjs";
 import {
   CLASS, NONE, MODEL_WIDGET, LOOKS, VIEWS, UPLOAD_ACCEPT, MIN_SIDE, MAX_SIDE,
@@ -639,6 +640,8 @@ function wireFace(node, els, handlers) {
   for (const [key, f] of [["w", els.w], ["h", els.h]]) {
     f.input.addEventListener("change", () => commitSide(node, key, f.input));
     f.input.addEventListener("keydown", (e) => {
+      // ComfyUI's save / run go on, after the blur commits the side (change) (UI#44).
+      if (passComfyShortcut(e, f.input, { blur: true })) return;
       // Keep ComfyUI's own shortcuts (Delete removes the node!) out of the field.
       e.stopPropagation();
       if (e.key === "Enter" || e.keyCode === 13) {

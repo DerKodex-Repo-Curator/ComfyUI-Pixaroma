@@ -5,6 +5,7 @@
 
 import { BRAND } from "./core.mjs";
 import { listLoras } from "./api.mjs";
+import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
 
 let _pop = null;
 let _cleanup = null;
@@ -102,7 +103,8 @@ export async function openLoraDropdown(anchorEl, opts) {
   const input = document.createElement("input");
   input.type = "text";
   input.placeholder = "Search LoRAs…";
-  input.addEventListener("keydown", (e) => e.stopPropagation()); // don't trigger canvas shortcuts
+  // don't trigger canvas shortcuts, but ComfyUI's save / run go on (UI#44)
+  input.addEventListener("keydown", (e) => { if (passComfyShortcut(e, input)) return; e.stopPropagation(); });
   srch.append(ic, input);
 
   const crumb = document.createElement("div");

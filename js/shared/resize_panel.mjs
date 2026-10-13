@@ -3,6 +3,7 @@
 // node.properties[...] state. Load Image keeps importing via the thin shim at
 // js/load_image/resize_modes.mjs.
 import { openPixaromaColorPickerModal } from "./color_picker.mjs";
+import { passComfyShortcut } from "./text_shortcuts.mjs";
 import { pixAsset } from "./api_url.mjs";
 
 // The per-mode panels use `pix-li-*` class names. Load Image injects these in
@@ -494,6 +495,9 @@ export function makeNumericInput(opts) {
 
   inp.addEventListener("blur", commit);
   inp.addEventListener("keydown", (e) => {
+    // ComfyUI's save / run still go on, after the blur commits the number
+    // (UI#44); the arrows keep stepping.
+    if (passComfyShortcut(e, inp, { blur: true })) return;
     // stopImmediatePropagation — needed because LiteGraph / ComfyUI Vue
     // listen at the document level with capture phase and would otherwise
     // grab Arrow / Tab / Enter to pan the canvas or switch workflow tabs.

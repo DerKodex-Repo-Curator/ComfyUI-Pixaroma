@@ -10,6 +10,7 @@
 // ============================================================
 
 import { ACC, notifyGraphChanged, placeZoomedPopup } from "../shared/index.mjs";
+import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
 import { RATIOS } from "./core.mjs";
 import { ALIGNMENTS, computeAlignedXY, defaultAlignForMeta } from "./alignments.mjs";
 
@@ -402,9 +403,12 @@ export function createCropPanel(callbacks) {
     attachArrowSpinner(el);
   }
 
-  // Block keyboard from bubbling to ComfyUI canvas (would otherwise pan/zoom).
+  // Block keyboard from bubbling to ComfyUI canvas (would otherwise pan/zoom),
+  // except ComfyUI's save / run, which go on after the blur commits the field
+  // (the inputs commit on change; UI#44). The arrow spinner runs first, so the
+  // arrows keep stepping.
   for (const el of [wInput.input, hInput.input, xInput.input, yInput.input, ...ratioSelect.keyTargets, ...alignSelect.keyTargets]) {
-    el.addEventListener("keydown", (e) => e.stopImmediatePropagation());
+    el.addEventListener("keydown", (e) => { if (passComfyShortcut(e, el, { blur: true })) return; e.stopImmediatePropagation(); });
   }
 
   // ── Refresh: read cropJson + image dims, populate inputs ──

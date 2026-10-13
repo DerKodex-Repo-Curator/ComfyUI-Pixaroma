@@ -6,6 +6,7 @@
 import { app } from "../../../scripts/app.js";
 import { isVueNodes } from "../shared/index.mjs";
 import { createAccentSection } from "../shared/node_settings.mjs";
+import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
 import { BRAND, SEP_OPTIONS, readState, writeState, saveGlobalDefault } from "./core.mjs";
 
 let _panel = null;
@@ -250,7 +251,8 @@ export function openTextJoinPanel(node, onChange) {
       inp.value = (st.labels && typeof st.labels[i] === "string") ? st.labels[i] : "";
       inp.placeholder = cfg.label;   // the default, e.g. "text 1"
       inp.title = "Shown on this box. Leave blank for the default (" + cfg.label + ").";
-      inp.addEventListener("keydown", (e) => e.stopPropagation());
+      // ComfyUI's save / run go on (UI#44); the name commits as you type
+      inp.addEventListener("keydown", (e) => { if (passComfyShortcut(e, inp)) return; e.stopPropagation(); });
       inp.addEventListener("input", () => {
         const s = readState(node);
         const labels = Array.isArray(s.labels) ? s.labels.slice() : [];
@@ -285,7 +287,7 @@ export function openTextJoinPanel(node, onChange) {
       custom.value = st.customSep;
       custom.placeholder = "e.g.  |   or   -   or   /";
       custom.title = "Typed exactly as-is between the pieces (spaces count). For a line break, pick New line instead.";
-      custom.addEventListener("keydown", (e) => e.stopPropagation());
+      custom.addEventListener("keydown", (e) => { if (passComfyShortcut(e, custom)) return; e.stopPropagation(); });
       custom.addEventListener("input", () => {
         writeState(node, { ...readState(node), customSep: custom.value });
         fire();

@@ -8,6 +8,7 @@
 
 import { el, copyText } from "./window.mjs";
 import { drawMap, coverFor, hasHandCover } from "./cover.mjs";
+import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
 
 export function renderDetail(pane, state, H) {
   pane.textContent = "";
@@ -90,7 +91,8 @@ export function renderDetail(pane, state, H) {
   const note = el("textarea", "pixwb-note");
   note.placeholder = "What is this one for? Searchable.";
   note.value = state.meta?.notes?.[entry.rel] || "";
-  note.addEventListener("keydown", (e) => e.stopPropagation());   // Escape must not close the window
+  // Escape must not close the window; ComfyUI's save / run go on after the blur flushes the note (UI#44)
+  note.addEventListener("keydown", (e) => { if (passComfyShortcut(e, note, { blur: true })) return; e.stopPropagation(); });
   let t = null;
   let sent = note.value;
   const flush = () => {

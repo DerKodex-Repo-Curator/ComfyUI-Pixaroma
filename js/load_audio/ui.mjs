@@ -7,6 +7,7 @@
 
 import { ACC, accentOf } from "../shared/node_settings.mjs";
 import { canvasBackingScale } from "../shared/nodes2.mjs";
+import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
 import { pixAsset } from "../shared/api_url.mjs";
 import { placeZoomedPopup } from "../shared/popup_zoom.mjs";
 import { attachCanvasSnapshot } from "../shared/canvas_snapshot.mjs";
@@ -403,6 +404,7 @@ export function buildFace(node, openPanel) {
   upB.addEventListener("click", () => nudge(0.5));
   dnB.addEventListener("click", () => nudge(-0.5));
   inp.addEventListener("keydown", (e) => {
+    if (passComfyShortcut(e, inp, { blur: true })) return;   // save / run after the commit (UI#44)
     e.stopPropagation();                       // or the canvas eats the typing
     if (e.key === "Enter") { e.preventDefault(); inp.blur(); }
   });

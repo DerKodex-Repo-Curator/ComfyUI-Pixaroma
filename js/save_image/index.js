@@ -8,6 +8,7 @@
 import { app } from "../../../scripts/app.js";
 import { api } from "../../../scripts/api.js";
 import { pixApiUrl } from "../shared/api_url.mjs";
+import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
 import {
   applyAdaptiveCanvasOnly,
   isVueNodes,
@@ -761,6 +762,8 @@ function insertToken(node, ui, tok) {
 
 function wireEvents(node, ui) {
   const stopKeys = (e) => {
+    // ComfyUI's save / run go on (UI#44); both fields commit as you type.
+    if (passComfyShortcut(e, e.target)) return;
     e.stopImmediatePropagation(); // capture-phase canvas shortcuts
     if (e.key === "Enter") {
       e.preventDefault();

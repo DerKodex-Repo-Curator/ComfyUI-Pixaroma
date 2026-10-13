@@ -13,6 +13,7 @@ import {
   notifyGraphChanged,
 } from "../shared/index.mjs";
 import { isGraphLoading } from "../shared/graph_loading.mjs";
+import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
 import {
   COMFY_CLASS,
   HIDDEN_INPUT_NAME,
@@ -326,6 +327,9 @@ function setupNode(node) {
 
   // events
   ui.folderInput.addEventListener("keydown", (e) => {
+    // ComfyUI's save / run go on, after the blur commits the folder (UI#44):
+    // the same as clicking Run right after typing a folder.
+    if (passComfyShortcut(e, ui.folderInput, { blur: true })) return;
     // capture-phase canvas shortcuts need stopImmediate, not just stop
     e.stopImmediatePropagation();
     if (e.key === "Enter") {
