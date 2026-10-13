@@ -1130,8 +1130,8 @@ const HELP = {
       {
         heading: "How to use",
         bullets: [
-          "Set the folder: type or paste a path into the folder box, or click `Browse` to navigate your drives and folders and pick one.",
-          "Click `Pick images` to open the gallery. Use `Select all`, type a number in the `First` box to grab the first few (it selects as you type), or click individual thumbnails to choose exactly what you want.",
+          "Set the folder: type or paste a path into the folder box, or click `Browse` to navigate your drives and folders and pick one. A new folder starts with every image in it picked, so you can Run right away (the button shows how many).",
+          "To do only some of them, click `Pick images` to open the gallery. Click `None` and then individual thumbnails to choose exactly what you want, or type a number in the `First` box to grab the first few (it selects as you type). `Select all` picks them all again.",
           "Wire `image` into your workflow (upscale, restyle, etc.) and `filename` into a Save node so each result keeps its original name.",
           "`Include subfolders` in the gallery also loads images from folders inside your folder. Their names then come out flattened, so an image at portraits/ana.png is called portraits_ana and cannot clash with a same-named file elsewhere.",
           "`Keep folder structure in the name`, next to it, hands over the real path (portraits/ana) instead. Switch on `Keep folders from the wired name` in Save Image Pixaroma's settings as well and your whole folder tree is rebuilt in the save folder, so processing a folder of folders gives you back the same arrangement.",

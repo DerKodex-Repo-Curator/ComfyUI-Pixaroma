@@ -10,6 +10,7 @@ import {
   installResizeFloor,
   hideJsonWidget,
   installCanvasZoomPassthrough, installNodeAccent, registerNodeAccent,
+  notifyGraphChanged,
 } from "../shared/index.mjs";
 import { isGraphLoading } from "../shared/graph_loading.mjs";
 import {
@@ -17,6 +18,7 @@ import {
   HIDDEN_INPUT_NAME,
   readState,
   writeState,
+  sortFiles,
 } from "./state.mjs";
 import { listFolder, pickNativeFolder } from "./api.mjs";
 import {
@@ -193,6 +195,20 @@ async function refreshListing(node, userAction = false) {
     node._pixLifFiles = [];
     node._pixLifListError = (res && res.message) || "Folder not found.";
   }
+  // A NEW folder starts with every picture picked (2026-10-13, two Ep38 reports: Browse,
+  // then Run without Pick images, was the red "no images selected" error). setFolder
+  // names the folder; only a listing OF that folder applies it (a paste then a blur
+  // races two listings), in the gallery's Select all order = the order they run in.
+  // A failed or EMPTY listing keeps the mark, so approving the folder with Browse, or
+  // ticking Include subfolders on a folder of folders, still picks all.
+  if (res && res.ok && node._pixLifFiles.length && node._pixLifPickAllFor === state.folder &&
+      userAction && !isGraphLoading()) {
+    node._pixLifPickAllFor = null;
+    const st = readState(node);
+    st.selected = sortFiles(node._pixLifFiles, st.sort, st.sort_dir).map((f) => f.file);
+    writeState(node, st);
+    notifyGraphChanged();   // an async commit (native dialog / listing): UI#31
+  }
   // Drop selections that no longer exist on disk, but PERSIST that only on a
   // genuine user action. The load path must never write serialized state
   // (Vue Compat #18) - and isGraphLoading() alone is unreliable here because
@@ -214,7 +230,10 @@ async function setFolder(node, folder) {
   const st = readState(node);
   const changed = (st.folder || "") !== normalized;
   st.folder = normalized;
-  if (changed) st.selected = []; // new folder → drop stale selection
+  if (changed) {
+    st.selected = []; // new folder → drop stale selection
+    node._pixLifPickAllFor = normalized; // ...and pick all of it once listed
+  }
   writeState(node, st);
   await refreshListing(node, true);
 }
