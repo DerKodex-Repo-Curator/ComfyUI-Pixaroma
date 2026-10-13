@@ -8,6 +8,7 @@ import { isVueNodes } from "../shared/nodes2.mjs";
 import { openPixaromaColorPickerPopup, BUTTON_PALETTE } from "../shared/color_picker.mjs";
 import { GLOBAL_ACCENT_SETTING, repaintAllAccents } from "../shared/node_settings.mjs";
 import { pixAsset } from "../shared/api_url.mjs";
+import { isComfyTextShortcut } from "../shared/text_shortcuts.mjs";
 import {
   readState, writeState, addSize, removeSize, reorderSize, addCommonSizes,
   accentOf, sanitizePair, isStarredPair, toggleStarAt,
@@ -257,11 +258,23 @@ export function openSizesPanel(node, onChange) {
     const add = el("div", "pix-szp-add");
     const wIn = el("input"); wIn.type = "text"; wIn.value = "1024"; wIn.title = "Width";
     const hIn = el("input"); hIn.type = "text"; hIn.value = "1536"; hIn.title = "Height";
-    wIn.addEventListener("keydown", (e) => e.stopPropagation());
-    hIn.addEventListener("keydown", (e) => e.stopPropagation());
+    // Keys stay in the field (a typed letter must not fire a canvas shortcut),
+    // except Ctrl/Cmd+S and Ctrl/Cmd+Enter: ComfyUI's save and run, which listen
+    // on window. Stopped here, Ctrl+S opened the browser's "Save page as" dialog.
+    const keepKey = (e) => {
+      if (isComfyTextShortcut(e) && e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
+      e.stopPropagation();
+    };
+    wIn.addEventListener("keydown", keepKey);
+    hIn.addEventListener("keydown", keepKey);
     const addBtn = el("button", "pix-szp-addbtn", "add");
     addBtn.disabled = st.sizes.length >= MAX_SIZES;
     const doAdd = () => {
+      // Only plain whole numbers. sanitizePair turns anything else into 1024
+      // (right for a damaged saved state, wrong for typing): "1,920" x 1080
+      // was added as 1024 x 1080, and "0x400" reads as hex 1024.
+      const whole = (v) => /^\s*\d+\s*$/.test(v) && +v > 0;
+      if (!whole(wIn.value) || !whole(hIn.value)) { showAddMsg("Type whole numbers"); return; }
       const [w, h] = sanitizePair(wIn.value, hIn.value);
       const res = addSize(node, w, h);
       if (res.ok) {
@@ -280,7 +293,8 @@ export function openSizesPanel(node, onChange) {
     };
     addBtn.addEventListener("click", doAdd);
     for (const inp of [wIn, hIn]) {
-      inp.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); doAdd(); } });
+      // plain Enter adds; Ctrl/Cmd+Enter is ComfyUI's Run (keepKey lets it out)
+      inp.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.ctrlKey && !e.metaKey) { e.preventDefault(); doAdd(); } });
     }
     add.append(wIn, el("span", "x", "×"), hIn, addBtn);
     body.appendChild(add);

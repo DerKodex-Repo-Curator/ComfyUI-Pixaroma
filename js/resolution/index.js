@@ -3,6 +3,7 @@ import { BRAND, hideJsonWidget, applyAdaptiveCanvasOnly,
   installCanvasZoomPassthrough, installNodeAccent, registerNodeAccent,
 } from "../shared/index.mjs";
 import { pixAsset } from "../shared/api_url.mjs";
+import { isComfyTextShortcut } from "../shared/text_shortcuts.mjs";
 
 // Node dimensions are LOCKED — width and height. The original "make it
 // resizable" attempt was a workaround for the default height being too small
@@ -555,7 +556,9 @@ function safeMathEval(str) {
   // expression and safely below browser stack limits.
   const MAX_DEPTH = 64;
   let depth = 0;
-  const skipWs = () => { while (pos < s.length && s[pos] === " ") pos++; };
+  // Any whitespace the whitelist lets in (\s): a pasted no-break space or a
+  // tab used to stop the parse, and the field silently kept its old value.
+  const skipWs = () => { while (pos < s.length && /\s/.test(s[pos])) pos++; };
   const eat = (ch) => { skipWs(); if (s[pos] === ch) { pos++; return true; } return false; };
 
   function parseExpr() {
@@ -644,6 +647,18 @@ function sizePreviewRect(el, pw, ph) {
 function setSizeLabel(el, w, h) {
   const part = (v) => { const s = document.createElement("span"); s.className = "accent"; s.textContent = String(v); return s; };
   el.replaceChildren(part(w), " × ", part(h));
+}
+
+// Ctrl/Cmd+S (save) and Ctrl/Cmd+Enter (run) are ComfyUI's own keys, and its
+// keybindings listen on window. Our fields stop every keydown so a typed letter
+// can never fire a canvas shortcut, which also swallowed these two (Ctrl+S then
+// opened the browser's "Save page as", Ctrl+Enter ran nothing). Commit the field
+// FIRST (they commit on blur, so the save / run sees the typed size), then let
+// the key go on. Ctrl+Arrows stay ours: they step the number (resolution.md #4).
+function passComfyShortcut(e, inp) {
+  if (!isComfyTextShortcut(e) || e.key === "ArrowUp" || e.key === "ArrowDown") return false;
+  inp.blur();
+  return true;
 }
 
 // Bounding box for the in-chip ratio rectangle. 14 × 11 fits comfortably next
@@ -892,6 +907,7 @@ function renderCustomPanel(node, state) {
 
   for (const inp of [wInput, hInput]) {
     inp.addEventListener("keydown", (e) => {
+      if (passComfyShortcut(e, inp)) return;
       // Always block ComfyUI canvas shortcuts from firing while typing.
       e.stopPropagation();
       if (e.key === "Enter") {
@@ -1160,6 +1176,7 @@ function renderCustomRatioPanel(node, state) {
 
   for (const [inp, isW] of [[wInput, true], [hInput, false]]) {
     inp.addEventListener("keydown", (e) => {
+      if (passComfyShortcut(e, inp)) return;
       e.stopPropagation();
       if (e.key === "Enter") {
         e.preventDefault();
@@ -1210,6 +1227,7 @@ function renderCustomRatioPanel(node, state) {
   for (const inp of [rwInput, rhInput]) {
     inp.addEventListener("blur", commitRatio);
     inp.addEventListener("keydown", (e) => {
+      if (passComfyShortcut(e, inp)) return;
       e.stopPropagation();
       if (e.key === "Enter") {
         e.preventDefault();
