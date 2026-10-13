@@ -258,7 +258,11 @@ function injectCSS() {
       background: color-mix(in srgb, var(--pix-acc,#f66744) 18%, transparent);
       border: 1px solid var(--pix-acc,#f66744);
       border-radius: 2px;
-      transition: width 0.15s ease, height 0.15s ease;
+      /* Sized by sizePreviewRect: aspect-ratio + max-width + a flex basis it
+         may shrink from. min-height 0 lets it shrink below that basis (a flex
+         item's automatic minimum would block it); the width follows. */
+      min-height: 0;
+      transition: flex-basis 0.15s ease, max-width 0.15s ease;
     }
     .pix-res-preview-label {
       font-family: inherit;
@@ -622,6 +626,17 @@ function fitRectToBox(rw, rh, maxW, maxH) {
   return { w: Math.max(1, Math.round(w)), h: Math.max(1, Math.round(h)) };
 }
 
+// Size the custom panels' aspect preview so it keeps its SHAPE when the panel
+// is short. Its height is a flex basis it may shrink from and its width follows
+// through aspect-ratio. A fixed width + height let the preview's flex column
+// shrink only the height: in Classic (fixed node height) the Custom Ratio panel
+// gets 226 px of the ~245 it wants, and a 4:3 was drawn 80 x 38 (resolution.md #2).
+function sizePreviewRect(el, pw, ph) {
+  el.style.aspectRatio = `${pw} / ${ph}`;
+  el.style.maxWidth = `${pw}px`;
+  el.style.flex = `0 1 ${ph}px`;
+}
+
 // Bounding box for the in-chip ratio rectangle. 14 × 11 fits comfortably next
 // to the longest label ("16:9", ~24 px) inside the ~66 px ratio chip.
 const CHIP_SHAPE_MAX_W = 14;
@@ -809,8 +824,7 @@ function renderCustomPanel(node, state) {
       ph = PREVIEW_MAX_H;
       pw = PREVIEW_MAX_H * aspect;
     }
-    previewRect.style.width = `${pw}px`;
-    previewRect.style.height = `${ph}px`;
+    sizePreviewRect(previewRect, pw, ph);
     previewLabel.innerHTML = `<span class="accent">${w}</span> × <span class="accent">${h}</span>`;
   }
   refreshPreview(state.w, state.h);
@@ -1047,8 +1061,7 @@ function renderCustomRatioPanel(node, state) {
       ph = PREVIEW_MAX_H;
       pw = PREVIEW_MAX_H * aspect;
     }
-    previewRect.style.width = `${pw}px`;
-    previewRect.style.height = `${ph}px`;
+    sizePreviewRect(previewRect, pw, ph);
     previewLabel.innerHTML = `<span class="accent">${w}</span> × <span class="accent">${h}</span>`;
   }
 
