@@ -244,8 +244,12 @@ The two editors can also use **rembg** (`pip install rembg`, then restart ComfyU
 
 ## 🛠 Changelog
 
-### **October 13, 2026 · v1.4.213**
+### **October 13, 2026 · v1.4.213-v1.4.214**
 - **Load Images from Folder: a new folder starts with every picture picked,** so Browse then Run does the whole folder. Use Pick images to choose fewer.
+- **Sizes and Resolution: a new latent output** for the KSampler, the same as Empty Latent Image, so you can skip that node. Resolution's spacing now matches Sizes.
+- **Ctrl+S and Ctrl+Enter now work while typing** in node fields and settings panels across the pack (they opened the browser's Save page or did nothing).
+- **Resolution:** a shared workflow can no longer run code through a saved size, and Custom Ratio keeps your ratio at the size limits.
+- **Control Panel: a Random seed stays Random** when you open its number and change nothing.
 
 ### **October 12, 2026 · v1.4.210-v1.4.212**
 - **Preview Image and Image Compare: a Run that ends while another workflow tab is open** now shows up when you switch back, and never lands on the other tab.
