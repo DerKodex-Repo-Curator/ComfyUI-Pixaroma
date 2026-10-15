@@ -355,7 +355,7 @@ export function injectResizePanelCSS() {
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
 // Recursive-descent math evaluator copied from Resolution Pixaroma. Supports
-// `+ - * / ( )` and decimals only. NEVER use eval()/Function() — a shared
+// `+ - * / ( )` and decimals only. NEVER use dynamic evaluation (JS eval or the Function constructor): a shared
 // workflow could otherwise execute arbitrary code on import. Returns NaN for
 // any invalid input. Examples: "1024", "1024+128", "512*2", "(1024+128)/2".
 function safeMathEval(str) {

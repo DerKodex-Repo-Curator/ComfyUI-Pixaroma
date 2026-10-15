@@ -4060,7 +4060,7 @@ async def api_workflows_cover_get(request):
 # node itself would run, touches no filesystem and stores nothing. The formula
 # is attacker-supplied like every other input on this unauthenticated server,
 # which is exactly why it goes through _duration_helpers (simpleeval, capped
-# length, capped exponent) and never near eval().
+# length, capped exponent) and never near dynamic evaluation.
 @PromptServer.instance.routes.post("/pixaroma/api/duration/preview")
 async def api_duration_preview(request):
     import math

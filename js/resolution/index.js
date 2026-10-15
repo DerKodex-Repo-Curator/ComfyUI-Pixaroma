@@ -558,7 +558,7 @@ function safePositiveInt(v, fallback) {
 const QUICK_PICK_WIDTHS = [512, 768, 1024, 1536];
 
 // Tiny safe math evaluator for the W/H inputs — supports `+ - * / ( )` and
-// decimals only. Hand-rolled recursive descent. NEVER use eval() / Function()
+// decimals only. Hand-rolled recursive descent. NEVER use dynamic evaluation (JS eval or the Function constructor)
 // here: even though the field is per-node, accepting arbitrary JS would let a
 // shared workflow execute code on import. Returns NaN for any invalid input.
 // Examples: "1024", "1024+128", "512*2", "(1024+128)/2", "1024 + 128".
