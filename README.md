@@ -13,7 +13,7 @@
   </p>
   <p>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License: MIT"></a>
-    <a href="https://www.youtube.com/@pixaroma"><img src="https://img.shields.io/badge/YouTube-121K%20subscribers-FF0000?style=flat-square&logo=youtube&logoColor=white" alt="YouTube subscribers"></a>
+    <a href="https://www.youtube.com/@pixaroma"><img src="https://img.shields.io/badge/YouTube-122K%20subscribers-FF0000?style=flat-square&logo=youtube&logoColor=white" alt="YouTube subscribers"></a>
     <a href="https://discord.gg/gggpkVgBf3"><img src="https://img.shields.io/badge/Discord-97.9K%20members-5865F2?style=flat-square&logo=discord&logoColor=white" alt="Discord members"></a>
   </p>
 </div>
@@ -243,6 +243,12 @@ The two editors can also use **rembg** (`pip install rembg`, then restart ComfyU
 ---
 
 ## 🛠 Changelog
+
+### **October 15, 2026 · v1.4.215**
+- **Video Prompt: Reset, Import and the seed box work on ComfyUI Desktop,** and Ctrl+Z in its editor no longer undoes the workflow.
+- **Copy (Clipspace) from Prompt Reader, Save Image or Save Video no longer breaks the next paste.**
+- **Scrub bars stop following the mouse** after a release outside the window.
+- **Image Uncrop masks keep their shape; Crop and Composer show subfolder pictures; Ctrl+S works in more fields.**
 
 ### **October 13, 2026 · v1.4.213-v1.4.214**
 - **Load Images from Folder: a new folder starts with every picture picked,** so Browse then Run does the whole folder. Use Pick images to choose fewer.
