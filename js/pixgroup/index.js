@@ -1,5 +1,6 @@
 import { app } from "../../../scripts/app.js";
 import { api } from "../../../scripts/api.js";
+import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
 import { isVueNodes } from "../shared/index.mjs";
 import { openHelpPopup, openHelpFor } from "../shared/help.mjs";
 
@@ -1825,6 +1826,8 @@ function inlineRename(g) {
   inp.addEventListener("blur", commit);
   inp.addEventListener("pointerdown", (e) => e.stopPropagation());
   inp.addEventListener("keydown", (e) => {
+    // Ctrl/Cmd+S + Ctrl/Cmd+Enter go on to ComfyUI; blur commits the title first (UI#44)
+    if (passComfyShortcut(e, inp, { blur: true })) return;
     e.stopPropagation();
     if (e.key === "Enter") { e.preventDefault(); commit(); }
     else if (e.key === "Escape") { e.preventDefault(); cleanup(); }

@@ -28,6 +28,7 @@
 // marking slots we therefore reassign `node.inputs` to force the re-read.
 
 import { readState, getUpstreamType, setActiveRow } from "./core.mjs";
+import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
 import { applyAdaptiveCanvasOnly } from "../shared/nodes2.mjs";
 import { installNodeAccent } from "../shared/node_settings.mjs";
 import { removeNodeWidget } from "../shared/remove_widget.mjs";
@@ -188,6 +189,8 @@ function renderRows(node) {
       labelEl.placeholder = usefulType ? usefulType.toLowerCase() : "name";
       labelEl.title = "Type a name to label this input (defaults to its type)";
       labelEl.addEventListener("keydown", (e) => {
+        // Ctrl/Cmd+S + Ctrl/Cmd+Enter go on to ComfyUI; blur commits the name first (UI#44)
+        if (passComfyShortcut(e, labelEl, { blur: true })) return;
         e.stopPropagation(); // keep typing instead of triggering canvas shortcuts
         if (e.key === "Enter") { e.preventDefault(); labelEl.blur(); }
         else if (e.key === "Escape") {

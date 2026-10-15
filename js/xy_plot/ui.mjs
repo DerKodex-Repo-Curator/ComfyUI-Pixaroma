@@ -6,6 +6,7 @@
 // + refreshes the counter/preview in place (no rebuild) so input focus is kept.
 
 import { app } from "../../../scripts/app.js";
+import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
 import { pixApiUrl } from "../shared/api_url.mjs";
 import {
   readState, writeState,
@@ -342,9 +343,14 @@ function el(tag, cls, txt) {
   return e;
 }
 
-// Keydown isolation so ComfyUI / LiteGraph don't grab Arrow / Enter / Z etc.
+// Keydown isolation so ComfyUI / LiteGraph don't grab Arrow / Enter / Z etc. -
+// except Ctrl/Cmd+S and Ctrl/Cmd+Enter, which go on to ComfyUI (UI#44; these
+// fields commit as you type, so they keep the focus).
 function isolate(input) {
-  input.addEventListener("keydown", (e) => e.stopImmediatePropagation());
+  input.addEventListener("keydown", (e) => {
+    if (passComfyShortcut(e, input)) return;
+    e.stopImmediatePropagation();
+  });
   input.addEventListener("pointerdown", (e) => e.stopPropagation());
   return input;
 }

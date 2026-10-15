@@ -1,5 +1,6 @@
 import { app } from "../../../scripts/app.js";
 import { api } from "../../../scripts/api.js";
+import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
 import { isVueNodes, applyAdaptiveCanvasOnly } from "../shared/nodes2.mjs";
 import { installResizeFloor } from "../shared/resize_floor.mjs";
 import { installCanvasZoomPassthrough } from "../shared/canvas_zoom.mjs";
@@ -435,6 +436,9 @@ function startEdit(node, i) {
   // Keep typing away from ComfyUI's canvas shortcuts, and clicks from starting a
   // node drag or re-triggering the row's dblclick.
   input.addEventListener("keydown", (e) => {
+    // Ctrl/Cmd+S and Ctrl/Cmd+Enter go on to ComfyUI; blur first commits the
+    // typed note so the save / run sees it (UI#44).
+    if (passComfyShortcut(e, input, { blur: true })) return;
     e.stopPropagation();
     if (e.key === "Enter") { e.preventDefault(); commit(true); }
     else if (e.key === "Escape") { e.preventDefault(); commit(false); }
