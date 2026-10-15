@@ -1090,7 +1090,21 @@ async def audio_studio_upload(request):
             kind = (await field.text()).strip()
         elif field.name == "file":
             file_filename = field.filename or ""
-            file_bytes = await field.read(decode=False)
+            # Read in chunks and stop AT the cap: field.read() held the whole part in memory before the size check,
+            # and this streamed body is not bounded by aiohttp's client_max_size (a 400 MB upload grew the server
+            # by ~262 MB before the refusal, 2026-10-15). read_chunk returns b"" at the end of the part.
+            buf = bytearray()
+            while True:
+                chunk = await field.read_chunk(1 << 16)
+                if not chunk:
+                    break
+                buf.extend(chunk)
+                if len(buf) > _AUDIO_STUDIO_MAX_FILE_BYTES:
+                    return web.json_response(
+                        {"error": f"file too large (>{_AUDIO_STUDIO_MAX_FILE_BYTES} bytes)."},
+                        status=400,
+                    )
+            file_bytes = bytes(buf)
 
     if not node_id or not _AUDIO_STUDIO_NODE_ID_RE.match(node_id) or len(node_id) > 64:
         return web.json_response(
