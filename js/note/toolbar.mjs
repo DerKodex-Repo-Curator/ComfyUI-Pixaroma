@@ -1698,8 +1698,13 @@ NoteEditor.prototype._promptLinkUrl = function (presetLabel, presetUrl) {
       const label = labelInput.value.trim() || url;
       finish({ url, label });
     });
+    // Close on a backdrop click only when the press started on the backdrop:
+    // a press inside the box released outside it also clicks the backdrop.
+    let downOnBackdrop = false;
+    backdrop.addEventListener("mousedown", (e) => { downOnBackdrop = (e.target === backdrop); });
     backdrop.addEventListener("click", (e) => {
-      if (e.target === backdrop) finish(null);
+      if (e.target === backdrop && downOnBackdrop) finish(null);
+      downOnBackdrop = false;
     });
     requestAnimationFrame(() => {
       // If we pre-filled the label (user had selection), focus URL first.
@@ -1754,8 +1759,13 @@ NoteEditor.prototype._promptCodeBlock = function (presetCode) {
       if (!v) { finish(null); return; }
       finish(v);
     });
+    // Same press-origin guard as the link dialog: selecting code in the
+    // textarea and releasing past the box edge must not discard it.
+    let downOnBackdrop = false;
+    backdrop.addEventListener("mousedown", (e) => { downOnBackdrop = (e.target === backdrop); });
     backdrop.addEventListener("click", (e) => {
-      if (e.target === backdrop) finish(null);
+      if (e.target === backdrop && downOnBackdrop) finish(null);
+      downOnBackdrop = false;
     });
     requestAnimationFrame(() => { ta.focus(); });
   });

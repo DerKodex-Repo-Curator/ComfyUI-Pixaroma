@@ -1046,9 +1046,17 @@ function openMoreColorsModal(opts) {
   });
   cancelBtn.addEventListener("click", close);
 
-  // Click outside the box (on the backdrop itself) cancels.
+  // Click outside the box (on the backdrop itself) cancels - but ONLY if the
+  // press started on the backdrop too. A press inside the box released outside
+  // it also lands its click on the backdrop (e.g. selecting the title text),
+  // and must not throw the pick away (same guard as openPixaromaColorPickerModal).
+  let mouseDownOnBackdrop = false;
+  backdrop.addEventListener("mousedown", (e) => {
+    mouseDownOnBackdrop = (e.target === backdrop);
+  });
   backdrop.addEventListener("click", (e) => {
-    if (e.target === backdrop) close();
+    if (e.target === backdrop && mouseDownOnBackdrop) close();
+    mouseDownOnBackdrop = false;
   });
 
   // Esc cancels. Use window-capture + stopImmediatePropagation so any
