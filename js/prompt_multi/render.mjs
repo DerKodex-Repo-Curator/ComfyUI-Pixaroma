@@ -316,6 +316,9 @@ export function buildRoot() {
 // of vertical space as rows are added or removed.
 export function measureContentHeight(root) {
   if (!root) return 120;
+  // Refuse to measure before the root has a real width (UI#39): a node built by an open / Ctrl+Z is ~16 px wide
+  // for a few frames, everything wraps, and the inflated answer grew the node.
+  if (root.offsetWidth < 100) return 120;
   let h = 0;
   let count = 0;
   for (const child of root.children) {

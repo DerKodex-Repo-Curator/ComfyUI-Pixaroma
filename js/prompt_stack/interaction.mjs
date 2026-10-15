@@ -112,6 +112,11 @@ function autoGrow(ta) {
   // hide/show. Skipping leaves the height exactly as it was, which is always
   // safe for a field nobody can currently see.
   if (ta.offsetParent === null) return;
+  // NO REAL WIDTH, NO MEASURE (2026-10-15, the same in Prompt Multi): a node built by an open / Ctrl+Z sits ~16 px
+  // wide for a few frames, every character wraps, and the field + the node grew to fit (180 -> 202 on open, so the
+  // workflow read "modified"). The width ResizeObserver in index.js re-runs this at the real width. Gate on the
+  // ROOT, never the field: a real field on the narrowest Nodes 2.0 node can be under 40 px (find-replace review).
+  if ((ta.closest(".pix-ps-root")?.offsetWidth ?? 0) < 100) return;
   // Reset to single line, then grow to scrollHeight up to max-height (CSS cap).
   ta.style.height = "auto";
   const h = Math.min(ta.scrollHeight, 120);
