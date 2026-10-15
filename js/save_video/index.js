@@ -17,6 +17,7 @@ import {
 } from "../shared/index.mjs";
 import { isGraphLoading } from "../shared/graph_loading.mjs";
 import { runTab, eachRestoredOutput } from "../shared/run_tab.mjs";
+import { openUrlInNewTab } from "../shared/open_tab.mjs";
 import { registerNodeSettings, installNodeAccent } from "../shared/node_settings.mjs";
 import { applyFilenameTokenRefs } from "../shared/filename_tokens.mjs";
 import { resolveWiredName, setPreviewPath, WIRED_TIP } from "../shared/wired_name.mjs";
@@ -616,7 +617,8 @@ function wireEvents(node, ui) {
   ui.btnOpen.addEventListener("click", () => {
     const entry = clipOrWarn();
     if (!entry) return;
-    window.open(buildVideoUrl(entry), "_blank");
+    // noopener: the new tab gets no reference back to the ComfyUI window.
+    openUrlInNewTab(buildVideoUrl(entry));
   });
 
   ui.btnDownload.addEventListener("click", () => {
