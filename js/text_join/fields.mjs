@@ -16,7 +16,7 @@
 
 import { app } from "../../../scripts/app.js";
 import { widgetOf, BRAND, readState, labelFor } from "./core.mjs";
-import { applyAdaptiveCanvasOnly, isVueNodes, installResizeFloor, installCanvasZoomPassthrough } from "../shared/index.mjs";
+import { applyAdaptiveCanvasOnly, isVueNodes, installResizeFloor, installCanvasZoomPassthrough, installNativeTextMenu } from "../shared/index.mjs";
 import { ACC, installNodeAccent } from "../shared/node_settings.mjs";
 import { isComfyTextShortcut } from "../shared/text_shortcuts.mjs";
 
@@ -348,6 +348,7 @@ export function installFields(node) {
     // 2.0). One widget per row, so install per row. A textarea with more text
     // than fits keeps its own scroll - the helper yields to it.
     installCanvasZoomPassthrough(wrap);
+    installNativeTextMenu(wrap);   // Cut/Copy/Paste in the field (Nodes 2.0 opened the node menu)
     // Carry this node's accent colour on the row, so the focus ring and the icon
     // hover follow the user's pick instead of being stuck on the brand orange.
     installNodeAccent(node, wrap);

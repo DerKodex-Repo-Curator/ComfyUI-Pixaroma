@@ -7,7 +7,7 @@ import {
 } from "./core.mjs";
 import { injectCSS, buildRoot, renderBody, measureContentHeight, closePopupIfOwner, refreshAxisNotes, detachLineGutters } from "./ui.mjs";
 import { buildGridPreview } from "./grid.mjs";
-import { applyAdaptiveCanvasOnly, isVueNodes, closeHelpPopup, installCanvasZoomPassthrough } from "../shared/index.mjs";
+import { applyAdaptiveCanvasOnly, isVueNodes, closeHelpPopup, installCanvasZoomPassthrough, installNativeTextMenu } from "../shared/index.mjs";
 import { isQueueLoopActive, runQueueLoop, feedsOnlyInactiveSwitch } from "../shared/queue_drivers.mjs";
 import { sweepProviderFor, anyProviderOwns } from "../shared/sweep_targets.mjs";
 import { isGraphLoading } from "../shared/graph_loading.mjs";
@@ -254,6 +254,7 @@ app.registerExtension({
         // Let the mouse wheel zoom the canvas when hovering this widget (Classic
         // renderer), except over a scrollable region (issue #17).
         installCanvasZoomPassthrough(root);
+        installNativeTextMenu(root);   // Cut/Copy/Paste in the value boxes (Nodes 2.0 opened the node menu)
 
         // The grid preview lives in .pix-xy-gridmount and PERSISTS across
         // renderBody() calls (renderBody only rebuilds the axis cards / counter
