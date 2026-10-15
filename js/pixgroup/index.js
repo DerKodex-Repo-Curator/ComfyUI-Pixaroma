@@ -1719,14 +1719,17 @@ function installFoldHooks() {
               // connect to the bar instead of being cut off at the hidden node.
               const show = (oG ? oG.showLinks !== false : true) && (tG ? tG.showLinks !== false : true);
               if (!show) return;
-              // A wire through REROUTES is drawn in pieces (LGraphCanvas renderLinkSegments, the same on frontend
+              // A wire through REROUTES is drawn in pieces (LGraphCanvas _renderAllLinkSegments, the same on frontend
               // 1.53 and 1.55): only the FIRST piece starts at the output slot (its reroute has no parent reroute),
-              // only the LAST piece (no opts.reroute) ends at the input slot; every other end is a reroute dot.
-              // Moving BOTH ends of EVERY piece to the bar drew broken stubs (Discord 2026-10-15, LIVE_BUGS D1).
+              // only the LAST piece (no `reroute` key in opts) ends at the input slot; every other end is a reroute
+              // dot. Moving BOTH ends of EVERY piece to the bar drew broken stubs (Discord 2026-10-15, LIVE_BUGS D1).
+              // The KEY marks a reroute piece: 1.55 passes `reroute: undefined` on the first piece of a revealed
+              // user-hidden link (it starts at the output tip), so test `"reroute" in opts`, not its value.
               const rr = opts && opts.reroute;
+              const rk = !!opts && "reroute" in opts;
               const g = this.graph;
-              const firstPiece = rr ? !(rr.parentId != null && g && typeof g.getReroute === "function" && g.getReroute(rr.parentId)) : !opts;
-              const lastPiece = !rr;
+              const firstPiece = rr ? !(rr.parentId != null && g && typeof g.getReroute === "function" && g.getReroute(rr.parentId)) : (!opts || rk);
+              const lastPiece = !rk;
               const na = oG && firstPiece ? barOut(oG) : a;
               const nb = tG && lastPiece ? barIn(tG) : b;
               let no = opts;
