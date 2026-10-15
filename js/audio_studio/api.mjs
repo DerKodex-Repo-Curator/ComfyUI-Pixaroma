@@ -2,6 +2,7 @@
 "use strict";
 
 import { pixApiUrl } from "../shared/api_url.mjs";
+import { comboViewRoute } from "../shared/view_url.mjs";
 
 const UPLOAD_ENDPOINT  = "/pixaroma/api/audio_studio/upload";
 const SYSINFO_ENDPOINT = "/pixaroma/api/audio_studio/sysinfo";
@@ -80,9 +81,10 @@ export function getUpstreamImageUrl(graph, node) {
   if (src.comfyClass === "LoadImage" || src.type === "LoadImage") {
     const w = src.widgets?.find(w => w.name === "image");
     if (w && w.value) {
-      const fn = String(w.value).split(/[\\/]/).pop();
-      return pixApiUrl(`/view?filename=${encodeURIComponent(fn)}` +
-             `&type=input&subfolder=&t=${Date.now()}`);
+      // The value can be "Studio1/cat.png" or "clipspace/x.png [input]": /view keeps only the BASENAME of
+      // filename and takes the folder from subfolder, so the old basename + empty subfolder 404'd, or showed a
+      // SAME-NAMED root file (image-pickers.md #4, LIVE_BUGS #16). The cache-buster goes on the ROUTE.
+      return pixApiUrl(`${comboViewRoute(w.value)}&t=${Date.now()}`);
     }
   }
   if (Array.isArray(src.imgs) && src.imgs.length) {
