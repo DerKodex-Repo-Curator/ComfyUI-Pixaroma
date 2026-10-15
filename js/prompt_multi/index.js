@@ -203,7 +203,15 @@ app.registerExtension({
         // (DOM measurement rounding) which would falsely flag the workflow
         // "modified" on a plain open. Auto-grow stays on user-action paths
         // (add/delete/toggle/mode pill) where a size change is legitimate.
-        node._pixPmRenderOnly = () => renderRows(node, root, handlers);
+        // A LOADED node also holds the row editors' first-frame grow (their rAF calls _pixPmGrow): it grew a
+        // saved 302 to 306 and the open read "modified" (2026-10-15, prompt-multi.md #19). Fresh nodes still grow.
+        node._pixPmRenderOnly = () => {
+          if (node._pixPmConfigured) {
+            node._pixPmHoldGrow = true;
+            requestAnimationFrame(() => requestAnimationFrame(() => { node._pixPmHoldGrow = false; }));
+          }
+          renderRows(node, root, handlers);
+        };
 
         installCanvasZoomPassthrough(root);
         installNativeTextMenu(root);   // Cut/Copy/Paste in a row's text box
@@ -239,6 +247,7 @@ app.registerExtension({
         node._pixPmRO = _pmRO;
 
         node._pixPmGrow = () => {
+          if (node._pixPmHoldGrow) return;
           growNodeToContent(node);
           node.setDirtyCanvas(true, true);
         };
@@ -250,6 +259,7 @@ app.registerExtension({
 
     const origConfigure = nodeType.prototype.onConfigure;
     nodeType.prototype.onConfigure = function (info) {
+      this._pixPmConfigured = true;   // loaded from a workflow: its render holds the first-frame grow
       const r = origConfigure ? origConfigure.apply(this, arguments) : undefined;
       restoreFromProperties(this);
       // DOM-only render on load (no auto-grow) so the saved node.size is
