@@ -1710,15 +1710,19 @@ function installFoldHooks() {
           if (owner.size) {
             const oG = owner.get(String(link.origin_id));
             const tG = owner.get(String(link.target_id));
-            // Internal wire (both ends inside ONE folded group) → always hidden.
-            if (oG && tG && oG === tG) return;
             if (oG || tG) {
+              // Internal wire (both ends inside ONE folded group) → always hidden.
               // Crossing wire (one end inside a folded group, the other outside):
               // hidden by default; when that group opts to "show links" we render it
               // REROUTED to the bar edge — so only outside-going wires show and they
               // connect to the bar instead of being cut off at the hidden node.
-              const show = (oG ? oG.showLinks !== false : true) && (tG ? tG.showLinks !== false : true);
-              if (!show) return;
+              const internal = !!(oG && tG && oG === tG);
+              const show = !internal && (oG ? oG.showLinks !== false : true) && (tG ? tG.showLinks !== false : true);
+              // A reroute piece is drawn ONCE for all the links through that reroute (core marks it drawn for the
+              // first link that reaches it). A HIDDEN wire reaching a SHARED reroute first must still draw it when a
+              // wire through it is shown, or that wire loses the piece (fan-out from a member to one node inside +
+              // one outside: a stub; review of D1). Its first piece then moves to the bar like the shown wire's.
+              if (!show && !(opts && opts.reroute && sharedRerouteShown(opts.reroute, link, owner, this.graph))) return;
               // A wire through REROUTES is drawn in pieces (LGraphCanvas _renderAllLinkSegments, the same on frontend
               // 1.53 and 1.55): only the FIRST piece starts at the output slot (its reroute has no parent reroute),
               // only the LAST piece (no `reroute` key in opts) ends at the input slot; every other end is a reroute
@@ -1743,6 +1747,24 @@ function installFoldHooks() {
     };
   }
   _foldHooksInstalled = true;
+}
+
+// Is another link through this reroute drawn (a plain wire, or a crossing wire whose groups show links)? A reroute
+// carries ONE source output, so all its links share the origin; only the targets differ.
+function sharedRerouteShown(rr, link, owner, graph) {
+  const ids = rr && rr.linkIds;
+  if (!ids || !graph) return false;
+  for (const id of ids) {
+    if (String(id) === String(link.id)) continue;
+    const l = typeof graph.getLink === "function" ? graph.getLink(id)
+      : (typeof graph.links?.get === "function" ? graph.links.get(id) : graph.links?.[id]);   // VC#3
+    if (!l) continue;
+    const o2 = owner.get(String(l.origin_id)), t2 = owner.get(String(l.target_id));
+    if (!o2 && !t2) return true;
+    if (o2 && t2 && o2 === t2) continue;
+    if ((o2 ? o2.showLinks !== false : true) && (t2 ? t2.showLinks !== false : true)) return true;
+  }
+  return false;
 }
 
 // NODES 2.0: members are Vue DOM (not canvas), so the CVN wrap can't hide them —
