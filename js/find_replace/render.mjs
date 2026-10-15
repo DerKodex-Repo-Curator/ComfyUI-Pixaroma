@@ -284,6 +284,9 @@ const PREVIEW_MIN = 100;
 // feedback loop), substituting PREVIEW_MIN for the flexible preview child.
 export function measureMinHeight(root) {
   if (!root) return 180;
+  // Refuse to measure before the root has a real width (UI#39): right after a Ctrl+Z / open the rebuilt root is
+  // ~16 px wide for a few frames, the toggles and buttons wrap, and the inflated answer grew the node (an undo jam).
+  if (root.offsetWidth < 100) return 180;
   let h = 0;
   let count = 0;
   for (const child of root.children) {

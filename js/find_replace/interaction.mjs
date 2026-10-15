@@ -14,6 +14,10 @@ function autoGrow(ta) {
   // when the node is widened, since autoGrow only runs on input). Only real
   // typed content grows the field.
   if (!ta.value) { ta.style.height = "30px"; return; }
+  // Not laid out at a real width yet: a node rebuilt by Ctrl+Z / open is attached for a few frames ~16 px wide,
+  // where every character wraps and each field would hit the 120 px cap, and the node grew to fit them (426 ->
+  // 606 on one Ctrl+Z = an undo jam, find-replace.md). The width ResizeObserver re-runs this at the real width.
+  if (ta.clientWidth < 40) return;
   ta.style.height = "auto";
   ta.style.height = Math.max(30, Math.min(ta.scrollHeight, 120)) + "px";
 }
