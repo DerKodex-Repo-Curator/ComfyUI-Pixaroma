@@ -1051,6 +1051,21 @@ ALLOWED_AUDIO_STUDIO_AUDIO_EXTS = {"wav"}  # WAV only — browser converts befor
 _AUDIO_STUDIO_NODE_ID_RE = re.compile(r"^[a-zA-Z0-9_\-]+$")
 _AUDIO_STUDIO_MAX_FILE_BYTES = 50 * 1024 * 1024   # 50 MB per file
 _AUDIO_STUDIO_MAX_DIR_BYTES  = 100 * 1024 * 1024  # 100 MB combined per node
+_AUDIO_STUDIO_MAX_FIELD_BYTES = 256                # node_id / kind are tiny (the id itself is capped at 64)
+
+
+async def _read_small_field(field, limit):
+    """A short text part of a streamed multipart body, or None once it passes `limit` bytes. field.text() read
+    the WHOLE part first (a 400 MB node_id held ~419 MB before the regex refused it, 2026-10-15)."""
+    buf = bytearray()
+    while True:
+        chunk = await field.read_chunk(1 << 16)
+        if not chunk:
+            break
+        buf.extend(chunk)
+        if len(buf) > limit:
+            return None
+    return buf.decode("utf-8", "replace").strip()
 
 
 @PromptServer.instance.routes.get("/pixaroma/api/audio_studio/sysinfo")
@@ -1084,10 +1099,14 @@ async def audio_studio_upload(request):
         field = await reader.next()
         if field is None:
             break
-        if field.name == "node_id":
-            node_id = (await field.text()).strip()
-        elif field.name == "kind":
-            kind = (await field.text()).strip()
+        if field.name in ("node_id", "kind"):
+            val = await _read_small_field(field, _AUDIO_STUDIO_MAX_FIELD_BYTES)
+            if val is None:
+                return web.json_response({"error": f"{field.name} is too long."}, status=400)
+            if field.name == "node_id":
+                node_id = val
+            else:
+                kind = val
         elif field.name == "file":
             file_filename = field.filename or ""
             # Read in chunks and stop AT the cap: field.read() held the whole part in memory before the size check,
