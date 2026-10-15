@@ -294,11 +294,13 @@ function updatePreview(node) {
   node._pixStxCntKey = key;
   clearTimeout(node._pixStxCntTimer);
   node._pixStxCntTimer = setTimeout(async () => {
-    const url =
-      pixApiUrl("/pixaroma/api/save_image/next_counter") +
+    // The whole query goes into the ROUTE, then pixApiUrl: a hosted ComfyUI appends its auth token to the END of
+    // apiURL's result, so a query glued on after it corrupted the token (hosted-urls.md #4, LIVE_BUGS #20).
+    const url = pixApiUrl(
+      "/pixaroma/api/save_image/next_counter" +
       `?folder=${encodeURIComponent(st.folder || "")}` +
       `&name=${encodeURIComponent(name)}` +
-      `&digits=${encodeURIComponent(st.counterDigits || 3)}`;
+      `&digits=${encodeURIComponent(st.counterDigits || 3)}`);
     let j = null;
     try {
       j = await (await fetch(url)).json();
