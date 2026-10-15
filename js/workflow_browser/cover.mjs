@@ -244,11 +244,12 @@ export function installOutputCoverCapture() {
       // The workflow that RAN, not the one open now: a run keeps going when you
       // switch tabs, and its picture became the OTHER workflow's cover (VC#30).
       // runWorkflow needs core's own listener to have filed the output first,
-      // hence the microtask; when it cannot tell, the open one as before.
+      // hence the microtask; when it cannot tell, the one open at the event, as before.
+      const openRel = A.activePath();
       queueMicrotask(() => {
         try {
           const owner = runWorkflow(output);
-          const rel = owner ? A.fromStorePath(owner.path || "") : A.activePath();
+          const rel = owner ? A.fromStorePath(owner.path || "") : openRel;
           if (!rel) return;                  // an unsaved workflow has no file to pin it to
           pending = pending || {};
           pending[rel] = { kind: "output", filename: img.filename, subfolder: img.subfolder || "", type: img.type || "output" };
