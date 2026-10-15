@@ -995,6 +995,9 @@ function setupNode(node) {
 
   // We emit ui.images when saving inside output/ (Assets panel refresh);
   // suppress ComfyUI's own bottom-of-node preview both ways (Preview #15).
+  // The getter returns NULL, never `[]`: an empty array passes core's
+  // copyToClipspace `!= undefined` test and the next paste into a loader
+  // threw (Preview #15, measured here 2026-10-15).
   node.hideOutputImages = true;
   try {
     const desc = Object.getOwnPropertyDescriptor(node, "imgs");
@@ -1002,7 +1005,7 @@ function setupNode(node) {
       Object.defineProperty(node, "imgs", {
         configurable: true,
         get() {
-          return [];
+          return null;
         },
         set() {},
       });

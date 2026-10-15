@@ -803,10 +803,10 @@ function setupNode(node) {
   // True` makes the framework fetch the selected file and assign it to
   // `node.imgs`, which LiteGraph then renders below the widgets. We don't
   // need that here - the readout is the whole point - so we lock `imgs` to
-  // an empty array. Side effect: right-click menu items that read
-  // `node.imgs[0]` (Save Image, Copy Clipspace, Open Image) become no-ops.
-  // That's an acceptable tradeoff since the file is reachable directly via
-  // ComfyUI's /view route from the input folder anyway.
+  // NULL. ⚠️ Never `[]`: core's copyToClipspace tests `imgs != undefined`, so
+  // an empty array was copied as the picture list and the NEXT paste into any
+  // loader threw on `imgs[0].src` (measured 2026-10-15, preview-image.md #15).
+  // `null` keeps the native preview gate (`imgs?.length`) closed just the same.
   //
   // Probe the existing descriptor first: if a previous redefine made it
   // non-configurable or some earlier framework code assigned a value the
@@ -820,7 +820,7 @@ function setupNode(node) {
     try {
       Object.defineProperty(node, "imgs", {
         configurable: true,
-        get() { return []; },
+        get() { return null; },
         set(_v) { /* swallow */ },
       });
     } catch (e) {

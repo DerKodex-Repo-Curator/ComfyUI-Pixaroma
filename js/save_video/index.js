@@ -894,10 +894,12 @@ function setupNode(node) {
   // broken after a run" shape that was reported. Save Mp4, Save Image, Preview
   // Image and Compare have always set it.
   node.hideOutputImages = true;
+  // NULL, never `[]`: an empty array passes core's copyToClipspace
+  // `!= undefined` test and the next paste into a loader threw (Preview #15).
   try {
     Object.defineProperty(node, "imgs", {
       configurable: true,
-      get() { return []; },
+      get() { return null; },
       set() {},
     });
   } catch {}
