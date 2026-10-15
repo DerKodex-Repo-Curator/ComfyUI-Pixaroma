@@ -260,9 +260,11 @@ class PixaromaUncrop:
         out_mask = out_mask.clamp(0.0, 1.0)
         # Pair the mask with the IMAGE output: same device, and same batch (the
         # image batch may have grown to match a multi-frame edited crop).
+        # The mask is 3-D [1,H,W]: THREE repeat args. A 4th one PREPENDS a dim and
+        # gave [B,1,H,W] for any batch > 1 (outpaint.md warns about this exact line).
         out_mask = out_mask.to(out.device)
         if out_mask.shape[0] == 1 and out.shape[0] > 1:
-            out_mask = out_mask.repeat(out.shape[0], 1, 1, 1)
+            out_mask = out_mask.repeat(out.shape[0], 1, 1)
 
         # Pass crop_info straight through so it can be forwarded downstream.
         return (out.clamp(0.0, 1.0), out_mask, crop_info)
