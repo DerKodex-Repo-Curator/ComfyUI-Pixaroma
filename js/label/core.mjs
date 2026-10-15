@@ -2,6 +2,7 @@ import { app } from "../../../scripts/app.js";
 import { createPixaromaColorPicker, PIXAROMA_PALETTE } from "../shared/color_picker.mjs";
 import { openHelpPopup, openHelpFor, closeHelpPopup } from "../shared/help.mjs";
 import { pixAsset } from "../shared/api_url.mjs";
+import { installGraphUndoGuard } from "../shared/graph_undo_guard.mjs";
 import {
   DEFAULTS,
   FONT_CHOICES,
@@ -131,9 +132,14 @@ export class LabelEditor {
     window.addEventListener("keydown", this._keyBlock, true);
     window.addEventListener("keyup", this._keyBlock, true);
     window.addEventListener("keypress", this._keyBlock, true);
+    // The key block above cannot stop ComfyUI's Ctrl+Z: 3 presses with the editor open removed every node, this
+    // Label included (2026-10-15). See js/shared/graph_undo_guard.mjs.
+    this._undoGuardOff = installGraphUndoGuard(() => !!this._el?.isConnected);
   }
 
   close() {
+    this._undoGuardOff?.();
+    this._undoGuardOff = null;
     window.removeEventListener("keydown", this._keyBlock, true);
     window.removeEventListener("keyup", this._keyBlock, true);
     window.removeEventListener("keypress", this._keyBlock, true);
