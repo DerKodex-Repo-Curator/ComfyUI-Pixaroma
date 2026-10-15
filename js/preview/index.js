@@ -11,6 +11,7 @@ import { isLiveNode } from "../shared/live_node.mjs";
 import { attachCanvasSnapshot } from "../shared/canvas_snapshot.mjs";
 import { removeNodeWidget } from "../shared/remove_widget.mjs";
 import { runTab, eachRestoredOutput } from "../shared/run_tab.mjs";
+import { openUrlInNewTab } from "../shared/open_tab.mjs";
 
 // ---- Nodes 2.0 helpers ----
 // The Vue "WidgetLegacy" bridge repaints a custom widget's canvas only via
@@ -509,10 +510,9 @@ function openInNewTab(node) {
     showToast(node, "No image to open");
     return;
   }
-  // noopener: don't leak `window.opener` to the new tab (it would inherit
-  // a reference back to the ComfyUI window).
-  const win = window.open(url, "_blank", "noopener");
-  if (!win) showToast(node, "Popup blocked");
+  // noopener (no reference back to the ComfyUI window), and no null check:
+  // window.open with noopener returns null even when the tab opens.
+  openUrlInNewTab(url);
 }
 
 // ---- save handlers ----

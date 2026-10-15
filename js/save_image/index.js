@@ -18,6 +18,7 @@ import {
 } from "../shared/index.mjs";
 import { isGraphLoading } from "../shared/graph_loading.mjs";
 import { runTab, eachRestoredOutput } from "../shared/run_tab.mjs";
+import { openUrlInNewTab } from "../shared/open_tab.mjs";
 import { registerNodeSettings, installNodeAccent } from "../shared/node_settings.mjs";
 import { applyFilenameTokenRefs } from "../shared/filename_tokens.mjs";
 import { resolveWiredName, setPreviewPath, WIRED_TIP } from "../shared/wired_name.mjs";
@@ -484,8 +485,8 @@ function openFrame(node) {
   const frames = node._pixSiFrames || [];
   const f = frames[node._pixSiSel || 0];
   if (!f) return;
-  const w = window.open(f.src, "_blank", "noopener");
-  if (!w) flashStatus(node, "info", "Popup blocked by the browser");
+  // Not window.open + a null check: with noopener it returns null even when the tab opens.
+  openUrlInNewTab(f.src);
 }
 
 // Download the shown frame (same-origin src, so the download attribute works).

@@ -6,6 +6,7 @@ import { api } from "../../../scripts/api.js";
 import { applyAdaptiveCanvasOnly, isVueNodes } from "../shared/nodes2.mjs";
 import { isGraphLoading } from "../shared/graph_loading.mjs";
 import { runTab, eachRestoredOutput } from "../shared/run_tab.mjs";
+import { openUrlInNewTab } from "../shared/open_tab.mjs";
 import { growToCoreMinHeight } from "../shared/core_min_size.mjs";
 import { getState, setGate, STATE_PROP } from "./state.mjs";
 import { applyGateMode } from "./prune.mjs";
@@ -85,9 +86,9 @@ async function copySnapshot(node) {
 function openSnapshot(node) {
   const frame = getState(node).frame;
   if (!frame?.filename) { flash(node, "Run once to capture an image"); return; }
-  // noopener so the new tab can't reach back into the ComfyUI window.
-  const win = window.open(frameViewUrl(frame), "_blank", "noopener");
-  if (!win) flash(node, "Popup blocked");
+  // noopener so the new tab can't reach back into the ComfyUI window (and no
+  // null check: window.open with noopener returns null even when the tab opens).
+  openUrlInNewTab(frameViewUrl(frame));
 }
 
 // ── Save (reuses the Preview Image server routes; no new backend) ──
