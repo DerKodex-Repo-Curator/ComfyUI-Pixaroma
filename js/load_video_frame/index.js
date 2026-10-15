@@ -437,7 +437,14 @@ app.registerExtension({
         dragging = true; scrubFrom(e);
         e.preventDefault(); e.stopPropagation();
       });
-      const onMove = (e) => { if (dragging) scrubFrom(e); };
+      // No button held = the mouseup was LOST: end the drag. Without this every
+      // later mouse move REWROTE the saved `frame` widget (convention #20,
+      // save-mp4.md #11).
+      const onMove = (e) => {
+        if (!dragging) return;
+        if (!(e.buttons & 1)) { dragging = false; return; }
+        scrubFrom(e);
+      };
       const onUp = () => { dragging = false; };
       window.addEventListener("mousemove", onMove);
       window.addEventListener("mouseup", onUp);

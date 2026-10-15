@@ -452,7 +452,14 @@ app.registerExtension({
         e.preventDefault();
         e.stopPropagation();
       });
-      const onMove = (e) => { if (dragging) seekFrom(e); };
+      // No button held = the mouseup was LOST (released outside the window, a
+      // context menu ate it): end the drag instead of seeking on every move
+      // (convention #20, save-mp4.md #11).
+      const onMove = (e) => {
+        if (!dragging) return;
+        if (!(e.buttons & 1)) { dragging = false; return; }
+        seekFrom(e);
+      };
       const onUp = () => { dragging = false; };
       window.addEventListener("mousemove", onMove);
       window.addEventListener("mouseup", onUp);

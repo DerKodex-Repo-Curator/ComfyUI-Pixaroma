@@ -286,7 +286,13 @@ AudioStudioEditor.prototype._buildTransport = function () {
   });
   // Stash listeners so forceClose can detach them — otherwise leaking
   // closures keep the editor alive after close.
-  this._scrubMove = (e) => { if (dragging) seekFromEvent(e); };
+  // No button held = the mouseup was LOST: end the drag instead of seeking on
+  // every move (convention #20, save-mp4.md #11).
+  this._scrubMove = (e) => {
+    if (!dragging) return;
+    if (!(e.buttons & 1)) { dragging = false; return; }
+    seekFromEvent(e);
+  };
   this._scrubUp = () => { dragging = false; };
   window.addEventListener("mousemove", this._scrubMove);
   window.addEventListener("mouseup", this._scrubUp);
