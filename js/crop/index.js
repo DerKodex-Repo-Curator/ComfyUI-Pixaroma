@@ -3,6 +3,7 @@
 // ============================================================
 import { app } from "../../../scripts/app.js";
 import { pixApiUrl } from "../shared/api_url.mjs";
+import { comboViewRoute } from "../shared/view_url.mjs";
 import { api } from "../../../scripts/api.js";
 import { isGraphLoading } from "../shared/graph_loading.mjs";
 import { isLiveNode } from "../shared/live_node.mjs";
@@ -47,11 +48,13 @@ function getUpstreamImageURL(node) {
   const srcNode = graph.getNodeById(link.origin_id);
   if (!srcNode) return null;
 
-  // LoadImage: read filename from its "image" widget.
+  // LoadImage: read filename from its "image" widget. The value can carry a
+  // subfolder ("Studio1/cat.png") or a type annotation ("x.png [input]"):
+  // comboViewRoute splits both, a raw value 404s (image-pickers.md #4).
   if (srcNode.comfyClass === "LoadImage" || srcNode.type === "LoadImage") {
     const imgWidget = (srcNode.widgets || []).find((w) => w.name === "image");
     if (imgWidget && imgWidget.value) {
-      return pixApiUrl(`/view?filename=${encodeURIComponent(imgWidget.value)}&type=input&t=${Date.now()}`);
+      return pixApiUrl(`${comboViewRoute(imgWidget.value)}&t=${Date.now()}`);
     }
   }
 

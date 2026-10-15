@@ -2,6 +2,9 @@
 import { PixaromaEditor } from "./core.mjs";
 
 import { pixApiUrl } from "../shared/api_url.mjs";
+// A LoadImage value can carry a subfolder or a type annotation: a raw value 404s
+// (image-pickers.md #4). Both upstream URL builders below go through this.
+import { comboViewRoute } from "../shared/view_url.mjs";
 const PH_COLORS = ["#4A90D9", "#E07B54", "#7DC97A", "#C06BC9", "#E8C547"];
 
 PixaromaEditor.prototype._nextPlaceholderIndex = function () {
@@ -156,7 +159,7 @@ PixaromaEditor.prototype._getUpstreamImageUrl = function (layer) {
   if (srcNode.comfyClass === "LoadImage" || srcNode.type === "LoadImage") {
     const imgWidget = (srcNode.widgets || []).find((w) => w.name === "image");
     if (imgWidget && imgWidget.value) {
-      return pixApiUrl(`/view?filename=${encodeURIComponent(imgWidget.value)}&type=input&t=${Date.now()}`);
+      return pixApiUrl(`${comboViewRoute(imgWidget.value)}&t=${Date.now()}`);
     }
   }
 
@@ -269,7 +272,7 @@ export function getUpstreamImageUrlForNode(node, inputName) {
   if (srcNode.comfyClass === "LoadImage" || srcNode.type === "LoadImage") {
     const imgWidget = (srcNode.widgets || []).find((w) => w.name === "image");
     if (imgWidget && imgWidget.value) {
-      return pixApiUrl(`/view?filename=${encodeURIComponent(imgWidget.value)}&type=input&t=${Date.now()}`);
+      return pixApiUrl(`${comboViewRoute(imgWidget.value)}&t=${Date.now()}`);
     }
   }
 
