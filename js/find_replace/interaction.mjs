@@ -17,7 +17,9 @@ function autoGrow(ta) {
   // Not laid out at a real width yet: a node rebuilt by Ctrl+Z / open is attached for a few frames ~16 px wide,
   // where every character wraps and each field would hit the 120 px cap, and the node grew to fit them (426 ->
   // 606 on one Ctrl+Z = an undo jam, find-replace.md). The width ResizeObserver re-runs this at the real width.
-  if (ta.clientWidth < 40) return;
+  // Gate on the ROOT (>= 205 px on the narrowest real Nodes 2.0 node), never the field: a real field on a 225 px
+  // Nodes 2.0 node is only 37 px wide, and a field threshold stopped it growing there (review, 2026-10-15).
+  if ((ta.closest(".pix-fr-root")?.offsetWidth ?? 0) < 100) return;
   ta.style.height = "auto";
   ta.style.height = Math.max(30, Math.min(ta.scrollHeight, 120)) + "px";
 }
