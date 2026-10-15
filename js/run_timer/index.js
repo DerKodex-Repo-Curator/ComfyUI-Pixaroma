@@ -1303,14 +1303,30 @@ function makeDraggable(panel, handle) {
     e.preventDefault();
     const r = panel.getBoundingClientRect();
     const ox = e.clientX - r.left, oy = e.clientY - r.top;
+    // Both defences against a LOST pointerup (convention #20, the same pair as
+    // js/shared/node_panel.mjs): when the release never arrives (pointer left
+    // the window, capture taken) the panel followed the cursor until a click.
+    try { handle.setPointerCapture(e.pointerId); } catch { /* not fatal */ }
+    let done = false;
     const move = (ev) => {
-      if (!panel.isConnected) { up(); return; }
+      if (!panel.isConnected) return up();
+      if (!(ev.buttons & 1)) return up(); // we missed the release
       panel.style.left = Math.max(0, Math.min(window.innerWidth - panel.offsetWidth, ev.clientX - ox)) + "px";
       panel.style.top = Math.max(0, Math.min(window.innerHeight - panel.offsetHeight, ev.clientY - oy)) + "px";
     };
-    const up = () => { window.removeEventListener("pointermove", move, true); window.removeEventListener("pointerup", up, true); };
+    const up = () => {
+      if (done) return; // idempotent: the guard above can call this too
+      done = true;
+      try { handle.releasePointerCapture(e.pointerId); } catch { /* already gone */ }
+      window.removeEventListener("pointermove", move, true);
+      window.removeEventListener("pointerup", up, true);
+      window.removeEventListener("pointercancel", up, true);
+      handle.removeEventListener("lostpointercapture", up);
+    };
     window.addEventListener("pointermove", move, true);
     window.addEventListener("pointerup", up, true);
+    window.addEventListener("pointercancel", up, true);
+    handle.addEventListener("lostpointercapture", up);
   });
 }
 function outsideClose(e) {
