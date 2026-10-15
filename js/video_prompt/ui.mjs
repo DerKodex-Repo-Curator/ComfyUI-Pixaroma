@@ -19,6 +19,8 @@ import { installCanvasZoomPassthrough } from "../shared/canvas_zoom.mjs";
 import { installNativeTextMenu } from "../shared/native_text_menu.mjs";
 import { installResizeFloor } from "../shared/resize_floor.mjs";
 import { notifyGraphChanged } from "../shared/graph_changed.mjs";
+// The themed seed question (no cycle: ai_prompt never imports video_prompt).
+import { askName } from "../ai_prompt/settings.mjs";
 import {
   IDEA_SHARE_DEFAULT, IDEA_SHARE_MAX, IDEA_SHARE_MIN,
   MODE_HINTS, MODE_LABELS, SEED_RANDOM, displaySeed, looksSpoken, modeOf,
@@ -474,15 +476,20 @@ export function buildFace(node, openPanel) {
   const seedWrap = el("div", "pix-vp-seedwrap");
   const seedBtn = el("button", "pix-vp-seed", "0");
   seedBtn.title = "Click to type a seed";
-  seedBtn.addEventListener("click", (e) => {
+  // Themed, not window.prompt: ComfyUI Desktop does not implement that at all,
+  // so the chip was dead there with nothing shown (ai-prompt.md #19). The write
+  // now lands after an await, past the click the change net records, so it
+  // reports itself.
+  seedBtn.addEventListener("click", async (e) => {
     e.stopPropagation();
     const st = readState(node);
-    const entered = window.prompt("Seed", String(st.seed));
+    const entered = await askName("Seed", "Type the seed number to use:", String(st.seed));
     if (entered == null) return;
     const n = Math.trunc(Number(entered));
     if (!Number.isFinite(n) || n < 0) return;
     writeState(node, { seed: n });
     renderFace(node);
+    notifyGraphChanged();
   });
   const seedMode = el("button", "pix-vp-seedmode", "F");
   seedMode.addEventListener("click", (e) => {

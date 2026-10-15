@@ -19,6 +19,13 @@ import {
 import { formatModelSize } from "../shared/utils.mjs";
 import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
 import { looksVision } from "../shared/model_kinds.mjs";
+import { installGraphUndoGuard } from "../shared/graph_undo_guard.mjs";
+// The themed dialogs, reused like Music Prompt does (no cycle: ai_prompt never
+// imports video_prompt). NEVER gate an action here on window.confirm / alert /
+// prompt: a ComfyUI Desktop pane refuses them SILENTLY (confirm = false in 1 ms,
+// nothing shown), so Reset, Reset all and Import did nothing and an import error
+// said nothing (ai-prompt.md #19 / #19c, video-prompt.md #24).
+import { askConfirm, sayIt } from "../ai_prompt/settings.mjs";
 // Duration Pixaroma's recipe list, shared rather than copied: it is pure data
 // with no imports and no side effects, and one list means the two nodes cannot
 // drift on what "Wan" means.
@@ -313,6 +320,7 @@ function closeEditor() {
   // for the whole app. The symptom looked intermittent: "Escape sometimes needs
   // two presses".
   try { EDITOR?._pixEscOff?.(); } catch (e) { /* already gone */ }
+  try { EDITOR?._pixUndoOff?.(); } catch (e) { /* already gone */ }
   EDITOR?.remove();
   EDITOR = null;
 }
@@ -373,6 +381,10 @@ export function openEditor(title, text, onSave, opts) {
   };
   window.addEventListener("keydown", esc, true);
   back._pixEscOff = () => window.removeEventListener("keydown", esc, true);
+  // Ctrl+Z must not reach the graph while this is open (it wiped the graph under
+  // the editor: 2 nodes -> 0 in three presses). Why a textarea is no protection:
+  // graph-undo-guard.md. Released in closeEditor.
+  back._pixUndoOff = installGraphUndoGuard(() => !!back.isConnected);
 
   document.body.appendChild(back);
   EDITOR = back;
@@ -425,6 +437,10 @@ export function closeVideoPromptPanelFor(node) {
 // made it look like a panel bug rather than an event-type bug.
 function outsideClose(e) {
   if (!PANEL) return;
+  // A themed dialog (askConfirm / sayIt, on <body>) sits ON TOP: answering it
+  // must not close the panel or its dropdown underneath. FIRST, like Music
+  // Prompt's, so the dropdown check below cannot take the list down with it.
+  if (e.target?.closest?.(".pix-apk-back")) return;
   // The dropdown is position:fixed on <body>, so a click ELSEWHERE INSIDE the
   // panel used to leave it floating over a row that renderPanel had already
   // destroyed - anchored to nothing. Close it before the inside-the-panel
@@ -466,6 +482,9 @@ function wheelClose(e) {
 function escClose(e) {
   if (e.key !== "Escape" || !PANEL) return;
   if (EDITOR) return;                 // the editor handles its own Escape
+  // ...and so does a themed dialog (window+capture): Escape answers "no" there,
+  // it must not also close the panel.
+  if (document.querySelector(".pix-apk-back")) return;
   // Close the DROPDOWN first if one is open. This handler is on document with
   // capture, so it runs before the event reaches the filter input inside the
   // popup - the filter's own Escape branch could never fire, and pressing
@@ -706,8 +725,9 @@ function renderPanel(node, body) {
     reset.disabled = !info.edited;
     reset.addEventListener("click", async (e) => {
       e.stopPropagation();
-      if (!window.confirm("Put the shipped " + (MODE_LABELS[mode] || mode) +
-        " formula back? Your edits to it are lost.")) return;
+      if (!await askConfirm("Put the shipped formula back?",
+        "Put the shipped " + (MODE_LABELS[mode] || mode)
+        + " formula back? Your edits to it are lost.", { okText: "Reset" })) return;
       await resetMode(mode);
       DATA = await fetchAll();
       for (const m of MODES) {
@@ -862,12 +882,12 @@ function renderPanel(node, body) {
       try {
         payload = JSON.parse(await file.text());
       } catch (err) {
-        window.alert("That file is not a formula export.");
+        sayIt("Could not import it", "That file is not a formula export.");
         return;
       }
       const incoming = payload?.modes;
       if (!incoming || typeof incoming !== "object") {
-        window.alert("That file is not a formula export.");
+        sayIt("Could not import it", "That file is not a formula export.");
         return;
       }
 
@@ -883,13 +903,14 @@ function renderPanel(node, body) {
           || (Array.isArray(m.durations) && m.durations.length);
       });
       if (!affected.length) {
-        window.alert("That file has no formulas in it.");
+        sayIt("Nothing to import", "That file has no formulas in it.");
         return;
       }
       const names = affected.map((mode) => MODE_LABELS[mode] || mode).join(", ");
-      if (!window.confirm(
+      if (!await askConfirm("Replace these formulas?",
         "Replace the formulas for " + names + " with the ones in this file?\n\n"
-        + "Your current wording for those is overwritten and cannot be undone.")) return;
+        + "Your current wording for those is overwritten and cannot be undone.",
+        { okText: "Replace" })) return;
 
       // Each save is its own request, so a failure part way through leaves a
       // HALF-applied import. Reporting nothing would look identical to success.
@@ -907,8 +928,8 @@ function renderPanel(node, body) {
         }
       }
       if (failed.length) {
-        window.alert("Some of that file could not be saved: " + failed.join(", ")
-          + ".\nThe rest was imported.");
+        sayIt("Imported in part", "Some of that file could not be saved: "
+          + failed.join(", ") + ".\nThe rest was imported.");
       }
       DATA = await fetchAll();
       for (const m of MODES) {
@@ -924,8 +945,9 @@ function renderPanel(node, body) {
   resetAll.title = "Put every shipped formula and tier back";
   resetAll.addEventListener("click", async (e) => {
     e.stopPropagation();
-    if (!window.confirm(
-      "Put every shipped formula and tier back? All of your edits are lost.")) return;
+    if (!await askConfirm("Reset everything?",
+      "Put every shipped formula and tier back? All of your edits are lost.",
+      { okText: "Reset all" })) return;
     for (const mode of MODES) await resetMode(mode);
     DATA = await fetchAll();
     for (const m of MODES) {
