@@ -87,6 +87,10 @@ function pixConfirmSimple(message, onOpen) {
     cancel.onclick = () => done(false);
     ok.onclick = () => done(true);
     const onKey = (e) => {
+      // A HELD key is not an answer: holding Ctrl+Enter past the key-repeat delay sent repeated Enter keydowns that
+      // took "Continue" and ran the big grid with no real answer (2026-10-15). Swallow repeats so they also do not
+      // reach ComfyUI's own keybindings while the question is open.
+      if (e.repeat) { e.stopImmediatePropagation(); return; }
       if (e.key === "Escape") { e.stopImmediatePropagation(); done(false); }
       else if (e.key === "Enter") { e.stopImmediatePropagation(); done(true); }
     };
