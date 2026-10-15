@@ -89,10 +89,11 @@ function pixConfirmSimple(message, onOpen) {
     const onKey = (e) => {
       // A HELD key is not an answer: holding Ctrl+Enter past the key-repeat delay sent repeated Enter keydowns that
       // took "Continue" and ran the big grid with no real answer (2026-10-15). Swallow repeats so they also do not
-      // reach ComfyUI's own keybindings while the question is open.
-      if (e.repeat) { e.stopImmediatePropagation(); return; }
-      if (e.key === "Escape") { e.stopImmediatePropagation(); done(false); }
-      else if (e.key === "Enter") { e.stopImmediatePropagation(); done(true); }
+      // reach ComfyUI's own keybindings while the question is open. preventDefault too: the focus usually stays in
+      // XY Plot's value textarea behind the dialog, and a held / answering Enter typed newlines into the axis values.
+      if (e.repeat) { e.preventDefault(); e.stopImmediatePropagation(); return; }
+      if (e.key === "Escape") { e.preventDefault(); e.stopImmediatePropagation(); done(false); }
+      else if (e.key === "Enter") { e.preventDefault(); e.stopImmediatePropagation(); done(true); }
     };
     document.addEventListener("keydown", onKey, true);
     back.addEventListener("mousedown", (e) => { if (e.target === back) done(false); });
