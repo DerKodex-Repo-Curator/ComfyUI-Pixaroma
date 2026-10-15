@@ -17,6 +17,7 @@
 
 import { api } from "../../../scripts/api.js";
 import { pixApiUrl } from "../shared/api_url.mjs";
+import { runWorkflow } from "../shared/run_tab.mjs";
 import * as A from "./api.mjs";
 
 // ── colour ──────────────────────────────────────────────────────────────────
@@ -234,19 +235,31 @@ export function installOutputCoverCapture() {
 
   api.addEventListener("executed", (ev) => {
     try {
-      const images = ev?.detail?.output?.images;
+      const output = ev?.detail?.output;
+      const images = output?.images;
       if (!Array.isArray(images) || !images.length) return;
-      const rel = A.activePath();
-      if (!rel) return;                      // an unsaved workflow has no file to pin it to
       const img = images.find((i) => i && i.filename && (i.type || "output") !== "temp"
                                      && isPictureName(i.filename));
       if (!img) return;
-      pending = pending || {};
-      pending[rel] = { kind: "output", filename: img.filename, subfolder: img.subfolder || "", type: img.type || "output" };
-      // Debounced: a batch fires this once per output node, and each one would
-      // otherwise be its own write.
-      clearTimeout(flushTimer);
-      flushTimer = setTimeout(flush, 1200);
+      // The workflow that RAN, not the one open now: a run keeps going when you
+      // switch tabs, and its picture became the OTHER workflow's cover (VC#30).
+      // runWorkflow needs core's own listener to have filed the output first,
+      // hence the microtask; when it cannot tell, the open one as before.
+      queueMicrotask(() => {
+        try {
+          const owner = runWorkflow(output);
+          const rel = owner ? A.fromStorePath(owner.path || "") : A.activePath();
+          if (!rel) return;                  // an unsaved workflow has no file to pin it to
+          pending = pending || {};
+          pending[rel] = { kind: "output", filename: img.filename, subfolder: img.subfolder || "", type: img.type || "output" };
+          // Debounced: a batch fires this once per output node, and each one would
+          // otherwise be its own write.
+          clearTimeout(flushTimer);
+          flushTimer = setTimeout(flush, 1200);
+        } catch {
+          // Never throw over a cover thumbnail.
+        }
+      });
     } catch {
       // Never throw inside ComfyUI's event loop over a cover thumbnail.
     }
