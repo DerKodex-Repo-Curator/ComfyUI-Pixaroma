@@ -125,6 +125,13 @@ class PixaromaUncrop:
         all-ones), with the edges feathered by `feather` px."""
         if isinstance(mask, torch.Tensor):
             m = mask
+            # squeeze a singleton channel dim ([B,1,H,W] / [B,H,W,1]) like
+            # _passthrough_mask does; a 4-D mask fell to all-ones before
+            if m.dim() == 4:
+                if m.shape[1] == 1:
+                    m = m[:, 0]
+                elif m.shape[-1] == 1:
+                    m = m[..., 0]
             if m.dim() == 2:
                 m = m[None, ...]
             if m.dim() == 3:
