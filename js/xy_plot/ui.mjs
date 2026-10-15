@@ -440,6 +440,9 @@ function openPicker(node, axisKey, anchorEl, rerender) {
     popup.appendChild(el("div", "pix-xy-empty", "No other nodes with adjustable settings found. Add a node (e.g. KSampler) and wire your workflow first."));
   } else {
     filter = isolate(el("input", "pix-xy-input"));
+    // Ctrl/Cmd+S or Ctrl/Cmd+Enter goes on to ComfyUI (isolate lets it out):
+    // close the picker, or it stays drawn over core's "Save workflow as" prompt.
+    filter.addEventListener("keydown", (e) => { if (passComfyShortcut(e, filter)) closePopup(); });
     filter.type = "text";
     filter.placeholder = "Filter settings…";
     filter.style.cssText += "position:sticky;top:0;margin-bottom:6px;";
