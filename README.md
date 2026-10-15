@@ -244,6 +244,12 @@ The two editors can also use **rembg** (`pip install rembg`, then restart ComfyU
 
 ## 🛠 Changelog
 
+### **October 16, 2026 · v1.4.216**
+- **Open buttons no longer say "Popup blocked"** on Save Image, Preview Image and Pause Image when the picture opened.
+- **Find and Replace, Prompt Multi and Prompt Stack** no longer grow or open as modified after Ctrl+Z or opening a workflow.
+- **Dialogs stay open when a drag ends outside them,** and dragged panels no longer stick to the mouse.
+- **Right-click in Text Join and XY Plot text boxes gives Copy and Paste;** Pixaroma Group draws links through reroutes.
+
 ### **October 15, 2026 · v1.4.215**
 - **Video Prompt: Reset, Import and the seed box work on ComfyUI Desktop,** and Ctrl+Z in its editor no longer undoes the workflow.
 - **Copy (Clipspace) from Prompt Reader, Save Image or Save Video no longer breaks the next paste.**
