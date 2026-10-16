@@ -245,7 +245,8 @@ The two editors can also use **rembg** (`pip install rembg`, then restart ComfyU
 
 ## 🛠 Changelog
 
-### **October 16, 2026 · v1.4.216-v1.4.218**
+### **October 16, 2026 · v1.4.216-v1.4.219**
+- **New node, Layout Boxes Pixaroma:** draw where things go for FLUX.3 layout prompts, in Classic and Nodes 2.0, with the same result as core's box node.
 - **Switch, Mute Switch, Text Join and Outpaint Stitch keep their wired rows in Nodes 2.0** on ComfyUI 0.40 and newer, instead of hiding them.
 - **AI Prompt: a new switch sends the formula as a system message,** the way Text Generate does, plus a FLUX 3 prompt upsampler preset that gives the same result.
 - **Open buttons no longer say "Popup blocked"** on Save Image, Preview Image and Pause Image when the picture opened.
