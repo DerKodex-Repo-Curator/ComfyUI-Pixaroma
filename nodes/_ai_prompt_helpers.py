@@ -337,31 +337,40 @@ def apply_no_think(prompt, thinking, clip_name):
 # It can only happen when the model has a system turn to put it in, and an
 # older ComfyUI would not say so: every tokenizer ends in **kwargs, so an
 # unknown system_prompt is accepted and silently DROPPED - the formula would
-# vanish from the request. So support is read from the tokenizer's signature,
-# and anything that cannot take it falls back to today's prompt WITH a note.
+# vanish from the request. So support is TESTED (tokenize_honours), and anything
+# that cannot take it falls back to today's prompt WITH a note.
 NOTE_NO_SYSTEM = "no system message on this model, formula sent in the prompt"
 NOTE_TEMPLATE_OFF = "template off, formula sent in the prompt"
 NOTE_ONLY_FORMULA = "only the formula to send, so it went in the prompt"
 
+# The fixed tokenize arguments of a system-mode run (the template is on there),
+# so a probe builds exactly what the real call will.
+_PROBE_BASE = {"skip_template": False, "min_length": 1}
 
-def tokenizer_takes(clip, name):
-    """True when the clip's tokenizer NAMES `name` as a parameter.
 
-    Named = it actually reads it. A name that would only land in **kwargs is
-    swallowed with no effect, which is the whole reason for asking. Never raises.
+def tokenize_honours(clip, kwarg, on_value, off_value, base=None):
+    """True when passing `kwarg` CHANGES what the clip's tokenizer builds.
+
+    Found out by doing it: a one-letter probe is tokenized both ways and the
+    results compared (text only, no model runs - a few milliseconds). Reading
+    the tokenizer's SIGNATURE was the first version and it was wrong (review
+    2026-10-16, reproduced live): Gemma 4's tokenizer and the Qwen3-VL types
+    krea2 / flux3 take only **kwargs on the outside and hand them to an inner
+    tokenizer that DOES build the system turn, so a working model was reported
+    as having none - while an older ComfyUI, also **kwargs, really drops it.
+    Only the tokens tell those apart. Never raises: any failure means False,
+    which falls back to the formula inside the prompt.
     """
-    import inspect
-
-    fn = getattr(getattr(clip, "tokenizer", None), "tokenize_with_weights", None)
-    if not callable(fn):
+    tokenize = getattr(clip, "tokenize", None)
+    if not callable(tokenize):
         return False
+    args = dict(_PROBE_BASE if base is None else base)
     try:
-        params = inspect.signature(fn).parameters
-    except (TypeError, ValueError):
+        off = tokenize("a", **dict(args, **{kwarg: off_value}))
+        on = tokenize("a", **dict(args, **{kwarg: on_value}))
+        return repr(off) != repr(on)
+    except Exception:
         return False
-    param = params.get(name)
-    return param is not None and param.kind not in (
-        inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD)
 
 
 def plan_prompt(state, wired_text, clip_name, clip):
@@ -389,13 +398,14 @@ def plan_prompt(state, wired_text, clip_name, clip):
     if st.get("system_formula") and formula.strip():
         if not st.get("use_default_template", True):
             note = NOTE_TEMPLATE_OFF
-        elif not tokenizer_takes(clip, "system_prompt"):
-            note = NOTE_NO_SYSTEM
         elif not user_turn.strip():
             note = NOTE_ONLY_FORMULA
+        elif not tokenize_honours(clip, "system_prompt", "x", "",
+                                  dict(_PROBE_BASE, thinking=bool(thinking))):
+            note = NOTE_NO_SYSTEM
         else:
             prompt = user_turn
-            if not tokenizer_takes(clip, "thinking"):
+            if not tokenize_honours(clip, "thinking", True, False):
                 prompt = apply_no_think(prompt, thinking, clip_name)
             return prompt, {"system_prompt": formula}, ""
     prompt = build_prompt(formula, st.get("idea", ""), wired_text,

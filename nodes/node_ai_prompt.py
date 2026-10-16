@@ -466,7 +466,9 @@ class PixaromaAIPrompt:
         # correctly. The switch written into the user turn IS honoured there.
         #
         # "Send the formula as a system message" needs a tokenizer that takes
-        # one (plan_prompt reads its signature). With the switch off, or no
+        # one (plan_prompt TESTS that with a one-letter tokenize probe, since a
+        # signature cannot tell: Gemma 4 forwards **kwargs to a tokenizer that
+        # does build the system turn, an older ComfyUI drops it). With the switch off, or no
         # formula, sys_kw is EMPTY, so both tokenize calls below are exactly
         # what they were before the switch existed.
         prompt, sys_kw, sys_note = plan_prompt(
