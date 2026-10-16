@@ -91,6 +91,10 @@ export const DEFAULT_STATE = {
   thinking: false,
   use_default_template: true,
   release_model: false,
+  // The formula as the model's SYSTEM message, like core's TextGenerate
+  // system_prompt (2026-10-16). Python decides whether the model can take one
+  // (nodes/_ai_prompt_helpers.py plan_prompt) and says so when it cannot.
+  system_formula: false,
   // NOTE: no "passthrough" flag, deliberately. Passing the text through is what
   // the node does when there is no model or nothing to send, and a switch to
   // turn that off could only mean "error instead", which is strictly worse.
@@ -107,7 +111,7 @@ const PROMPT_KEYS = [
   "idea", "formula", "model", "clip_type", "order", "sep", "seed",
   "temperature", "max_length", "top_k", "top_p", "min_p",
   "repetition_penalty", "presence_penalty", "do_sample", "thinking",
-  "use_default_template", "release_model",
+  "use_default_template", "release_model", "system_formula",
 ];
 
 // Exactly what a PRESET may carry, and it must match SETTING_KEYS in
@@ -117,7 +121,7 @@ const PROMPT_KEYS = [
 export const SETTING_KEYS = [
   "temperature", "max_length", "top_k", "top_p", "min_p",
   "repetition_penalty", "presence_penalty", "do_sample", "thinking",
-  "use_default_template",
+  "use_default_template", "system_formula",
 ];
 
 function num(value, fallback, lo, hi) {
@@ -152,6 +156,7 @@ export function readState(node) {
   st.thinking = st.thinking === true;
   st.use_default_template = st.use_default_template !== false;
   st.release_model = st.release_model === true;
+  st.system_formula = st.system_formula === true;
   st.idea_share = num(st.idea_share, IDEA_SHARE_DEFAULT, IDEA_SHARE_MIN, IDEA_SHARE_MAX);
   return st;
 }
@@ -349,6 +354,7 @@ export function readLast(node) {
     meta: str(src.meta, ""),
     error: src.error === true,
     muted: src.muted === true,
+    warn: src.warn === true,
     seed: Number.isFinite(Number(src.seed)) ? Number(src.seed) : null,
   };
 }
@@ -362,6 +368,9 @@ export function writeLast(node, next) {
     meta: str(next?.meta, ""),
     error: next?.error === true,
     muted: next?.muted === true,
+    // "Send the formula as a system message" was on and could not happen, so
+    // the meta line (which says why) is amber. Python's payload `warn`.
+    warn: next?.warn === true,
     // The seed the run REPORTED, so the chip can still name it after a tab
     // switch has taken _pixApLastSeed with the node object - see displaySeed.
     seed: Number.isFinite(Number(next?.seed)) ? Number(next.seed) : null,

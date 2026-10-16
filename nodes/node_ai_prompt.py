@@ -23,13 +23,12 @@ import comfy.sd
 import folder_paths
 
 from ._ai_prompt_helpers import (
-    apply_no_think,
     as_text,
-    build_prompt,
     content_text,
     AIPromptInputs,
     extra_image_keys,
     parse_state,
+    plan_prompt,
     reasoning_only,
     status_line,
     strip_reasoning,
@@ -449,29 +448,33 @@ class PixaromaAIPrompt:
             }
 
         # ---- the generating path -------------------------------------------
-        prompt = build_prompt(
-            st["formula"], st["idea"], wired, st["order"], st["sep"]
-        )
         own_clip = False
         if not has_clip:
             clip = _load_clip(st["model"], st["clip_type"])
             own_clip = True
 
-        # Make the Thinking toggle mean something. AFTER the clip is resolved,
-        # because the decision reads the model's NAME - and because own_clip
-        # does not exist until here, which is how the first draft of this
-        # would have raised NameError on every generating run.
+        # The whole string the model is asked, decided AFTER the clip is
+        # resolved, because two things here read the model:
         #
-        # The `thinking` argument handed to tokenize below only reaches a chat
-        # template some encoder paths never apply, so a Qwen3 loaded as lumina2
-        # reasoned at length with the toggle already OFF: 59 seconds against
-        # 17, for a control the user had set correctly. The switch written into
-        # the user turn IS honoured there.
-        prompt = apply_no_think(
-            prompt,
-            st["thinking"],
+        # Make the Thinking toggle mean something (apply_no_think, by the
+        # model's NAME - and own_clip does not exist until here, which is how
+        # the first draft of this would have raised NameError on every
+        # generating run). The `thinking` argument handed to tokenize below
+        # only reaches a chat template some encoder paths never apply, so a
+        # Qwen3 loaded as lumina2 reasoned at length with the toggle already
+        # OFF: 59 seconds against 17, for a control the user had set
+        # correctly. The switch written into the user turn IS honoured there.
+        #
+        # "Send the formula as a system message" needs a tokenizer that takes
+        # one (plan_prompt reads its signature). With the switch off, or no
+        # formula, sys_kw is EMPTY, so both tokenize calls below are exactly
+        # what they were before the switch existed.
+        prompt, sys_kw, sys_note = plan_prompt(
+            st,
+            wired,
             getattr(getattr(clip, "tokenizer", None), "clip_name", "")
             or (st["model"] if own_clip else ""),
+            clip,
         )
 
         img = _img(image)
@@ -486,7 +489,8 @@ class PixaromaAIPrompt:
             # fallback that quietly dropped skip_template would change what the
             # model is asked without saying so. `image` is singular on purpose -
             # that is what core passes and what Qwen3VLTokenizer reads out of
-            # kwargs.
+            # kwargs. sys_kw is {} unless the formula goes as a system message,
+            # and then it is core's own `system_prompt=` (plan_prompt).
             tokens = clip.tokenize(
                 prompt,
                 image=img,
@@ -495,6 +499,7 @@ class PixaromaAIPrompt:
                 thinking=st["thinking"],
                 video=vid,
                 audio=aud,
+                **sys_kw,
             )
         else:
             # image_2 ... image_8 are wired. ONLY this branch is new, so a node
@@ -518,6 +523,7 @@ class PixaromaAIPrompt:
                 thinking=st["thinking"],
                 video=vid,
                 audio=aud,
+                **sys_kw,
             )
 
         # A LIST input (a folder of pictures, Prompt Each) runs this function
@@ -579,7 +585,12 @@ class PixaromaAIPrompt:
                     "status": ("this model reasons, and it used the whole Max len "
                                "thinking before it wrote anything - raise Max len, "
                                "or pick a model that does not reason")
-                    if ran_out_thinking else status_line(st, wired, has_clip, True),
+                    if ran_out_thinking
+                    else sys_note or status_line(st, wired, has_clip, True),
+                    # Amber on the face: "Send the formula as a system message"
+                    # is on but could not happen, so the formula went inside the
+                    # prompt instead (plan_prompt says why in sys_note).
+                    "warn": bool(sys_note),
                     "used_clip": has_clip,
                     "words": word_count(out),
                     "seconds": round(time.time() - started, 2),

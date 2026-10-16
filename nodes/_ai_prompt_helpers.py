@@ -74,6 +74,11 @@ DEFAULT_STATE = {
     "thinking": False,
     "use_default_template": True,
     "release_model": False,
+    # Send the formula as the model's SYSTEM message instead of inside the
+    # prompt, the way core's TextGenerate sends its system_prompt (2026-10-16,
+    # Ep39: BFL's FLUX 3 prompt upsampler was trained that way). See
+    # plan_prompt() for when it can and cannot happen.
+    "system_formula": False,
 }
 # NOTE: there is deliberately no "passthrough" flag. Passing the text through
 # is what the node does when there is no model or nothing to send, and a switch
@@ -163,6 +168,7 @@ def parse_state(raw):
     st["thinking"] = st["thinking"] is True
     st["use_default_template"] = st["use_default_template"] is not False
     st["release_model"] = st["release_model"] is True
+    st["system_formula"] = st["system_formula"] is True
     return st
 
 
@@ -316,6 +322,85 @@ def apply_no_think(prompt, thinking, clip_name):
     if "<|im_start|>" in prompt:
         return prompt
     return prompt.rstrip() + "\n\n/no_think"
+
+
+# ---------------------------------------------------------------------------
+# The formula as a SYSTEM message (2026-10-16)
+# ---------------------------------------------------------------------------
+# By default the formula goes INSIDE the prompt, above the idea (build_prompt).
+# Core's TextGenerate can instead send an instruction as the model's system
+# message (its `system_prompt` input, ComfyUI 0.38.0+), and a model TRAINED that
+# way - BFL's FLUX 3 prompt upsampler - writes a different caption when the
+# same words arrive in the user turn (measured, Ep39 jobs14.py). The switch
+# makes this node ask exactly what TextGenerate asks.
+#
+# It can only happen when the model has a system turn to put it in, and an
+# older ComfyUI would not say so: every tokenizer ends in **kwargs, so an
+# unknown system_prompt is accepted and silently DROPPED - the formula would
+# vanish from the request. So support is read from the tokenizer's signature,
+# and anything that cannot take it falls back to today's prompt WITH a note.
+NOTE_NO_SYSTEM = "no system message on this model, formula sent in the prompt"
+NOTE_TEMPLATE_OFF = "template off, formula sent in the prompt"
+NOTE_ONLY_FORMULA = "only the formula to send, so it went in the prompt"
+
+
+def tokenizer_takes(clip, name):
+    """True when the clip's tokenizer NAMES `name` as a parameter.
+
+    Named = it actually reads it. A name that would only land in **kwargs is
+    swallowed with no effect, which is the whole reason for asking. Never raises.
+    """
+    import inspect
+
+    fn = getattr(getattr(clip, "tokenizer", None), "tokenize_with_weights", None)
+    if not callable(fn):
+        return False
+    try:
+        params = inspect.signature(fn).parameters
+    except (TypeError, ValueError):
+        return False
+    param = params.get(name)
+    return param is not None and param.kind not in (
+        inspect.Parameter.VAR_POSITIONAL, inspect.Parameter.VAR_KEYWORD)
+
+
+def plan_prompt(state, wired_text, clip_name, clip):
+    """(prompt, extra tokenize kwargs, note) for a generating run.
+
+    Switch OFF, or no formula: EXACTLY what the node always asked - the formula
+    above the idea, plus the name-scoped /no_think - and no extra kwargs, so the
+    tokenize call stays byte-identical to before the switch existed.
+
+    Switch ON and possible: the idea (+ wired text) alone as the prompt and the
+    formula VERBATIM as `system_prompt`, which is what TextGenerate sends. No
+    /no_think where the template handles thinking itself (Qwen3.5 / Qwen3-VL add
+    the empty think block), or the request would no longer match core's; plain
+    Qwen3 (Z-Image's encoder) has no such control, so it keeps the switch in the
+    user turn - otherwise Thinking off would reason for a minute (#14c).
+
+    Switch ON but impossible: today's prompt and a note for the readout.
+    """
+    st = state
+    formula = st.get("formula", "")
+    thinking = st.get("thinking", False)
+    user_turn = content_text(st.get("idea", ""), wired_text,
+                             st.get("order", ORDER_IDEA), st.get("sep", DEFAULT_SEP))
+    note = ""
+    if st.get("system_formula") and formula.strip():
+        if not st.get("use_default_template", True):
+            note = NOTE_TEMPLATE_OFF
+        elif not tokenizer_takes(clip, "system_prompt"):
+            note = NOTE_NO_SYSTEM
+        elif not user_turn.strip():
+            note = NOTE_ONLY_FORMULA
+        else:
+            prompt = user_turn
+            if not tokenizer_takes(clip, "thinking"):
+                prompt = apply_no_think(prompt, thinking, clip_name)
+            return prompt, {"system_prompt": formula}, ""
+    prompt = build_prompt(formula, st.get("idea", ""), wired_text,
+                          st.get("order", ORDER_IDEA), st.get("sep", DEFAULT_SEP))
+    return apply_no_think(prompt, thinking, clip_name), {}, note
 
 
 def word_count(text):

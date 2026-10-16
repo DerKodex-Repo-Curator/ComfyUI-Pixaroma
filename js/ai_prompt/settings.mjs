@@ -1155,6 +1155,9 @@ async function applyRecipeText(node, raw, sourceName) {
   for (const key of SETTING_KEYS) {
     if (key in recipe.settings) patch[key] = recipe.settings[key];
   }
+  // Same rule as loading a preset: a recipe that brings settings but not this
+  // one was exported before the switch existed, with the formula in the prompt.
+  if (hasSettings && !("system_formula" in recipe.settings)) patch.system_formula = false;
   // Same rule as loading a preset: a named model is applied only when it is
   // actually here and nothing is on the clip wire. Never point a node at a
   // file that does not exist on this machine.
@@ -1526,6 +1529,10 @@ function renderPanel(node, body) {
           for (const key of SETTING_KEYS) {
             if (key in preset.settings) patch[key] = preset.settings[key];
           }
+          // A preset that does not mention it predates the switch, so its
+          // formula was written and measured INSIDE the prompt: leaving the
+          // switch on from an earlier preset would change how it is asked.
+          if (!("system_formula" in preset.settings)) patch.system_formula = false;
         }
         // A model hint is APPLIED when that file is actually here, and never
         // over a wired clip. When it is missing the panel SAYS so, on the line
@@ -1760,6 +1767,14 @@ function renderPanel(node, body) {
     (v) => set({ use_default_template: v }),
     "Most chat models have a built-in wrapper that tells them they are "
     + "answering a question. Off sends your words completely raw."));
+  body.appendChild(toggleRow("Send the formula as a system message", st.system_formula,
+    (v) => set({ system_formula: v }),
+    "On: the formula goes to the model as its system message, and only your idea "
+    + "(and any wired text) is the prompt. This is how ComfyUI's Text Generate "
+    + "sends a system prompt, and some models were trained that way, like the "
+    + "FLUX 3 prompt upsampler. Needs ComfyUI 0.38 or newer, a model that has a "
+    + "system message and the template above on. Otherwise the formula goes "
+    + "inside the prompt as usual, and the node says so in amber."));
   body.appendChild(toggleRow("Thinking mode, if the model has one", st.thinking,
     (v) => set({ thinking: v }),
     "Some models reason first and answer second. Slower, and not every model "

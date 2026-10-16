@@ -807,7 +807,7 @@ export function renderFace(node) {
   const last = readLast(node);
   els.out.value = last.text;
   els.copy.disabled = !last.text || last.error;
-  els.meta.classList.toggle("is-error", last.error || last.muted);
+  els.meta.classList.toggle("is-error", last.error || last.muted || last.warn);
   els.meta.textContent = last.meta;
   els.meta.title = last.meta;
 
@@ -849,6 +849,7 @@ export function applyResult(node, payload, elapsed) {
     meta: bits.join(" · "),
     error: false,
     muted: payload?.used_clip === false && slotConnected(node, "clip"),
+    warn: payload?.warn === true,
     seed: payload?.seed,
   });
   renderFace(node);

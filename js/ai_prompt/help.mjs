@@ -197,7 +197,7 @@ export const AI_PROMPT_HELP = {
         ["Hover a name", "Shows which model it was written for, whether you have that model, and its temperature. All before you load it."],
         ["Save current", "Keeps whatever this node has right now under a name you choose, so your own recipes sit in the same list. After changing one of your own presets, its name is already filled in: press Enter to update it, or type a new name to keep both."],
         ["Deleting one", "Hover a name in the list and a ✕ appears at the end of the row. It works on your own presets and asks first, because they are files on disk. On the ones that ship with Pixaroma it is greyed out: those come back with every update, so they cannot be deleted."],
-        ["Reset", "On the Advanced sampling line. Puts the sampling values back to the defaults and leaves your formula and model alone. It covers everything a preset can carry, so the two Behaviour switches at the bottom go back too. It wakes up only when something has really changed, and its tooltip names what."],
+        ["Reset", "On the Advanced sampling line. Puts the sampling values back to the defaults and leaves your formula and model alone. It covers everything a preset can carry, so the Behaviour switches at the bottom go back too. It wakes up only when something has really changed, and its tooltip names what."],
       ],
     },
     {
@@ -241,6 +241,7 @@ export const AI_PROMPT_HELP = {
         ["Video - prompt from a video (Gemma 4 E4B)", "Watches a clip and writes the video prompt that would make one like it: the medium, what HAPPENS from beginning to end, and what the camera does. Wire Load Video Pixaroma into the video input. Frames are read as 24fps and sampled one per second, so load a few seconds rather than a whole clip."],
         ["Transcribe - the words only (Gemma 4 E4B)", "Writes out what is said and nothing else: no summary, no description of the sounds, no speaker labels or timestamps, and an unclear word comes back as [inaudible]. Use this one when you want the words themselves; use Sound when you want the mood."],
         ["Sound - describe what you hear (Gemma 4 E4B)", "Wire a Load Audio in and it says what kind of sound it is, quotes any words spoken or sung, names the instruments and gives the mood. Gemma 4 is the ONLY text encoder ComfyUI can feed audio to, so a Qwen3-VL will take the audio, ignore it and answer anyway. Send its text into a second AI Prompt node to turn it into an image prompt."],
+        ["FLUX 3 - prompt from an idea", "BFL's own prompt upsampler for FLUX 3 Image Klein, with their system prompt, their settings and Send the formula as a system message on, so it asks exactly what their Text Generate template asks. It turns a short idea into the long caption FLUX 3 was trained on. Best on short real-world ideas: a fantasy label like \"magical forest\" makes it pile on glowing extras. Top_k is 40, because the template's 1 writes the same caption whatever the seed. Use it before a Flux3 Layout Prompt node, never after, because it removes the box tags."],
         ["Krea 2 - prompt from an idea", "Turns a rough idea into a full Krea 2 prompt. Built from Krea's own published prompt-expansion instructions, then tightened by watching where it went wrong. Measured on Qwen3-VL 4B and 8B."],
         ["Krea 2 - prompt from an image", "Wire a Load Image into the image input and it writes the prompt that would make a similar picture, naming the medium, the framing and the light. Leave Your idea empty for this one. Needs a vision model. Photographs come back cleanest."],
         ["Ming Image - prompt from an idea", "Turns a short idea into the structured JSON layout Ming Image 0.1 Design reads best, built on Ming's own published rewriter: every part of the design with its position and colours, and every word you put in quotes kept exactly. Wire a line like Canvas: 832 x 1248 px into the text input (a core Format Text node fed by your width and height) so the layout fits the shape of your picture. Two versions: Qwen3.8 27B, the writer Ming's makers name, and the smaller Qwen3.5 9B. Ming's own text encoder cannot write, so it needs one of these."],
@@ -270,6 +271,25 @@ export const AI_PROMPT_HELP = {
         + "big one. A 4B at 0.7 will echo your formula back at you or invent "
         + "things you never asked for. At 0.3 it behaves. If a formula seems to "
         + "be ignored, lower the temperature before you blame the wording.",
+    },
+    {
+      heading: "Send the formula as a system message",
+      body:
+        "A chat model reads two kinds of text: a system message that sets its job, "
+        + "and the user's turn that asks. By default this node puts the formula inside "
+        + "the prompt, above your idea, and the presets were written for that.\n\n"
+        + "Some models were trained with their instructions in the system message, "
+        + "like BFL's FLUX 3 prompt upsampler. For those, open the settings and turn on "
+        + "Send the formula as a system message, under Behaviour. The formula then "
+        + "goes to the model as its system message, and only your idea, plus any wired "
+        + "text, is the prompt. That is exactly how ComfyUI's own Text Generate node "
+        + "sends its system prompt: tested with the FLUX 3 upsampler, the same seed "
+        + "gave the same caption word for word and the same picture.\n\n"
+        + "It needs ComfyUI 0.38 or newer, a model that has a system message (Qwen3.5, "
+        + "Qwen3-VL, Z-Image's Qwen3 and Gemma 4 do), and Use the model's own template "
+        + "on. When one of those is missing, the formula goes inside the prompt as "
+        + "before and the line under the answer says so in amber. Nothing is dropped "
+        + "without telling you.",
     },
     {
       heading: "Writing a good formula",
@@ -320,6 +340,7 @@ export const AI_PROMPT_HELP = {
         ["It got the words in the picture wrong", "The model reads one large piece of text reliably, and guesses at several smaller ones: a menu reading PLAY, SETTINGS, EXIT came back as PAY, SHEETS, EAT. It never says it is unsure, so a wrong word looks like a right one. A bigger model does not help, and nor does asking it to read carefully; both were tried. If the words matter, read them in the prompt before you Run, and to correct them press Copy, paste into a Text Pixaroma node, fix the words there and wire that into your text encoder."],
         ["I typed in Your idea with the image preset and it changed nothing", "That preset's strongest rule is to describe only what is really in the picture, so it overrules you, which is what stops it inventing things. A change of medium does land, so \"as a watercolour painting\" works. To change what is IN the picture, leave the idea empty and send this node's text into a second AI Prompt node whose formula is the change you want."],
         ["A workflow somebody sent me says the model is not in my text_encoders folder", "A workflow carries the model's NAME, not the model itself. Either download that file, or open the settings and pick one you already have. Everything else, the formula and all the settings, came with the workflow and is already there."],
+        ["The line under the answer says the formula went in the prompt", "Send the formula as a system message is on, but this run could not use one: the model has no system message, Use the model's own template is off, or there was nothing to send besides the formula. The run still worked, with the formula inside the prompt as usual. The amber line says which."],
         ["The settings panel will not close", "Click the gear again, press Escape, or click the canvas."],
       ],
     },

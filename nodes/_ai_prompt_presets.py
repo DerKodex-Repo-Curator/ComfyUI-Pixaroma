@@ -39,7 +39,7 @@ MAX_PRESETS = 200
 SETTING_KEYS = (
     "temperature", "max_length", "top_k", "top_p", "min_p",
     "repetition_penalty", "presence_penalty", "do_sample", "thinking",
-    "use_default_template",
+    "use_default_template", "system_formula",
 )
 
 _ASSET = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
