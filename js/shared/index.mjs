@@ -37,7 +37,7 @@ export {
 
 export { injectLabelCSS } from "./label_css.mjs";
 
-export { isVueNodes, applyAdaptiveCanvasOnly, canvasBackingScale, installZoomRepaint } from "./nodes2.mjs";
+export { isVueNodes, applyAdaptiveCanvasOnly, keepRowWhenWired, canvasBackingScale, installZoomRepaint } from "./nodes2.mjs";
 
 // Fires when the user flips the Nodes 2.0 setting WITHOUT reloading. Any node
 // that builds a different UI per renderer MUST rebuild on this, or it is left

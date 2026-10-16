@@ -129,3 +129,41 @@ export function applyAdaptiveCanvasOnly(widget) {
   }
   return widget;
 }
+
+/**
+ * Keep a widget-socket ROW on screen while its input is wired.
+ *
+ * Frontend 1.55 (core 0.40+, PR #16326) hides any widget whose bound input slot
+ * has a link: `LGraphNode.updateComputedDisabled()` sets
+ * `widget.connectionSuppressed = connected`, which writes
+ * `visibility.suppression.byConnection`, and the Nodes 2.0 body then drops the
+ * control and shows the widget's raw name (`pixsw_row_2`) instead. That is right
+ * for a value widget (the wire decides the value) but our rows ARE the inputs:
+ * Switch / Mute Switch toggles must stay on a wired row, and the Text Join /
+ * Outpaint Stitch rows too (those grey themselves when wired). Core has no option
+ * for this, so the row widget gets its own accessor that never reports
+ * suppression and ignores core's write. `computedDisabled` stays core's: the Nodes
+ * 2.0 DOM-widget host ignores it, and Classic binds no slot to these rows.
+ * A frontend without the flag (1.53) never reads the accessor: harmless.
+ *
+ * Call AFTER `addDOMWidget`, on row widgets only (one bound to an input slot).
+ *
+ * @param {object} widget - the row widget returned by addDOMWidget
+ * @returns {object} the same widget (for chaining)
+ */
+export function keepRowWhenWired(widget) {
+  if (!widget) return widget;
+  try {
+    const sup = widget.visibility?.suppression;
+    if (sup && sup.byConnection) sup.byConnection = false;
+    Object.defineProperty(widget, "connectionSuppressed", {
+      configurable: true,
+      enumerable: false,
+      get() { return false; },
+      set() {},
+    });
+  } catch (e) {
+    // A widget object that refuses the property: core's own behaviour stays.
+  }
+  return widget;
+}

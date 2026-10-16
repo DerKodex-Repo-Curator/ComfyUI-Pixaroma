@@ -18,7 +18,7 @@
 import { readState, togglePillRow, setSelectMode, setMuteMode } from "./core.mjs";
 import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
 import { getUpstreamType } from "./render.mjs";
-import { applyAdaptiveCanvasOnly } from "../shared/nodes2.mjs";
+import { applyAdaptiveCanvasOnly, keepRowWhenWired } from "../shared/nodes2.mjs";
 import { installNodeAccent } from "../shared/node_settings.mjs";
 import { removeNodeWidget } from "../shared/remove_widget.mjs";
 
@@ -144,6 +144,8 @@ function syncRowWidgets(node) {
     // is an "auto" (growing) grid row and they would split the node's spare
     // height between them instead of hugging their content.
     w.computeLayoutSize = undefined;
+    // Frontend 1.55 hides a widget whose input is wired; every useful row is.
+    keepRowWhenWired(w);
     rows.push(w);
   }
 

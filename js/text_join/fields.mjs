@@ -16,7 +16,7 @@
 
 import { app } from "../../../scripts/app.js";
 import { widgetOf, BRAND, readState, labelFor } from "./core.mjs";
-import { applyAdaptiveCanvasOnly, isVueNodes, installResizeFloor, installCanvasZoomPassthrough, installNativeTextMenu } from "../shared/index.mjs";
+import { applyAdaptiveCanvasOnly, keepRowWhenWired, isVueNodes, installResizeFloor, installCanvasZoomPassthrough, installNativeTextMenu } from "../shared/index.mjs";
 import { ACC, installNodeAccent } from "../shared/node_settings.mjs";
 import { isComfyTextShortcut } from "../shared/text_shortcuts.mjs";
 
@@ -341,6 +341,9 @@ export function installFields(node) {
       };
     }
     applyAdaptiveCanvasOnly(w);
+    // Frontend 1.55 hides a widget whose input is wired; a wired field must stay
+    // (it greys itself: "text comes from the wired node").
+    keepRowWhenWired(w);
     node._pixTjWraps.push(wrap);
     node._pixTjRowWidgets[cfg.name] = w;
     node._pixTjFloorOffs.push(installResizeFloor(wrap, () => MIN_FIELD_H));

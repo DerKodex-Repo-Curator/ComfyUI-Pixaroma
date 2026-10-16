@@ -14,7 +14,7 @@
 
 import { app } from "../../../scripts/app.js";
 import { widgetOf, accentOf } from "./core.mjs";
-import { applyAdaptiveCanvasOnly, isVueNodes } from "../shared/nodes2.mjs";
+import { applyAdaptiveCanvasOnly, keepRowWhenWired, isVueNodes } from "../shared/nodes2.mjs";
 import { installResizeFloor } from "../shared/resize_floor.mjs";
 import { installCanvasZoomPassthrough } from "../shared/canvas_zoom.mjs";
 import { passComfyShortcut } from "../shared/text_shortcuts.mjs";
@@ -315,6 +315,9 @@ export function installSliders(node) {
     w.serialize = false;
     w.computeLayoutSize = undefined;   // hug content (Nodes 2.0)
     applyAdaptiveCanvasOnly(w);
+    // Frontend 1.55 hides a widget whose input is wired; a wired slider must stay
+    // (it greys and locks itself).
+    keepRowWhenWired(w);
     node._pixOpsWraps.push(wrap);
     node._pixOpsRowWidgets[cfg.name] = w;
     // Pin to the wrap's ACTUAL rendered height (not ROW_H+PAD, which was TALLER
