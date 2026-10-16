@@ -244,7 +244,8 @@ The two editors can also use **rembg** (`pip install rembg`, then restart ComfyU
 
 ## 🛠 Changelog
 
-### **October 16, 2026 · v1.4.216**
+### **October 16, 2026 · v1.4.216-v1.4.217**
+- **AI Prompt: a new switch sends the formula as a system message,** the way Text Generate does, plus a FLUX 3 prompt upsampler preset that gives the same result.
 - **Open buttons no longer say "Popup blocked"** on Save Image, Preview Image and Pause Image when the picture opened.
 - **Find and Replace, Prompt Multi and Prompt Stack** no longer grow or open as modified after Ctrl+Z or opening a workflow.
 - **Dialogs stay open when a drag ends outside them,** and dragged panels no longer stick to the mouse.
