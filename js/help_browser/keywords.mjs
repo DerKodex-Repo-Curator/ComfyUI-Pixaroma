@@ -29,6 +29,10 @@ export const KEYWORDS = {
   PixaromaResizeCrop: "exact size cover fill stretch squash aspect force size",
   PixaromaCrop: "trim cut region area chop",
   PixaromaSketch: "sketch draw drawing doodle scribble mark marker markup annotate annotation red box rectangle square circle oval ellipse lasso loop outline arrow point pointer text label highlight circle it edit instruct instructions flux klein kontext qwen edit nano banana edit model tell what to change change this here visual prompt draw on image draw on picture pen tablet",
+  PixaromaLayoutBoxes: "layout boxes box bounding box bounding boxes bbox bboxes create bounding boxes region regions area areas "
+    + "composition compose arrange arrangement placement place position where things go put object here obj_1 tag elements element "
+    + "flux 3 flux3 flux.3 klein layout prompt ideogram json prompt draw boxes rectangle canvas text box sign title exact words "
+    + "classic nodes 2.0 only works in classic",
   PixaromaUncrop: "paste back restore put back region",
   PixaromaInpaintCrop: "inpaint mask repair fix retouch face hands blemish",
   PixaromaInpaintStitch: "seam blend feather merge join invisible edge",
