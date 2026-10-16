@@ -245,14 +245,15 @@ The two editors can also use **rembg** (`pip install rembg`, then restart ComfyU
 
 ## 🛠 Changelog
 
-### **October 16, 2026 · v1.4.216-v1.4.219**
-- **New node, Layout Boxes Pixaroma:** draw where things go for FLUX.3 layout prompts, in Classic and Nodes 2.0, with the same result as core's box node.
-- **Switch, Mute Switch, Text Join and Outpaint Stitch keep their wired rows in Nodes 2.0** on ComfyUI 0.40 and newer, instead of hiding them.
-- **AI Prompt: a new switch sends the formula as a system message,** the way Text Generate does, plus a FLUX 3 prompt upsampler preset that gives the same result.
-- **Open buttons no longer say "Popup blocked"** on Save Image, Preview Image and Pause Image when the picture opened.
-- **Find and Replace, Prompt Multi and Prompt Stack** no longer grow or open as modified after Ctrl+Z or opening a workflow.
-- **Dialogs stay open when a drag ends outside them,** and dragged panels no longer stick to the mouse.
-- **Right-click in Text Join and XY Plot text boxes gives Copy and Paste;** Pixaroma Group draws links through reroutes.
+### **October 16, 2026 · v1.4.216-v1.4.220**
+- **New node, Layout Boxes Pixaroma:** draw where things go for FLUX.3 layout prompts, in Classic and Nodes 2.0.
+- **Switch, Mute Switch, Text Join and Outpaint Stitch keep their wired rows** in Nodes 2.0 on ComfyUI 0.40 and newer.
+- **AI Prompt can send the formula as a system message,** plus a FLUX 3 prompt upsampler preset.
+- **Control Panel dropdowns take the new model list when you press R,** also through Set and Get.
+- **Open buttons no longer say "Popup blocked"** on Save Image, Preview Image and Pause Image.
+- **Find and Replace, Prompt Multi and Prompt Stack** no longer grow or open as modified.
+- **Dialogs stay open when a drag ends outside them;** dragged panels no longer stick to the mouse.
+- **Text Join and XY Plot text boxes get Copy and Paste on right-click;** Pixaroma Group draws links through reroutes.
 
 ### **October 15, 2026 · v1.4.215**
 - **Video Prompt: Reset, Import and the seed box work on ComfyUI Desktop,** and Ctrl+Z in its editor no longer undoes the workflow.
