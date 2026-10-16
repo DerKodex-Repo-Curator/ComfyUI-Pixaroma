@@ -54,15 +54,20 @@ def color_of(index):
     return COLORS[index % len(COLORS)]
 
 
+MAX_COORD = 1e6   # far past any real box (the canvas is 0..1), small enough that x1000 still rounds
+
+
 def _num(v):
-    """A finite float, or None. A bool is not a number here."""
+    """A finite float within MAX_COORD, or None. A bool is not a number here.
+    A 400-digit integer overflows float() and 1e306 overflows round(x * 1000),
+    so both are refused here rather than failing the run later."""
     if isinstance(v, bool) or v is None:
         return None
     try:
         f = float(v)
-    except (TypeError, ValueError):
+    except (TypeError, ValueError, OverflowError):
         return None
-    return f if math.isfinite(f) else None
+    return f if math.isfinite(f) and abs(f) <= MAX_COORD else None
 
 
 def _text(v, cap):
@@ -81,7 +86,7 @@ def parse_state(raw):
     if isinstance(raw, str):
         try:
             data = json.loads(raw) if raw.strip() else {}
-        except (ValueError, TypeError):
+        except (ValueError, TypeError, RecursionError):
             data = {}
     if not isinstance(data, dict):
         data = {}

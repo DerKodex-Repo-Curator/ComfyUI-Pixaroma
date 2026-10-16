@@ -224,13 +224,28 @@ export function syncListSelection(node, host) {
 /** A box was drawn or clicked: show its row and put the caret in it (the
  *  words for a text box, else the description). preventScroll, because a plain
  *  focus() also scrolls every ancestor, the graph canvas included. */
-export function focusRow(host, index) {
+export function focusRow(host, index, scroller = null) {
   const row = host.querySelector(`.pix-lyb-row[data-index="${index}"]`);
   if (!row) return;
   const inp = row.querySelector(".pix-lyb-words") || row.querySelector(".pix-lyb-desc");
-  const top = row.offsetTop - host.offsetTop;
-  if (top < host.scrollTop || top + row.offsetHeight > host.scrollTop + host.clientHeight) {
-    host.scrollTop = Math.max(0, top - 4);
+  if (scroller) {
+    // The big view: the list never scrolls there, its side panel does (a
+    // drawn box 12 left the caret in a row below the panel's edge). Only that
+    // panel moves, never an ancestor. Again on the next frame: the row's
+    // description box grows to its text one frame after it is built.
+    const reveal = () => {
+      const rr = row.getBoundingClientRect();
+      const sr = scroller.getBoundingClientRect();
+      if (rr.top < sr.top) scroller.scrollTop -= sr.top - rr.top + 8;
+      else if (rr.bottom > sr.bottom) scroller.scrollTop += rr.bottom - sr.bottom + 8;
+    };
+    reveal();
+    requestAnimationFrame(() => requestAnimationFrame(reveal));
+  } else {
+    const top = row.offsetTop - host.offsetTop;
+    if (top < host.scrollTop || top + row.offsetHeight > host.scrollTop + host.clientHeight) {
+      host.scrollTop = Math.max(0, top - 4);
+    }
   }
   try { inp?.focus({ preventScroll: true }); } catch {}
 }

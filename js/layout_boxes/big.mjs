@@ -101,7 +101,7 @@ export function openBig(node) {
 
   const ro = new ResizeObserver(paint);
   ro.observe(stage);
-  const input = attachBoxes(node, stage, () => big.rect, (d) => { big.draft = d; paint(); }, (i) => focusRow(list, i));
+  const input = attachBoxes(node, stage, () => big.rect, (d) => { big.draft = d; paint(); }, (i) => focusRow(list, i, side));
 
   const undoGuardOff = installGraphUndoGuard(() => ov.isConnected);
 
@@ -144,6 +144,10 @@ export function openBig(node) {
     e.stopPropagation();
     if (e.key === "Escape") { e.preventDefault(); if (typing) e.target.blur(); else close(); return; }
     if (typing) return;
+    // Mid-drag, the drag holds a box INDEX until the release: a Delete or an
+    // undo now would shift the list under it, and the release would then move
+    // the wrong box (reproduced: Delete while dragging box 1 moved box 2).
+    if (input.dragging()) { e.preventDefault(); return; }
     const k = e.key.toLowerCase();
     if ((e.ctrlKey || e.metaKey) && k === "z" && !e.shiftKey) { e.preventDefault(); undo(node); return; }
     if ((e.ctrlKey || e.metaKey) && (k === "y" || (k === "z" && e.shiftKey))) { e.preventDefault(); redo(node); return; }

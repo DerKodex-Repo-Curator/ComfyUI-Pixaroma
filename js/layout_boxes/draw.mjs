@@ -42,20 +42,31 @@ export const HANDLE_CURSOR = {
   n: "ns-resize", s: "ns-resize", e: "ew-resize", w: "ew-resize",
 };
 
+// The last line of a label that does not fit ends with "…", cut to the width:
+// a lone first word ("a") on a small box said nothing.
+function ellipsize(ctx, text, maxW) {
+  if (ctx.measureText(text).width <= maxW) return text;
+  let s = text;
+  while (s.length > 1 && ctx.measureText(s + "…").width > maxW) s = s.slice(0, -1);
+  return s.trimEnd() + "…";
+}
+
 function wrapLines(ctx, text, maxW, maxLines) {
+  if (maxLines <= 0) return [];
+  const words = text.split(/\s+/).filter(Boolean);
   const lines = [];
   let line = "";
-  for (const word of text.split(/\s+/).filter(Boolean)) {
-    const test = line ? line + " " + word : word;
+  for (let i = 0; i < words.length; i++) {
+    const test = line ? line + " " + words[i] : words[i];
     if (line && ctx.measureText(test).width > maxW) {
+      if (lines.length === maxLines - 1) return [...lines, ellipsize(ctx, words.slice(i - line.split(" ").length).join(" "), maxW)];
       lines.push(line);
-      if (lines.length >= maxLines) return lines;
-      line = word;
+      line = words[i];
     } else {
       line = test;
     }
   }
-  if (line && lines.length < maxLines) lines.push(line);
+  if (line) lines.push(lines.length === maxLines - 1 ? ellipsize(ctx, line, maxW) : line);
   return lines;
 }
 

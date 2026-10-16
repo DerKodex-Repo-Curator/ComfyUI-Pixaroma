@@ -18,6 +18,7 @@ import { HANDLE, HANDLE_CURSOR, boxPx, handlesOf } from "./draw.mjs";
 import { addBox, refresh, select, setRect, uiState } from "./actions.mjs";
 
 const MIN_BOX_PX = 6;          // smaller than this on screen is a click, not a box
+const DEAD_PX = 3;             // a press on a box moves it only after this much travel
 const GRAB = HANDLE / 2 + 3;   // how close to a handle counts as on it, CSS px
 
 const clamp01 = (v) => Math.min(1, Math.max(0, v));
@@ -98,7 +99,7 @@ export function attachBoxes(node, area, getRect, onDraft, onPick) {
       select(node, hit.index);
       drag = {
         mode: hit.kind === "handle" ? "resize" : "move",
-        index: hit.index, handle: hit.handle, start: p,
+        index: hit.index, handle: hit.handle, start: p, startPx: px,
         startRect: { x: b.x, y: b.y, w: b.w, h: b.h }, rect: { x: b.x, y: b.y, w: b.w, h: b.h },
         moved: false, pointerId: e.pointerId,
       };
@@ -121,7 +122,15 @@ export function attachBoxes(node, area, getRect, onDraft, onPick) {
     if (e.pointerId !== drag.pointerId) return;
     if (!(e.buttons & 1)) { finish(true); return; }
     if (!rect || !rect.w) return;
-    const p = toCanvas(toArea(e), rect);
+    const px = toArea(e);
+    // A press on a box is a CLICK until the pointer travels DEAD_PX: a tap with
+    // a pixel of jitter used to nudge the box, add an Undo step and skip the
+    // caret jump to its row (reproduced: x 0.4 -> 0.4031 on a 1 px wobble).
+    if (drag.mode !== "draw" && !drag.moved) {
+      if (Math.hypot(px[0] - drag.startPx[0], px[1] - drag.startPx[1]) < DEAD_PX) return;
+      drag.moved = true;
+    }
+    const p = toCanvas(px, rect);
     const s = drag.startRect;
     if (drag.mode === "draw") {
       const a = drag.start;
@@ -144,10 +153,6 @@ export function attachBoxes(node, area, getRect, onDraft, onPick) {
       if (hd.includes("n")) y0 = clamp01(p[1]);
       if (hd.includes("s")) y1 = clamp01(p[1]);
       drag.rect = { x: Math.min(x0, x1), y: Math.min(y0, y1), w: Math.abs(x1 - x0), h: Math.abs(y1 - y0) };
-    }
-    if (drag.mode !== "draw") {
-      const r = drag.rect;
-      drag.moved = drag.moved || r.x !== s.x || r.y !== s.y || r.w !== s.w || r.h !== s.h;
     }
     onDraft({ index: drag.index, rect: drag.rect });
   });
