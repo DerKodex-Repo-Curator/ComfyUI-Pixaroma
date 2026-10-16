@@ -43,12 +43,22 @@ export const HANDLE_CURSOR = {
 };
 
 // The last line of a label that does not fit ends with "…", cut to the width:
-// a lone first word ("a") on a small box said nothing.
+// a lone first word ("a") on a small box said nothing. Runs on EVERY paint
+// (each pointermove of a drag, each keystroke), so it measures at most about a
+// dozen times: a binary search, never past what one line can hold (no glyph
+// at 11-13 px is narrower than 3 px). Trimming one character per measure cost
+// 106 ms a paint with six 2000-character descriptions (measured).
 function ellipsize(ctx, text, maxW) {
-  if (ctx.measureText(text).width <= maxW) return text;
-  let s = text;
-  while (s.length > 1 && ctx.measureText(s + "…").width > maxW) s = s.slice(0, -1);
-  return s.trimEnd() + "…";
+  const cap = Math.min(text.length, Math.ceil(maxW / 3) + 2);
+  if (text.length <= cap && ctx.measureText(text).width <= maxW) return text;
+  let lo = 1;
+  let hi = cap;
+  while (lo < hi) {
+    const mid = (lo + hi + 1) >> 1;
+    if (ctx.measureText(text.slice(0, mid) + "…").width <= maxW) lo = mid;
+    else hi = mid - 1;
+  }
+  return text.slice(0, lo).trimEnd() + "…";
 }
 
 function wrapLines(ctx, text, maxW, maxLines) {
