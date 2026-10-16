@@ -117,6 +117,7 @@ The groups are in order of how much they are used in real workflows, and inside 
 | [Pause&nbsp;Text&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/pause-text/) | Stops the Run so you can read and fix a text before the rest&nbsp;runs. |
 | [Caption&nbsp;Review&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/caption-review/) | Every picture of a folder with its caption under it, to read and fix a training&nbsp;set. |
 | [Music&nbsp;Prompt&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/music-prompt/) | One idea in, a caption and lyrics out for MiniMax Music&nbsp;3. |
+| [Layout&nbsp;Boxes&nbsp;Pixaroma](https://workflows.pixaroma.com/help/nodes/layout-boxes/) | Draw boxes where things go and write what goes in each, for FLUX.3 layout&nbsp;prompts. |
 
 ### 📝 Notes and Overlay
 
