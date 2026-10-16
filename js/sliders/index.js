@@ -5,10 +5,11 @@ import { registerNodeHelp } from "../shared/help.mjs";
 import { registerNodeSettings } from "../shared/node_settings.mjs";
 import { registerRunWorkflowPatcher, readNodeProp, writeNodeProp } from "../shared/run_seed_embed.mjs";
 import { narrowSlotType } from "../shared/slot_types.mjs";
+import { notifyGraphChanged } from "../shared/graph_changed.mjs";
 import {
   BRAND, MAX_SLIDERS, STATE_PROP,
   readState, normalizeSliders, syncOutputs, addSlider, resolveAutoType, resetRowOnDisconnect,
-  comboOptionsOf, randomSeed,
+  comboOptionsOf, randomSeed, refreshComboRows,
 } from "./core.mjs";
 
 // A Control Panel can only drive widget-style value inputs (numbers, on/off,
@@ -304,6 +305,23 @@ app.registerExtension({
     };
   },
 
+  // R (Refresh Node Definitions, also run on a reconnect). ComfyUI refreshes its
+  // own pickers, but a dropdown row holds a COPY of its picker's list taken when
+  // it was wired, so a new or deleted model never showed (Discord 2026-10-16).
+  // Core calls this after every node has its fresh list, with the fresh defs.
+  refreshComboInNodes(defs) {
+    if (isGraphLoading()) return;
+    let changed = false;
+    for (const node of allControlPanels()) {
+      try {
+        if (refreshComboRows(node, defs)) { refresh(node); changed = true; }
+      } catch {}
+    }
+    // An open option popup still lists the OLD options: close it, or a click on a
+    // deleted one saves a pick that is not in the list (review round 1).
+    if (changed) { closeComboPopup(); notifyGraphChanged(); }
+  },
+
   // The extension-level right-click hook (the new context-menu API) so the item
   // shows in both renderers.
   getNodeMenuItems(node) {
@@ -316,6 +334,24 @@ app.registerExtension({
     ];
   },
 });
+
+// Every Control Panel in the workflow, subgraphs included (a list, not an id map:
+// ids repeat across subgraph levels).
+function allControlPanels() {
+  const found = [];
+  const seen = new Set();
+  const visit = (graph) => {
+    if (!graph || seen.has(graph)) return;
+    seen.add(graph);
+    for (const n of graph._nodes || graph.nodes || []) {
+      if (!n) continue;
+      if (n.comfyClass === CLASS || n.type === CLASS) found.push(n);
+      if (n.subgraph) visit(n.subgraph);
+    }
+  };
+  visit(app.rootGraph || app.graph);
+  return found;
+}
 
 // ── graphToPrompt: inject the slider values ─────────────────────────────────
 // INJECT ONLY - never prune here (Export (API) serialises this same output).
@@ -453,7 +489,7 @@ registerNodeHelp(CLASS, {
       defs: [
         ["Slider", "For a number: steps, cfg, denoise, a LoRA strength, a width. Drag it (hold Shift for fine control) or double-click to type. Whole number or decimal is decided by the input you plug it into."],
         ["Switch", "For a true / false setting. Click to flip it. Sends true / false, or 1 / 0 for a number input. You can rename its two states and set which one it starts in."],
-        ["Dropdown", "For a picker: sampler, scheduler, checkpoint, VAE, a LoRA name. It learns the whole list from the input; in the settings you tick which options to show, so it only offers the ones you actually use. For a long list, type part of a name in the filter box at the top, then All or None ticks or unticks just the matching ones."],
+        ["Dropdown", "For a picker: sampler, scheduler, checkpoint, VAE, a LoRA name. It learns the whole list from the input; in the settings you tick which options to show, so it only offers the ones you actually use. For a long list, type part of a name in the filter box at the top, then All or None ticks or unticks just the matching ones. Added or deleted a model? Press R on the canvas (Refresh Node Definitions) and the dropdown takes the new list, also when it is wired through Set and Get nodes. A dropdown made before this update needs one direct re-wire to its picker first. Your pick stays; if its file is gone, the run tells you."],
         ["Seed", "For a seed input. R randomizes it on every run, N rolls a new fixed one, or click the number to type an exact seed."],
         ["Text", "For words: a prompt, a filename, a style tag. Type straight into it on the node."],
       ],

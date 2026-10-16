@@ -86,7 +86,7 @@ export const KEYWORDS = {
   // ── Values ──
   PixaromaResolution: "size width height ratio dimensions aspect latent empty latent image",
   PixaromaSizes: "preset list dimensions size resolution star starred recommended favourite favorite mark best supported latent empty latent image",
-  PixaromaSliders: "slider knob dashboard remote control panel dropdown checkpoint list filter",
+  PixaromaSliders: "slider knob dashboard remote control panel dropdown checkpoint list filter refresh new model",
   PixaromaSeed: "random fixed number sampler noise",
   PixaromaNumber: "int float value amount",
   PixaromaNumberPick: "number pick picker buttons chips presets preset whole number int integer decimal float value steps batch size cfg denoise strength fps frame rate quick set favourite numbers click instead of typing one number switch between values control knob",

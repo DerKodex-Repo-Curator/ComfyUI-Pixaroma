@@ -159,6 +159,75 @@ export function comboOptionsOf(target, inputName) {
   return null;
 }
 
+// Where a dropdown row's list comes from: the picker's node type + input name,
+// saved on the row (`src`) when it is wired, so R can re-read the list later even
+// when the row reaches the picker through Set/Get (no direct link to follow).
+// Cosmetic: never injected into the prompt.
+function comboSourceOf(target, inputName) {
+  const type = target?.comfyClass || target?.type;
+  return (typeof type === "string" && type && inputName) ? { type, input: String(inputName) } : null;
+}
+
+// A picker input's list in a set of node definitions (/object_info shape): the
+// old [[values], opts] form or the newer ["COMBO", {options}] one.
+function defComboList(defs, type, input) {
+  const def = defs?.[type]?.input;
+  const spec = def?.required?.[input] || def?.optional?.[input];
+  if (!Array.isArray(spec)) return null;
+  if (Array.isArray(spec[0])) return spec[0];
+  if (spec[0] === "COMBO" && Array.isArray(spec[1]?.options)) return spec[1].options;
+  return null;
+}
+
+function sameList(a, b) {
+  if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+  return true;
+}
+
+// The fresh list for one dropdown row after R: from its saved source, else (a row
+// saved before `src` existed) from a picker it is still wired to directly.
+function freshComboList(node, s, slotIndex, defs) {
+  if (s.src && typeof s.src.type === "string" && typeof s.src.input === "string") {
+    const l = defComboList(defs, s.src.type, s.src.input);
+    if (l && l.length) return l;
+  }
+  const links = node.outputs?.[slotIndex]?.links || [];
+  for (const id of links) {
+    const lk = node.graph?.links?.get ? node.graph.links.get(id) : node.graph?.links?.[id];
+    const target = lk && node.graph?.getNodeById?.(lk.target_id);
+    const inp = target?.inputs?.[lk.target_slot];
+    const name = inp?.widget?.name || inp?.name;
+    const l = comboOptionsOf(target, name);
+    if (l && l.length) return l;
+  }
+  return null;
+}
+
+// R (Refresh Node Definitions) for one Control Panel: every dropdown row takes its
+// picker's fresh list. The pick stays: a pick whose file is gone stays listed,
+// so the run stops with "value not in list" like ComfyUI's own pickers, instead
+// of silently running another model. Filter entries that are gone are dropped.
+// Writes NOTHING when the list did not change. Returns true when it changed.
+export function refreshComboRows(node, defs) {
+  const st = readState(node);
+  let changed = false;
+  st.sliders.forEach((s, i) => {
+    if (s.type !== "combo") return;
+    const fresh = freshComboList(node, s, i, defs);
+    if (!fresh || !fresh.length) return;
+    const next = fresh.slice();
+    if (typeof s.value === "string" && s.value && !next.includes(s.value)) next.push(s.value);
+    const allowed = (Array.isArray(s.allowed) ? s.allowed : []).filter((o) => next.includes(o));
+    if (sameList(next, s.options) && sameList(allowed, Array.isArray(s.allowed) ? s.allowed : [])) return;
+    s.options = next;
+    s.allowed = allowed;
+    ensureCombo(s);
+    changed = true;
+  });
+  return changed;
+}
+
 // A seed control is an INT row (name like "seed") with a randomize mode. `value`
 // is the current seed; `mode` is "fixed" (keep it) or "random" (a fresh seed each
 // run, rolled at submit time - see graphToPrompt). Kept < 1e12 so Python's value
@@ -372,6 +441,8 @@ function resolveComboOptions(node, s, slotIndex, link) {
   const opts = comboOptionsOf(target, wname);
   if (!opts || !opts.length) return false;
   s.options = opts;
+  const src = comboSourceOf(target, wname);
+  if (src) s.src = src;
   if (Array.isArray(s.allowed)) s.allowed = s.allowed.filter((o) => opts.includes(o));
   if (wname && (s.name === `Value ${slotIndex + 1}` || s.autoName)) {
     s.name = String(wname).replace(/_/g, " ");
@@ -507,6 +578,8 @@ export function resolveAutoType(node, slotIndex, link) {
   if (comboOpts && comboOpts.length) {
     s.type = "combo";
     s.options = comboOpts;
+    const src = comboSourceOf(target, cwname);
+    if (src) s.src = src;
     if (!Array.isArray(s.allowed)) s.allowed = [];
     const cw = target?.widgets?.find((x) => x.name === cwname);
     const cur = (cw && typeof cw.value === "string" && comboOpts.includes(cw.value)) ? cw.value : comboOpts[0];
