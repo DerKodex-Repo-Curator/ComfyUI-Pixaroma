@@ -13,6 +13,7 @@ import { isGraphLoading } from "../shared/graph_loading.mjs";
 import { registerNodeHelp } from "../shared/help.mjs";
 import { registerNodeSettings } from "../shared/node_settings.mjs";
 import { pixAsset } from "../shared/api_url.mjs";
+import { installLatentBatch } from "../shared/latent_batch.mjs";
 import {
   BRAND, STATE_PROP, HIDDEN_INPUT, MAX_SIZES,
   readState, writeState, fmtRow, accentOf, DEFAULT_STATE, isStarredPair,
@@ -313,6 +314,17 @@ function setupNode(node) {
   node._pixSzRoot = root;
   node._pixSzInner = inner;
 
+  // The latent's batch size: a small stepper on the level of the `latent`
+  // output dot (output 2), in the empty space left of the labels, so it adds
+  // no height. Stored as state.batch (absent = 1). render() only clears the
+  // inner div, so the Classic band in the root survives every re-render.
+  node._pixLb = installLatentBatch(node, {
+    outputIndex: 2,
+    getRoot: () => ensureRoot(node),
+    read: () => readState(node).batch ?? 1,
+    write: (n) => writeState(node, { ...readState(node), batch: n }),
+  });
+
   // ONE listener on the persistent widget wrapper (root lives inside it, so
   // clicks bubble up). Attaching to both the wrapper AND root would double-fire.
   const clickTarget = widget.element || root;
@@ -450,12 +462,13 @@ registerNodeHelp(CLASS, {
     {
       heading: "The latent output",
       body:
-        "The latent is the same as ComfyUI's Empty Latent Image (batch 1), so you can wire it straight into the " +
+        "The latent is the same as ComfyUI's Empty Latent Image, so you can wire it straight into the " +
         "KSampler and skip that node. It works for image models: SD 1.5, SDXL, SD3, Flux, Flux 2, Qwen Image and " +
         "others, because the KSampler adapts it to the model.\n\n" +
-        "For video models, or a batch of more than one image, wire width and height into that model's own latent " +
-        "node instead. For Flux 2, keep the size a multiple of 16 (turn on Snap 16 in settings) to get exactly " +
-        "the same size as its own latent node.",
+        "The batch box on the same line as the latent output sets how many pictures one Run makes, from 1 to 64: " +
+        "click + or -, or click the number and type. It only changes the latent; width and height stay the same.\n\n" +
+        "For video models, wire width and height into that model's own latent node instead. For Flux 2, keep the " +
+        "size a multiple of 16 (turn on Snap 16 in settings) to get exactly the same size as its own latent node.",
     },
     {
       heading: "Portrait and Landscape",
@@ -484,6 +497,7 @@ registerNodeHelp(CLASS, {
       heading: "The buttons on the node",
       defs: [
         ["The fold arrow", "Collapses the list down to just the chosen size, or opens it again."],
+        ["batch, beside the latent output", "How many pictures the latent makes in one Run (1 to 64): + and -, or type a number."],
         ["Portrait and Landscape", "Shows the chosen size tall or wide, swapping which number is the width."],
         ["The gear", "Opens the settings panel, where you add, remove, reorder and recolour your sizes."],
         ["A size in the list", "Click any one to make it the size this node sends out."],

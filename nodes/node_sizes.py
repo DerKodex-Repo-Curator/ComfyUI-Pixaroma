@@ -44,11 +44,11 @@ class PixaromaSizes:
         "Sizes Pixaroma - your own list of favourite resolutions. Add the exact "
         "width x height sizes you use, pick one from the list, and it outputs "
         "width and height as INT, plus an empty latent at that size.\n\n"
-        "The latent output is the same as ComfyUI's Empty Latent Image (batch "
-        "1), so it can go straight into a KSampler for image models (SD 1.5, "
-        "SDXL, SD3, Flux, Flux 2, Qwen Image and others). For video models, or "
-        "a batch of more than one, use width and height with that model's own "
-        "latent node.\n\n"
+        "The latent output is the same as ComfyUI's Empty Latent Image, so it "
+        "can go straight into a KSampler for image models (SD 1.5, SDXL, SD3, "
+        "Flux, Flux 2, Qwen Image and others). The batch box beside it sets how "
+        "many pictures one run makes (1 to 64). For video models, use width and "
+        "height with that model's own latent node.\n\n"
         "The Portrait / Landscape buttons flip the chosen size, so you add a "
         "size like 1024 x 1536 once and reuse it in either orientation (square "
         "sizes are unaffected). A fresh node starts with just 1024 x 1024; open "
@@ -78,8 +78,9 @@ class PixaromaSizes:
     OUTPUT_TOOLTIPS = (
         "The chosen width in pixels.",
         "The chosen height in pixels.",
-        "An empty latent at this size, batch 1: the same as ComfyUI's Empty "
-        "Latent Image. A KSampler adapts it to most image models.",
+        "An empty latent at this size: the same as ComfyUI's Empty Latent "
+        "Image. The batch box beside this output sets how many pictures it "
+        "makes per run (1 to 64). A KSampler adapts it to most image models.",
     )
     FUNCTION = "get_size"
     CATEGORY = "👑 Pixaroma/🔢 Values"
@@ -88,8 +89,8 @@ class PixaromaSizes:
         w, h = sizes_wh(SizesState)
         # Imported here, not at the top: the size maths (sizes_wh, below) stays
         # loadable as a plain file (the parity harness loads it outside the package).
-        from ._empty_latent import empty_latent
-        return (w, h, empty_latent(w, h))
+        from ._empty_latent import batch_of, empty_latent
+        return (w, h, empty_latent(w, h, batch_of(SizesState)))
 
 
 def sizes_wh(SizesState: str):

@@ -1863,7 +1863,7 @@ const HELP = {
       },
       {
         heading: "The latent output",
-        body: "The latent is the same as ComfyUI's Empty Latent Image (batch 1), so you can wire it straight into the KSampler and skip that node. It works for image models: SD 1.5, SDXL, SD3, Flux, Flux 2, Qwen Image and others, because the KSampler adapts it to the model.\n\nFor video models, or a batch of more than one image, wire `width` and `height` into that model's own latent node instead. For Flux 2, a size that is a multiple of 16 gives exactly the same size as its own latent node.",
+        body: "The latent is the same as ComfyUI's Empty Latent Image, so you can wire it straight into the KSampler and skip that node. It works for image models: SD 1.5, SDXL, SD3, Flux, Flux 2, Qwen Image and others, because the KSampler adapts it to the model.\n\nThe `batch` box on the same line as the latent output sets how many pictures one Run makes, from 1 to 64: click `+` or `-`, or click the number and type. It only changes the latent; `width` and `height` stay the same.\n\nFor video models, wire `width` and `height` into that model's own latent node instead. For Flux 2, a size that is a multiple of 16 gives exactly the same size as its own latent node.",
       },
       {
         heading: "Modes",
@@ -1882,7 +1882,7 @@ const HELP = {
         defs: [
           ["width", "Chosen width in pixels."],
           ["height", "Chosen height in pixels."],
-          ["latent", "An empty latent at this size, batch 1. Wire it into the KSampler's latent_image."],
+          ["latent", "An empty latent at this size, as many pictures as the batch box beside it says. Wire it into the KSampler's latent_image."],
         ],
       },
     ],

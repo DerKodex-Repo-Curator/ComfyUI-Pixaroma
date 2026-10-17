@@ -4,6 +4,7 @@ import { BRAND, hideJsonWidget, applyAdaptiveCanvasOnly,
 } from "../shared/index.mjs";
 import { pixAsset } from "../shared/api_url.mjs";
 import { isComfyTextShortcut } from "../shared/text_shortcuts.mjs";
+import { installLatentBatch } from "../shared/latent_batch.mjs";
 
 // Node dimensions are LOCKED — width and height. The original "make it
 // resizable" attempt was a workaround for the default height being too small
@@ -1297,6 +1298,8 @@ function renderUI(node) {
   } else {
     root.appendChild(renderSizeList(state));
   }
+  // The innerHTML wipe above took the Classic batch band with it: put it back.
+  node._pixLb?.mount();
 }
 
 function setupResolutionNode(node) {
@@ -1432,6 +1435,16 @@ function setupResolutionNode(node) {
 
   node._pixResRoot = root;
 
+  // The latent's batch size: a small stepper on the level of the `latent`
+  // output dot (output 2), in the empty space left of the labels, so the
+  // locked node size does not change. Stored as state.batch (absent = 1).
+  node._pixLb = installLatentBatch(node, {
+    outputIndex: 2,
+    getRoot: () => node._pixResRoot,
+    read: () => readState(node).batch ?? 1,
+    write: (n) => writeState(node, { ...readState(node), batch: n }),
+  });
+
   // Deferred initial render. By the time the microtask fires, Vue will have
   // called configure() on this node (if it's being restored from a saved
   // workflow) so widget.value reflects the saved state and we render it
@@ -1447,6 +1460,7 @@ function setupResolutionNode(node) {
     } else {
       root.appendChild(renderSizeList(state));
     }
+    node._pixLb?.mount();
   });
 }
 

@@ -36,11 +36,12 @@ class PixaromaResolution:
         "(8 / 16 / 32 / 64) round outputs to multiples that VAE encoders "
         "prefer.\n\n"
         "Outputs width and height as INT, plus an empty latent at that size. "
-        "The latent output is the same as ComfyUI's Empty Latent Image (batch "
-        "1), so it can go straight into a KSampler for image models (SD 1.5, "
-        "SDXL, SD3, Flux, Flux 2, Qwen Image and others). For video models, or "
-        "a batch of more than one, use width and height with that model's own "
-        "latent node. State saves and restores with the workflow.\n\n"
+        "The latent output is the same as ComfyUI's Empty Latent Image, so it "
+        "can go straight into a KSampler for image models (SD 1.5, SDXL, SD3, "
+        "Flux, Flux 2, Qwen Image and others). The batch box beside it sets how "
+        "many pictures one run makes (1 to 64). For video models, use width and "
+        "height with that model's own latent node. State saves and restores "
+        "with the workflow.\n\n"
         "All UI lives on the JS side; the only Python input is a hidden "
         "serialized state string that gets injected at execution time."
     )
@@ -71,8 +72,9 @@ class PixaromaResolution:
     OUTPUT_TOOLTIPS = (
         "The chosen width in pixels.",
         "The chosen height in pixels.",
-        "An empty latent at this size, batch 1: the same as ComfyUI's Empty "
-        "Latent Image. A KSampler adapts it to most image models.",
+        "An empty latent at this size: the same as ComfyUI's Empty Latent "
+        "Image. The batch box beside this output sets how many pictures it "
+        "makes per run (1 to 64). A KSampler adapts it to most image models.",
     )
     FUNCTION = "get_resolution"
     CATEGORY = "👑 Pixaroma/🔢 Values"
@@ -81,8 +83,8 @@ class PixaromaResolution:
         w, h = resolution_wh(ResolutionState)
         # Imported here, not at the top, so the size maths stays loadable as a
         # plain file outside the package (same as node_sizes).
-        from ._empty_latent import empty_latent
-        return (w, h, empty_latent(w, h))
+        from ._empty_latent import batch_of, empty_latent
+        return (w, h, empty_latent(w, h, batch_of(ResolutionState)))
 
 
 def resolution_wh(ResolutionState: str):
