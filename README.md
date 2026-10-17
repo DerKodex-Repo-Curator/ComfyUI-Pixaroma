@@ -245,6 +245,9 @@ The two editors can also use **rembg** (`pip install rembg`, then restart ComfyU
 
 ## 🛠 Changelog
 
+### **October 17, 2026 · v1.4.221**
+- **Control Panel dropdowns show long model names on a wider node,** instead of always cutting them after a few words.
+
 ### **October 16, 2026 · v1.4.216-v1.4.220**
 - **New node, Layout Boxes Pixaroma:** draw where things go for FLUX.3 layout prompts, in Classic and Nodes 2.0.
 - **Switch, Mute Switch, Text Join and Outpaint Stitch keep their wired rows** in Nodes 2.0 on ComfyUI 0.40 and newer.
