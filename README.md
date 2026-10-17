@@ -245,7 +245,8 @@ The two editors can also use **rembg** (`pip install rembg`, then restart ComfyU
 
 ## 🛠 Changelog
 
-### **October 17, 2026 · v1.4.221**
+### **October 17, 2026 · v1.4.221-v1.4.222**
+- **Resolution and Sizes get a batch box beside the latent output:** one Run makes 1 to 64 pictures.
 - **Control Panel dropdowns show long model names on a wider node,** instead of always cutting them after a few words.
 
 ### **October 16, 2026 · v1.4.216-v1.4.220**
