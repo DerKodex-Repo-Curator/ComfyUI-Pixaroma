@@ -323,6 +323,8 @@ function setupNode(node) {
     getRoot: () => ensureRoot(node),
     read: () => readState(node).batch ?? 1,
     write: (n) => writeState(node, { ...readState(node), batch: n }),
+    // Sizes keeps its colour in its own state / setting, not the shared chain.
+    accent: () => accentOf(node),
   });
 
   // ONE listener on the persistent widget wrapper (root lives inside it, so

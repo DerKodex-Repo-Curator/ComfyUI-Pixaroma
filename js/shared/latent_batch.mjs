@@ -70,6 +70,7 @@ function vueSlotBlock(el) {
  *   opts.getRoot()    the node's widget root (Classic home of the band)
  *   opts.read()       the current batch (number)
  *   opts.write(n)     store a new batch in the node's state
+ *   opts.accent()     optional: the node's colour when it is not the shared accent chain
  * Returns { mount, refresh, uninstall }. Call mount() after anything that empties
  * the root (Resolution's render wipes it).
  */
@@ -104,8 +105,9 @@ export function installLatentBatch(node, opts) {
 
   const show = () => {
     // The node's own colour, set on the band itself: in Nodes 2.0 it is parked
-    // OUTSIDE the root and would not inherit it (longest-side.md #28).
-    const acc = accentOf(node);
+    // OUTSIDE the root and would not inherit it (longest-side.md #28). A node that
+    // keeps its colour elsewhere (Sizes: in its state) passes opts.accent.
+    const acc = opts.accent ? opts.accent() : accentOf(node);
     if (band.style.getPropertyValue("--pix-acc") !== acc) band.style.setProperty("--pix-acc", acc);
     const b = clampBatch(opts.read());
     if (document.activeElement !== val && val.value !== String(b)) val.value = String(b);
@@ -137,8 +139,15 @@ export function installLatentBatch(node, opts) {
     else if (e.key === "ArrowUp") { e.preventDefault(); commit(clampBatch(opts.read()) + 1); }
     else if (e.key === "ArrowDown") { e.preventDefault(); commit(clampBatch(opts.read()) - 1); }
   });
-  val.addEventListener("change", () => commit(val.value));
-  val.addEventListener("blur", () => commit(val.value));
+  // Typed text: an empty box or anything that is not a number puts the current
+  // value back instead of quietly writing 1 (review 2026-10-17); 0 / 999 clamp.
+  const commitTyped = () => {
+    const txt = String(val.value).trim();
+    if (!txt || !Number.isFinite(Number(txt))) { val.value = String(clampBatch(opts.read())); show(); return; }
+    commit(txt);
+  };
+  val.addEventListener("change", commitTyped);
+  val.addEventListener("blur", commitTyped);
   val.addEventListener("focus", () => val.select());
 
   const place = () => {
@@ -175,6 +184,10 @@ export function installLatentBatch(node, opts) {
           if (getComputedStyle(root).position === "static") root.style.position = "relative";
           root.insertBefore(band, root.firstChild);
         }
+        // Core hides the widget (v-show) while the node is off-screen or in another graph: its box reads as zeros
+        // and placing then would park the band far from the row until the next check. The offsets do not change
+        // with pan or zoom, so the last good place is still right when the node comes back (review 2026-10-17).
+        if (!root.getClientRects().length) return;
         placeSlotBand(node, band, { side: "left", slot: "output", index: opts.outputIndex });
       }
     } catch { /* leave it where it is; the next check tries again */ }
