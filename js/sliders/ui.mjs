@@ -125,9 +125,12 @@ export function injectCSS() {
     .pix-sld-cnav:hover { color:#fff; }
     /* the value element carries class "cval" (not "pix-sld-cval") - scope these
        via the parent so they actually match (a bare .pix-sld-cval never did, so
-       a long option used to overflow the row with no caret + no ellipsis). */
+       a long option used to overflow the row with no caret + no ellipsis).
+       Width cap: 145px on a narrow node (as before), and on a wider node all the
+       row except ~120px, so a long model name uses the room you drag in and the
+       label keeps about the space it had at the default width (Discord 10-17). */
     .pix-sld-combo .cval {
-      flex:0 1 auto; min-width:0; max-width:145px; display:flex; align-items:center; gap:5px; cursor:pointer;
+      flex:0 1 auto; min-width:0; max-width:max(145px, calc(100% - 120px)); display:flex; align-items:center; gap:5px; cursor:pointer;
       font:11.5px 'Segoe UI',sans-serif; font-weight:600; color:#fff;
     }
     .pix-sld-combo .cval .ct { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
