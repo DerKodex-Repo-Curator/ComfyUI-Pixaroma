@@ -384,26 +384,30 @@ def read_sampler(prompt, sampler_id):
     if out["seed"] is None:
         out["seed"] = resolve_input(prompt, sampler_id, "noise_seed")
 
+    # The SamplerCustom family keeps these on separate nodes, and the same rule
+    # holds there: RandomNoise's noise_seed wired from Seed Pixaroma (the Flux 2 /
+    # FLUX 3 template shape) recorded NO seed while widget_value was used here
+    # (Discord 2026-10-17, civitai-meta.md #19). A typed value reads the same.
     if out["sampler_name"] is None:
         picker = link_source(prompt, sampler_id, "sampler")
         if picker:
-            out["sampler_name"] = widget_value(prompt, picker, "sampler_name")
+            out["sampler_name"] = resolve_input(prompt, picker, "sampler_name")
     if out["scheduler"] is None:
         sigmas = link_source(prompt, sampler_id, "sigmas")
         if sigmas:
-            out["scheduler"] = widget_value(prompt, sigmas, "scheduler")
+            out["scheduler"] = resolve_input(prompt, sigmas, "scheduler")
             if out["steps"] is None:
-                out["steps"] = widget_value(prompt, sigmas, "steps")
+                out["steps"] = resolve_input(prompt, sigmas, "steps")
             if out["denoise"] is None:
-                out["denoise"] = widget_value(prompt, sigmas, "denoise")
+                out["denoise"] = resolve_input(prompt, sigmas, "denoise")
     if out["cfg"] is None:
         guider = link_source(prompt, sampler_id, "guider")
         if guider:
-            out["cfg"] = widget_value(prompt, guider, "cfg")
+            out["cfg"] = resolve_input(prompt, guider, "cfg")
     if out["seed"] is None:
         noise = link_source(prompt, sampler_id, "noise")
         if noise:
-            out["seed"] = widget_value(prompt, noise, "noise_seed")
+            out["seed"] = resolve_input(prompt, noise, "noise_seed")
     return out
 
 
