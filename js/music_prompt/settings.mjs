@@ -890,6 +890,26 @@ function renderPanel(node, body) {
     + "the last node using that model, and it is skipped entirely when the "
     + "model arrived on the clip wire - that one is not this node's to unload."));
 
+  // ---- mtp (ai-prompt.md #34) -----------------------------------------------
+  const mtpRow = el("div", "pix-mps-row");
+  mtpRow.appendChild(el("span", "t", "Faster writing (MTP), if the model has it"));
+  const mtpTog = el("div", "pix-mps-tog" + (st.mtp ? " on" : ""));
+  mtpTog.appendChild(el("span", "knob"));
+  mtpTog.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const next = !readState(node).mtp;
+    writeState(node, { mtp: next });
+    mtpTog.classList.toggle("on", next);
+    ON_CHANGE?.();
+  });
+  mtpRow.appendChild(mtpTog);
+  body.appendChild(mtpRow);
+  body.appendChild(el("div", "pix-mps-note",
+    "Qwen3.5 files carry an MTP part that writes a few words ahead, which is "
+    + "faster. Turn it off if a run stops with a CUDA error such as \"illegal "
+    + "memory access\". The same as mtp = off on ComfyUI's Generate Text node; "
+    + "a formula set never changes it."));
+
   body.appendChild(el("div", "pix-mps-rule"));
 
   // ---- advanced ------------------------------------------------------------

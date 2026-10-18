@@ -429,6 +429,9 @@ def parse_state(raw):
             # ON by default: the shipped formulas are written to be paired with
             # a length block. Off is for somebody running their own wording.
             "length_block": True,
+            # Multi-token prediction, core Generate Text's `mtp` (ai-prompt.md
+            # #34). On = the generate call exactly as before.
+            "mtp": True,
         }
     )
     # Only keys we already know about: an unknown key in a hand-edited blob must
@@ -466,6 +469,7 @@ def parse_state(raw):
     out["use_default_template"] = out["use_default_template"] is not False
     out["release_model"] = out["release_model"] is True
     out["length_block"] = out["length_block"] is not False
+    out["mtp"] = out["mtp"] is not False
     if not isinstance(out["model"], str) or not out["model"].strip():
         out["model"] = _DEFAULT_MODEL
     if not isinstance(out["clip_type"], str) or not out["clip_type"].strip():

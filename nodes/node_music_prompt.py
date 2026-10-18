@@ -39,7 +39,7 @@ from ._music_prompt_helpers import (
 # The SHARED loader and the SHARED one-entry cache. Importing rather than
 # copying is the one architectural rule of this node: these took twenty-odd
 # documented fixes on the sibling and a second copy would drift.
-from .node_ai_prompt import _load_clip, _release_clip, repeat_generation, reset_generation_runtime
+from .node_ai_prompt import _load_clip, _release_clip, mtp_kwargs, repeat_generation, reset_generation_runtime
 
 _NEEDED = (
     "  Put a language model in your ComfyUI/models/text_encoders folder and\n"
@@ -134,8 +134,10 @@ class PixaromaMusicPrompt:
     CATEGORY = "👑 Pixaroma/💬 Prompt & Text"
 
     # ---- generation ------------------------------------------------------
-    def _ask(self, clip, prompt, sampling, seed, model_name):
-        """One generation. Byte-identical call shape to core's TextGenerate."""
+    def _ask(self, clip, prompt, sampling, seed, model_name, mtp_kw=None):
+        """One generation. Byte-identical call shape to core's TextGenerate.
+
+        `mtp_kw` is {} unless the node's MTP switch is off (ai-prompt.md #34)."""
         # ComfyUI resets its per-node memory machinery between NODES, and this
         # node generates twice inside ONE. Without the reset the second
         # generation aborts the whole ComfyUI process on 0.37.0 - see
@@ -165,6 +167,7 @@ class PixaromaMusicPrompt:
                 tokens,
                 seed=seed,
                 **dict(COMMON_SAMPLING, **sampling),
+                **(mtp_kw or {}),
             )
         except AttributeError as e:
             # Narrow on purpose: without the gate this wraps a multi-minute
@@ -241,6 +244,7 @@ class PixaromaMusicPrompt:
         # loses the subject (a song "about love" whose lyrics never say love,
         # because a caption describes sound and never says what the song is
         # about) and the idea alone loses the mood the caption just settled.
+        mtp_kw = mtp_kwargs(st, clip)
         caption, cap_ran_out = self._ask(
             clip,
             build_caption_prompt(st["idea"], wired, st["caption_formula"],
@@ -248,6 +252,7 @@ class PixaromaMusicPrompt:
             sampling_for("caption", st),
             st["seed"],
             model_name,
+            mtp_kw,
         )
         if st["no_vocals"]:
             # ONE PASS. A piece with no singing has no words to write, so asking
@@ -271,6 +276,7 @@ class PixaromaMusicPrompt:
                 sampling_for("lyrics", st),
                 st["seed"],
                 model_name,
+                mtp_kw,
             )
 
         # Both strings are plain text by now, so the model can go. Only ours: a

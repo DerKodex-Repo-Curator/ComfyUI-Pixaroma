@@ -214,6 +214,10 @@ DEFAULT_STATE = {
     # string so an old saved workflow simply reads False.
     "no_vocals": False,
     "release_model": False,
+    # Multi-token prediction on/off, core Generate Text's `mtp` (ai-prompt.md
+    # #34). On = the generate call exactly as before. Machine-specific, so a
+    # formula SET never carries it.
+    "mtp": True,
     # ---- the escape hatch, added 2026-08-18 --------------------------------
     # #3 says the formulas are baked in, and that stands as the DEFAULT: both
     # were measured, the lyrics one took three rounds, and each is tuned to its
@@ -281,6 +285,7 @@ def parse_state(raw):
     st["instrumental"] = st["instrumental"] is True
     st["no_vocals"] = st["no_vocals"] is True
     st["release_model"] = st["release_model"] is True
+    st["mtp"] = st["mtp"] is not False
     return st
 
 

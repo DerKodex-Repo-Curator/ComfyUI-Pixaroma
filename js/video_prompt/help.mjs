@@ -132,6 +132,7 @@ export const VIDEO_PROMPT_HELP = {
         ["Video model", "What the frames output has to satisfy. MiniMax H3, Wan, Hunyuan, LTX, or no snapping at all, with the numbers editable underneath for anything not listed."],
         ["Add the length instructions", "On by default. Turn it off to use your own wording without our length guidance being appended. The durations still set the frames and seconds outputs either way. In first and last frame mode the alignment line is kept even with this off, because the formula tells the model to copy it and it has to name your chosen duration."],
         ["Hint when 5s meets a speaking idea", "Turns the 5 second nudge off if you find it in the way. 8 and 10 seconds are still the surest for talking."],
+        ["Faster writing (MTP)", "On by default. A model that ships MTP weights (Qwen3.5 files) writes a few words ahead, which is faster; other models ignore it. Turn it off if a run stops with a CUDA error such as \"illegal memory access\": the same as the mtp setting on ComfyUI's Generate Text node."],
         ["Export, Import, Reset all", "Export writes every formula and tier to one file. Import reads one back, which is how you move your wording to another machine or take somebody else's. Reset all puts every shipped formula and tier back."],
       ],
     },

@@ -73,6 +73,9 @@ export const DEFAULT_STATE = {
   // wording. The tier still sets the DURATION - the seconds come from its
   // name - so frames and seconds keep working either way.
   length_block: true,
+  // Multi-token prediction, core Generate Text's `mtp` (ai-prompt.md #34). On =
+  // core's default and the generate call exactly as before.
+  mtp: true,
   // The frame shape of the video model this feeds. Defaults are MiniMax H3;
   // the settings panel offers Duration Pixaroma's recipe list so the frames
   // output is right for Wan, Hunyuan, LTX or no snapping at all.
@@ -99,7 +102,7 @@ const PROMPT_KEYS = [
   "temperature", "max_length", "top_k", "top_p", "min_p",
   "repetition_penalty", "presence_penalty", "thinking",
   "use_default_template", "release_model", "length_block",
-  "fps", "step", "plus", "min_frames",
+  "fps", "step", "plus", "min_frames", "mtp",
 ];
 
 function num(value, fallback, lo, hi) {
@@ -137,6 +140,7 @@ export function readState(node) {
   st.use_default_template = st.use_default_template !== false;
   st.release_model = st.release_model === true;
   st.length_block = st.length_block !== false;
+  st.mtp = st.mtp !== false;
   st.speech_hint = st.speech_hint !== false;
   st.idea_share = num(st.idea_share, IDEA_SHARE_DEFAULT, IDEA_SHARE_MIN, IDEA_SHARE_MAX);
   return st;

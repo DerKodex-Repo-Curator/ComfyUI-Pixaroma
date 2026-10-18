@@ -130,6 +130,13 @@ registerNodeHelp(CLASS, {
         ["max len", "How much it may write before stopping. Raise it a lot for a "
           + "model that thinks out loud before answering, or it spends the whole "
           + "budget thinking and writes nothing."],
+        ["Faster writing (MTP)", "Qwen3.5 files, like the one the shipped set "
+          + "was measured on, carry an extra MTP part that writes a few words "
+          + "ahead. On some cards and model files that crashes with a CUDA error "
+          + "such as \"illegal memory access\": turn it off and the run goes "
+          + "through, a little slower. The same as mtp = off on ComfyUI's Generate "
+          + "Text node. A set never changes it, because it is about your graphics "
+          + "card, not the recipe."],
       ],
     },
     {

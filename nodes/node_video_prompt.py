@@ -40,6 +40,8 @@ from ._video_prompt_helpers import (
     pick_model,
     word_count,
 )
+# The MTP switch helper is shared with AI Prompt and Music Prompt (ai-prompt.md #34).
+from .node_ai_prompt import mtp_kwargs
 
 # ---------------------------------------------------------------------------
 # Model cache
@@ -490,6 +492,7 @@ class PixaromaVideoPrompt:
                 repetition_penalty=st["repetition_penalty"],
                 presence_penalty=st["presence_penalty"],
                 seed=st["seed"],
+                **mtp_kwargs(st, model),
             )
         except AttributeError as e:
             # NARROW on the message, not just the type. This block wraps a

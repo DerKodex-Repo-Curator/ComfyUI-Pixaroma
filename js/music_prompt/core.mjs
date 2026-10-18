@@ -105,6 +105,9 @@ export const DEFAULT_STATE = {
   // workflow simply reads false.
   no_vocals: false,
   release_model: false,
+  // Multi-token prediction, core Generate Text's `mtp` (ai-prompt.md #34). On =
+  // core's default. Machine-specific, so a formula SET never carries it.
+  mtp: true,
   // --- the formula set ----------------------------------------------------
   // EMPTY MEANS THE BUILT-IN. A blank box cannot be mistaken for a formula, and
   // going back to the measured wording is just clearing it - so the node keeps
@@ -128,7 +131,7 @@ export const DEFAULT_STATE = {
 // (reference_cosmetic_key_in_injected_state_recaches).
 const PROMPT_KEYS = [
   "idea", "model", "clip_type", "seed", "seconds", "verses",
-  "bridge", "instrumental", "no_vocals", "release_model",
+  "bridge", "instrumental", "no_vocals", "release_model", "mtp",
   // The formula set CHANGES THE OUTPUT, so it belongs in the cache signature -
   // editing an instruction must re-run the model by itself, exactly as editing
   // the idea does. That is the same property AI Prompt gets from keeping its
@@ -163,6 +166,7 @@ export function readState(node) {
   st.instrumental = st.instrumental === true;
   st.no_vocals = st.no_vocals === true;
   st.release_model = st.release_model === true;
+  st.mtp = st.mtp !== false;
   // The same ranges Python clamps to, so the panel can never show a value the
   // node would silently refuse.
   st.caption_formula = str(st.caption_formula, "");

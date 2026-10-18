@@ -839,6 +839,14 @@ function renderPanel(node, body) {
     (v) => set({ speech_hint: v }),
     "5 seconds is the tightest fit for a speaking idea. This marks it rather than blocking it.",
   ));
+  body.appendChild(toggleRow(
+    "Faster writing (MTP), if the model has it", st.mtp,
+    (v) => set({ mtp: v }),
+    "Multi-token prediction: a model that ships MTP weights (Qwen3.5 files) guesses a few "
+    + "words ahead and checks them, which writes faster. Other models ignore it. Turn it off "
+    + "if a run stops with a CUDA error such as \"illegal memory access\". The same as the mtp "
+    + "setting on ComfyUI's Generate Text node.",
+  ));
   // "Free VRAM" deliberately does NOT appear here. It lives on the node face
   // next to Copy, because it is a per-workflow decision the user flips while
   // working, not a set-once preference - and two controls for one state is how

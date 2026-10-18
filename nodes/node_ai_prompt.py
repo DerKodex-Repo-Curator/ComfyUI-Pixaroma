@@ -330,6 +330,14 @@ def _takes_kwarg(fn, name):
         return False
 
 
+def mtp_kwargs(st, clip):
+    """The extra keyword arguments for `clip.generate` from a node state's `mtp`
+    switch: {} when it is on (the call stays exactly as before), {"mtp": False}
+    when it is off and this ComfyUI's generate takes it. Shared by AI Prompt,
+    Music Prompt and Video Prompt (ai-prompt.md #34)."""
+    return generate_kwargs(st, _takes_kwarg(getattr(clip, "generate", None), "mtp"))
+
+
 class PixaromaAIPrompt:
     DESCRIPTION = (
         "Runs a language model you already have, on your own machine, using an "
@@ -550,7 +558,7 @@ class PixaromaAIPrompt:
         if repeat_generation(self):
             reset_generation_runtime()
         # {} unless the MTP switch is OFF, so the default call is unchanged.
-        mtp_kw = generate_kwargs(st, _takes_kwarg(getattr(clip, "generate", None), "mtp"))
+        mtp_kw = mtp_kwargs(st, clip)
         try:
             generated_ids = clip.generate(
                 tokens,
