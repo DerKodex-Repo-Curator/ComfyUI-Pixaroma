@@ -1779,6 +1779,13 @@ function renderPanel(node, body) {
     (v) => set({ thinking: v }),
     "Some models reason first and answer second. Slower, and not every model "
     + "supports it."));
+  body.appendChild(toggleRow("Faster writing (MTP), if the model has it", st.mtp,
+    (v) => set({ mtp: v }),
+    "Multi-token prediction: a model that ships MTP weights guesses a few words "
+    + "ahead and checks them, which writes faster. Other models ignore it. Turn it "
+    + "off if a run stops with a CUDA error such as \"illegal memory access\". It is "
+    + "the same as the mtp setting on ComfyUI's Generate Text node. Not saved in "
+    + "presets, because it is about your graphics card, not the recipe."));
   // No "show what the tags expand to" row: the box it switched on did not fit this
   // face and was removed (ai-prompt.md #21).
 

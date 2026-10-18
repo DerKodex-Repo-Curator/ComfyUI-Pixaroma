@@ -95,6 +95,11 @@ export const DEFAULT_STATE = {
   // system_prompt (2026-10-16). Python decides whether the model can take one
   // (nodes/_ai_prompt_helpers.py plan_prompt) and says so when it cannot.
   system_formula: false,
+  // Multi-token prediction, core Generate Text's `mtp` (auto / off). On = core's
+  // default; off is for a card where MTP drafting crashes (ai-prompt.md #34).
+  // Machine-specific, so deliberately NOT in SETTING_KEYS: a preset, a recipe or
+  // Reset must never switch it back on.
+  mtp: true,
   // NOTE: no "passthrough" flag, deliberately. Passing the text through is what
   // the node does when there is no model or nothing to send, and a switch to
   // turn that off could only mean "error instead", which is strictly worse.
@@ -111,7 +116,7 @@ const PROMPT_KEYS = [
   "idea", "formula", "model", "clip_type", "order", "sep", "seed",
   "temperature", "max_length", "top_k", "top_p", "min_p",
   "repetition_penalty", "presence_penalty", "do_sample", "thinking",
-  "use_default_template", "release_model", "system_formula",
+  "use_default_template", "release_model", "system_formula", "mtp",
 ];
 
 // Exactly what a PRESET may carry, and it must match SETTING_KEYS in
@@ -157,6 +162,7 @@ export function readState(node) {
   st.use_default_template = st.use_default_template !== false;
   st.release_model = st.release_model === true;
   st.system_formula = st.system_formula === true;
+  st.mtp = st.mtp !== false;
   st.idea_share = num(st.idea_share, IDEA_SHARE_DEFAULT, IDEA_SHARE_MIN, IDEA_SHARE_MAX);
   return st;
 }

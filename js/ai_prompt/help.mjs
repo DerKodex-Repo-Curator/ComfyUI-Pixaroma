@@ -197,7 +197,7 @@ export const AI_PROMPT_HELP = {
         ["Hover a name", "Shows which model it was written for, whether you have that model, and its temperature. All before you load it."],
         ["Save current", "Keeps whatever this node has right now under a name you choose, so your own recipes sit in the same list. After changing one of your own presets, its name is already filled in: press Enter to update it, or type a new name to keep both."],
         ["Deleting one", "Hover a name in the list and a ✕ appears at the end of the row. It works on your own presets and asks first, because they are files on disk. On the ones that ship with Pixaroma it is greyed out: those come back with every update, so they cannot be deleted."],
-        ["Reset", "On the Advanced sampling line. Puts the sampling values back to the defaults and leaves your formula and model alone. It covers everything a preset can carry, so the Behaviour switches at the bottom go back too. It wakes up only when something has really changed, and its tooltip names what."],
+        ["Reset", "On the Advanced sampling line. Puts the sampling values back to the defaults and leaves your formula and model alone. It covers everything a preset can carry, so the Behaviour switches at the bottom go back too, except Faster writing (MTP), which is about your graphics card and is never reset. It wakes up only when something has really changed, and its tooltip names what."],
       ],
     },
     {
@@ -341,6 +341,7 @@ export const AI_PROMPT_HELP = {
         ["I typed in Your idea with the image preset and it changed nothing", "That preset's strongest rule is to describe only what is really in the picture, so it overrules you, which is what stops it inventing things. A change of medium does land, so \"as a watercolour painting\" works. To change what is IN the picture, leave the idea empty and send this node's text into a second AI Prompt node whose formula is the change you want."],
         ["A workflow somebody sent me says the model is not in my text_encoders folder", "A workflow carries the model's NAME, not the model itself. Either download that file, or open the settings and pick one you already have. Everything else, the formula and all the settings, came with the workflow and is already there."],
         ["The line under the answer says the formula went in the prompt", "Send the formula as a system message is on, but this run could not use one: the model has no system message, Use the model's own template is off, or there was nothing to send besides the formula. The run still worked, with the formula inside the prompt as usual. The amber line says which."],
+        ["A run stops with a CUDA error such as \"illegal memory access\"", "Open the settings and turn off Faster writing (MTP), under Behaviour. Some models (several Qwen3.5 files) carry an extra MTP part that writes a few words ahead, and on some cards and model files that crashes. Off writes a little slower and gives the same kind of answer. It is the same as setting mtp to off on ComfyUI's Generate Text node, and presets never turn it back on."],
         ["The settings panel will not close", "Click the gear again, press Escape, or click the canvas."],
       ],
     },

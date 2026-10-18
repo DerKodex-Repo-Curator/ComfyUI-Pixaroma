@@ -79,6 +79,13 @@ DEFAULT_STATE = {
     # Ep39: BFL's FLUX 3 prompt upsampler was trained that way). See
     # plan_prompt() for when it can and cannot happen.
     "system_formula": False,
+    # Multi-token prediction, the `mtp` of core's Generate Text (auto / off). On
+    # = core's default, and the generate call is exactly as before. Off asks
+    # core not to draft with the model's MTP head: a Discord report (2026-10-17)
+    # had a CUDA "illegal memory access" on an int8 Qwen3.5 that went away with
+    # mtp off in core's node (ai-prompt.md #34). Machine-specific, so NOT a
+    # preset setting: a preset or Reset must never turn it back on.
+    "mtp": True,
 }
 # NOTE: there is deliberately no "passthrough" flag. Passing the text through
 # is what the node does when there is no model or nothing to send, and a switch
@@ -169,7 +176,22 @@ def parse_state(raw):
     st["use_default_template"] = st["use_default_template"] is not False
     st["release_model"] = st["release_model"] is True
     st["system_formula"] = st["system_formula"] is True
+    st["mtp"] = st["mtp"] is not False
     return st
+
+
+def generate_kwargs(st, accepts_mtp):
+    """Extra keyword arguments for clip.generate: only `mtp=False`, and only when
+    the switch is off AND this ComfyUI's generate takes `mtp`.
+
+    MTP on sends NOTHING extra, so the call stays byte-identical to the one
+    before the switch existed (core's own default is mtp=True). An older
+    ComfyUI without the argument has no MTP at all, so there is nothing to turn
+    off and passing it would raise.
+    """
+    if st.get("mtp", True) is not False or not accepts_mtp:
+        return {}
+    return {"mtp": False}
 
 
 def _join(parts, sep):

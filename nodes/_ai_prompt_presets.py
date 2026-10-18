@@ -35,7 +35,8 @@ MAX_PRESETS = 200
 
 # Exactly the settings a preset may carry. The idea, the seed, the join order
 # and the separator are deliberately NOT here: those belong to the workflow and
-# the wiring, not to the recipe. release_model is a per-workflow memory choice.
+# the wiring, not to the recipe. release_model is a per-workflow memory choice,
+# and mtp is about the user's graphics card (ai-prompt.md #34).
 SETTING_KEYS = (
     "temperature", "max_length", "top_k", "top_p", "min_p",
     "repetition_penalty", "presence_penalty", "do_sample", "thinking",

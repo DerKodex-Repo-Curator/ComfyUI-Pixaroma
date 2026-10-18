@@ -27,6 +27,7 @@ from ._ai_prompt_helpers import (
     content_text,
     AIPromptInputs,
     extra_image_keys,
+    generate_kwargs,
     parse_state,
     plan_prompt,
     reasoning_only,
@@ -315,6 +316,20 @@ def _batch_like_core(pics):
     return torch.cat(out, dim=0)
 
 
+def _takes_kwarg(fn, name):
+    """True when `fn` NAMES the keyword `name` in its signature.
+
+    Core's CLIP.generate (comfy/sd.py) names `mtp` explicitly; an older
+    ComfyUI has no such argument and no MTP to turn off. Anything that cannot
+    be inspected counts as False, so the call falls back to the plain one.
+    """
+    import inspect
+    try:
+        return name in inspect.signature(fn).parameters
+    except (TypeError, ValueError):
+        return False
+
+
 class PixaromaAIPrompt:
     DESCRIPTION = (
         "Runs a language model you already have, on your own machine, using an "
@@ -534,6 +549,8 @@ class PixaromaAIPrompt:
         # One generation per execution needs no reset (ai-prompt.md #25, #31).
         if repeat_generation(self):
             reset_generation_runtime()
+        # {} unless the MTP switch is OFF, so the default call is unchanged.
+        mtp_kw = generate_kwargs(st, _takes_kwarg(getattr(clip, "generate", None), "mtp"))
         try:
             generated_ids = clip.generate(
                 tokens,
@@ -546,6 +563,7 @@ class PixaromaAIPrompt:
                 repetition_penalty=st["repetition_penalty"],
                 presence_penalty=st["presence_penalty"],
                 seed=st["seed"],
+                **mtp_kw,
             )
         except AttributeError as e:
             # Narrow on purpose. Without the gate this wrapped a multi-minute
